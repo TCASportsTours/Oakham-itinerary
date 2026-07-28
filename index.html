@@ -609,6 +609,12 @@
   .badge i{font-size:26px;color:#ff9d52}
   .badge b{display:block;font-size:12px;color:#fff;margin-top:6px}
   .badge span{display:block;font-size:10px;color:var(--muted);margin-top:3px;line-height:1.35}
+  .badge em{display:block;font-style:normal;font-size:10px;font-weight:700;color:#51cea7;margin-top:6px}
+  .badge em.won{color:#51cea7}
+  .badge.locked{opacity:.45}
+  .badge.locked i{color:var(--faint)}
+  .badge.locked b{color:var(--muted)}
+  .badge.locked em{color:var(--faint);font-weight:600}
 
   .xprow{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
     border-radius:12px;padding:11px 13px;margin-top:8px}
@@ -685,7 +691,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cb · how-to-compete</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cd · player-takes-photo</div>
     </section>
 
     <!-- TODAY -->
@@ -4228,18 +4234,31 @@
   function rankOf(list,match){ for(var i=0;i<list.length;i++) if(match(list[i])) return i+1; return 0; }
   function ord(n){ if(!n) return '\u2014'; var s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
 
-  /* ---- badges: derived from the submissions, never stored ---------------- */
-  function badgesFor(pid){
+  /* ---- badges ------------------------------------------------------------
+     Every badge is always shown. Unearned ones sit greyed out with how far off
+     you are, so there is something to aim at rather than an empty shelf.
+     All of it is derived from the submissions — nothing is stored. */
+  function badgeState(pid){
     var ap=subsList().filter(function(s){ return s.player_id===pid && s.status==='approved'; });
+    var done=ap.length;
     var feat=ap.filter(function(s){ return s.featured; }).length;
-    var out=[];
-    if(ap.length>=1) out.push({i:'ti-rocket',   t:'First Post',      d:'Completed your first challenge'});
-    if(ap.length>=3) out.push({i:'ti-flame',    t:'On a Roll',       d:'Three challenges completed'});
-    if(ap.length>=5) out.push({i:'ti-star',     t:'Tour Regular',    d:'Five challenges completed'});
-    if(CHALLENGES.length && ap.length>=CHALLENGES.length) out.push({i:'ti-crown', t:'Full House', d:'Every challenge on the tour'});
-    if(feat>=1)      out.push({i:'ti-sparkles', t:'Featured',        d:'GCS shared your content'});
-    if(xpFor(pid)>=100) out.push({i:'ti-medal', t:'Century',         d:'100 XP or more'});
-    return out;
+    var early=ap.filter(function(s){ return (parseInt(s.early_bonus,10)||0)>0; }).length;
+    var xp=xpFor(pid);
+    var total=CHALLENGES.length||0;
+    var defs=[
+      {i:'ti-rocket',     t:'First Post',   d:'Complete your first challenge',        have:done,  goal:1},
+      {i:'ti-clock-bolt', t:'Early Bird',   d:'Earn an early bird bonus',             have:early, goal:1},
+      {i:'ti-flame',      t:'On a Roll',    d:'Complete three challenges',            have:done,  goal:3},
+      {i:'ti-star',       t:'Tour Regular', d:'Complete five challenges',             have:done,  goal:5},
+      {i:'ti-sparkles',   t:'Featured',     d:'Get your photo shared by GCS',         have:feat,  goal:1},
+      {i:'ti-medal',      t:'Century',      d:'Reach 100 XP',                         have:xp,    goal:100, unit:'XP'},
+      {i:'ti-crown',      t:'Full House',   d:'Complete every challenge on the tour', have:done,  goal:total}
+    ];
+    return defs.map(function(b){
+      b.locked = !(b.goal>0 && b.have>=b.goal);
+      b.left   = b.goal>0 ? Math.max(0,b.goal-b.have) : 0;
+      return b;
+    });
   }
 
   /* ======================= PLAYER: main screen ============================ */
@@ -4278,8 +4297,9 @@
          '<div class="hd"><i class="ti ti-flag"></i> How to compete</div>'+
          '<ol>'+
            '<li><b>Do today\u2019s challenge.</b> It changes every day and closes at the time shown below.</li>'+
-           '<li><b>A parent or guardian takes the photo or video.</b> You don\u2019t need your own social media account.</li>'+
-           '<li><b>They post it from their account</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>#'+esc(tourHashtag())+'</b>. Tap <i>Copy caption &amp; tags</i> and send it to them.</li>'+
+           '<li><b>You take the photo or video.</b> It\u2019s your tour \u2014 you\u2019re the one who\u2019s there.</li>'+
+           '<li><b>Send it to a parent or guardian</b> along with the caption. Tap <i>Copy caption &amp; tags</i> and it\u2019s ready to paste.</li>'+
+           '<li><b>They post it from their account</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>#'+esc(tourHashtag())+'</b>. You don\u2019t need your own social media.</li>'+
            '<li><b>Come back and tap Submit challenge</b>, then paste the link. Story instead? Upload a screenshot.</li>'+
            '<li><b>Collect your XP.</b> Most links are checked and approved on the spot.</li>'+
          '</ol>'+
@@ -4607,7 +4627,7 @@
   function renderMyXP(){
     var host=document.getElementById('myXPBody'); if(!host) return;
     var me=myPlayerId(), pb=playerBoard(), tb=teamBoard();
-    var mine=mySubs(), badges=badgesFor(me);
+    var mine=mySubs(), badges=badgeState(me);
     var h='<div class="xpstrip big">'+
             '<div class="xpbig"><span class="n">'+xpFor(me)+'</span><span class="l">XP</span></div>'+
             '<div class="xpmeta">'+
@@ -4618,10 +4638,21 @@
             '</div>'+
           '</div>';
 
-    h+='<div class="eyebrow" style="margin-top:16px">Badges</div>';
-    if(!badges.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> Complete a challenge to earn your first badge.</div>';
-    else { h+='<div class="badgewrap">'; badges.forEach(function(b){
-      h+='<div class="badge"><i class="ti '+b.i+'"></i><b>'+esc(b.t)+'</b><span>'+esc(b.d)+'</span></div>'; }); h+='</div>'; }
+    var got=badges.filter(function(b){return !b.locked;}).length;
+    h+='<div class="eyebrow" style="margin-top:16px">Badges <span style="color:var(--faint);font-weight:400">'+got+' of '+badges.length+'</span></div>';
+    h+='<div class="badgewrap">';
+    badges.forEach(function(b){
+      var prog = b.goal<=0 ? 'Not available yet'
+               : b.locked  ? (b.have>0 ? (b.have+' / '+b.goal+(b.unit?' '+b.unit:'')) : ('Locked'))
+               : 'Earned';
+      h+='<div class="badge'+(b.locked?' locked':'')+'">'+
+           '<i class="ti '+(b.locked?b.i:b.i)+'"></i>'+
+           '<b>'+esc(b.t)+'</b>'+
+           '<span>'+esc(b.d)+'</span>'+
+           '<em class="'+(b.locked?'':'won')+'">'+(b.locked?'':'<i class="ti ti-check"></i> ')+esc(prog)+'</em>'+
+         '</div>';
+    });
+    h+='</div>';
 
     h+='<div class="eyebrow" style="margin-top:16px">XP history</div>';
     if(!mine.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> Nothing submitted yet.</div>';
@@ -4778,11 +4809,12 @@
     document.getElementById('detailBody').innerHTML=
       '<div class="chintro"><b>Every day there\u2019s a new challenge.</b><p>Do it, get a grown-up to post it, send us the link \u2014 and XP lands on your GCS profile.</p></div>'+
       chHelpBlock('ti-bolt','What is XP?','XP is points on your GCS player profile. Every challenge you complete adds more. The more you collect, the higher you climb on the leaderboard \u2014 and your XP counts towards your team\u2019s total too.')+
-      chHelpBlock('ti-camera','1. Do the challenge','Open the Tour Challenge screen to see today\u2019s one. It might be a team selfie, meeting a player from another country, or something daft. You\u2019ve got until the closing time shown.')+
-      chHelpBlock('ti-users','2. Ask a parent to post it','You don\u2019t need your own Instagram or TikTok. A parent or guardian posts it from their account, tags <b>@'+esc(igHandle())+'</b> and uses <b>#'+esc(tourHashtag())+'</b>. Tap <b>Copy caption &amp; tags</b> and it\u2019s all done for them.')+
-      chHelpBlock('ti-link','3. Send us the link','Tap <b>Submit challenge</b>, choose where it was posted and paste the link. If it was a Story, upload a screenshot instead \u2014 Stories disappear after a day.')+
-      chHelpBlock('ti-hourglass-low','4. Wait a bit','A GCS admin checks it. You\u2019ll see <b>Waiting for approval</b> until then \u2014 usually not long.')+
-      chHelpBlock('ti-trophy','5. Collect your XP','Once it\u2019s approved your XP goes up, the leaderboard updates and you might unlock a badge. Check <b>My GCS XP</b> any time to see where you are.')+
+      chHelpBlock('ti-camera','1. Take the photo yourself','Open the Tour Challenge screen to see today\u2019s one. It might be a team selfie, meeting a player from another team, or something daft. <b>You</b> take the picture \u2014 you\u2019re the one who\u2019s actually there. You\u2019ve got until the closing time shown.')+
+      chHelpBlock('ti-send','2. Send it to a parent','Message the photo to your mum, dad or guardian. Tap <b>Copy caption &amp; tags</b> and send them that too, so all they have to do is paste it.')+
+      chHelpBlock('ti-users','3. They post it','You don\u2019t need your own Instagram or TikTok. It goes up from their account, tagging <b>@'+esc(igHandle())+'</b> and using <b>#'+esc(tourHashtag())+'</b>. Then ask them to send you the link back.')+
+      chHelpBlock('ti-link','4. Send us the link','Tap <b>Submit challenge</b>, choose where it was posted and paste the link. If it was a Story, upload a screenshot instead \u2014 Stories disappear after a day.')+
+      chHelpBlock('ti-hourglass-low','5. Wait a moment','Most links are checked and approved on the spot. A few come to a GCS admin \u2014 you\u2019ll see <b>Waiting for approval</b> until they get to it.')+
+      chHelpBlock('ti-trophy','6. Collect your XP','Once it\u2019s approved your XP goes up, the leaderboard updates and you might unlock a badge. Check <b>My GCS XP</b> any time to see where you are.')+
       chHelpBlock('ti-help-circle','Not accepted?','Sometimes a submission gets sent back \u2014 usually a broken link or a missing tag. You\u2019ll see why, and you can have another go while the challenge is still open.')+
       '<div class="chintro" style="margin-top:14px"><b>Climbing the leaderboard</b><p>Do every challenge \u2014 they all count. Get them in early. And if GCS shares your photo you get a Featured badge, which nobody can take off you.</p></div>';
   }
@@ -4794,7 +4826,8 @@
       '<div class="chintro"><b>A quick word on the Family Challenge.</b><p>It\u2019s a daily photo or video challenge your child completes on tour. You post it, they submit the link in the app, and they collect XP on their GCS profile.</p></div>'+
       chHelpBlock('ti-heart','Why we run it','Tours produce brilliant moments that nobody outside the ground ever sees. This gives families a reason to capture them, and gives the players something to collect along the way.')+
       chHelpBlock('ti-shield-check','Your child does not need social media','That\u2019s the point of it being a <i>family</i> challenge. Everything is posted from your account, not theirs. All your child does in the app is paste the link.')+
-      chHelpBlock('ti-photo','How to share','Take the photo or video, post it to your own Instagram, Facebook or TikTok, tag <b>@'+esc(igHandle())+'</b> and add <b>#'+esc(tourHashtag())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot.')+
+      chHelpBlock('ti-camera','Who does what','<b>Your child takes the photo</b> \u2014 they\u2019re the one at the ground. They send it to you with the caption. <b>You post it</b> from your own account and send them the link back. That\u2019s the whole job.')+
+      chHelpBlock('ti-photo','How to share','Post the photo or video to your own Instagram, Facebook or TikTok, tag <b>@'+esc(igHandle())+'</b> and add <b>#'+esc(tourHashtag())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot, so there\u2019s nothing to type.')+
       chHelpBlock('ti-link','Helping them submit','In the app: <b>Tour Challenge</b> &rarr; <b>Submit challenge</b> &rarr; pick where you posted it &rarr; paste the link. If you used a Story, send them a screenshot to upload instead, since Stories are gone within a day.')+
       chHelpBlock('ti-license','Repost permission','There\u2019s an optional tick box giving GCS permission to share or repost. It is genuinely optional \u2014 leave it unticked and your child still gets the full XP. We only repost content where that box was ticked.')+
       chHelpBlock('ti-users','Other people\u2019s children','Several challenges involve team photos. Please check with the other parents before posting a picture that clearly shows their child. If in doubt, leave it out or crop it \u2014 the XP is not worth an awkward conversation.')+
@@ -4802,7 +4835,10 @@
       chHelpBlock('ti-lock','Privacy','Your post stays on your account, under your own privacy settings \u2014 we never get access to it. Inside the app, submissions are visible only to your child and GCS tournament staff. The leaderboard shows first names, team and XP, nothing else.')+
       chHelpBlock('ti-clipboard-check','What happens next','A GCS administrator reviews every submission before any XP is awarded and before anything is ever reposted. If something isn\u2019t right we send it back with a reason rather than simply ignoring it.')+
       chHelpBlock('ti-message-2','Any concerns','Speak to your team manager or the GCS safeguarding lead on site at any point. If you want a post removed from our channels after we\u2019ve shared it, just ask and we\u2019ll take it down.')+
-      '<div class="chintro" style="margin-top:14px"><b>Not compulsory</b><p>No child is disadvantaged for not taking part. It\u2019s meant to be a bit of fun on the side of the cricket.</p></div>';
+      '<div class="chintro" style="margin-top:14px"><b>Fair warning</b><p>This only works if the two of you talk to each other. Your child has to send you a photo and a caption, and you have to send a link back \u2014 every day, four days running.</p>'+
+      '<p>Which means that for once, you might actually hear from them while they\u2019re away. Consider it a feature rather than a bug.</p>'+
+      '<p style="font-size:12.5px">Worth agreeing before they go: which app you\u2019ll use, and roughly when. Most families find the gap between supper and lights out works best \u2014 the challenge has usually closed by breakfast the next morning.</p></div>'+
+      '<div class="chintro" style="margin-top:12px"><b>Not compulsory</b><p>No child is disadvantaged for not taking part. It\u2019s meant to be a bit of fun on the side of the cricket.</p></div>';
   }
 
   /* Tile visibility for the Tour Challenge. Players get the challenge and their XP;
