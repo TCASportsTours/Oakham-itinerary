@@ -512,6 +512,15 @@
   .chearly{display:flex;gap:10px;align-items:flex-start;margin-top:12px;background:rgba(81,206,167,.13);
     border:1px solid rgba(81,206,167,.4);border-radius:12px;padding:11px 12px}
   .chearly i{font-size:20px;color:#51cea7;flex:0 0 auto}
+  .chdupe{display:flex;gap:10px;align-items:flex-start;margin-top:9px;background:rgba(255,157,82,.13);
+    border:1px solid rgba(255,157,82,.42);border-radius:11px;padding:11px 12px}
+  .chdupe i{font-size:19px;color:#ff9d52;flex:0 0 auto}
+  .chdupe b{display:block;font-size:13px;color:#ff9d52}
+  .chdupe span{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .chflag{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:#ff9d52;margin-top:8px;
+    background:rgba(255,157,82,.13);border:1px solid rgba(255,157,82,.35);border-radius:8px;padding:7px 9px}
+  .chsuccess .tick.dupe{background:rgba(255,157,82,.16)}
+  .chsuccess .tick.dupe i{color:#ff9d52}
   .chearly b{display:block;font-size:14px;color:#7bdcc0}
   .chearly span{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
   .chtags{display:flex;gap:10px;margin-top:12px}
@@ -654,7 +663,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28by · challenge-autocheck</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bz · duplicate-links</div>
     </section>
 
     <!-- TODAY -->
@@ -4081,6 +4090,33 @@
   }
   function chCanPlay(){ return role==='player' && !!myPlayerId(); }
 
+  /* Same rule the server uses: compare links on host + path only, so the tracking
+     junk Instagram and TikTok append to a shared link doesn't disguise a repeat. */
+  function normPostUrl(u){
+    try{
+      var x=new URL(String(u).trim());
+      return x.hostname.toLowerCase().replace(/^www\./,'').replace(/^m\./,'')+x.pathname.replace(/\/+$/,'').toLowerCase();
+    }catch(e){ return String(u||'').trim().toLowerCase().replace(/\/+$/,''); }
+  }
+  /* Any earlier submission using this link, ignoring one the player is replacing. */
+  function findDuplicate(url,ignoreId){
+    var n=normPostUrl(url); if(!n) return null;
+    var l=subsList();
+    for(var i=0;i<l.length;i++){
+      var x=l[i];
+      if(!x.post_url || x.status==='rejected') continue;
+      if(ignoreId && x.submission_id===ignoreId) continue;
+      if(normPostUrl(x.post_url)===n) return x;
+    }
+    return null;
+  }
+  function dupeWho(s){
+    if(!s) return '';
+    var p=playerIdParts(s.player_id), c=challengeById(s.challenge_id);
+    var who=(p.name||'another player')+(p.team?' ('+p.team+')':'');
+    return who+(c?' for \u201c'+c.title+'\u201d':'');
+  }
+
   /* ---- challenge lookup ------------------------------------------------- */
   function challengeFor(day){
     var d=parseInt(day,10);
@@ -4338,7 +4374,8 @@
 
         '<div id="chLinkWrap">'+
           '<label class="chlab">Link to the post</label>'+
-          '<input id="chLink" class="chinput" type="url" inputmode="url" placeholder="Paste the link here" autocomplete="off">'+
+          '<input id="chLink" class="chinput" type="url" inputmode="url" placeholder="Paste the link here" autocomplete="off" oninput="chLinkCheck()">'+
+          '<div id="chDupe"></div>'+
           '<div class="chhint">On Instagram: tap the three dots on the post &rarr; Copy link.</div>'+
         '</div>'+
 
@@ -4359,10 +4396,25 @@
         '<div id="chErr" class="cherr" style="display:none"></div>'+
       '</div>';
   }
+  /* Warn the moment a link is pasted that has been used before, rather than letting
+     them submit and find out afterwards. */
+  function chLinkCheck(){
+    var box=document.getElementById('chDupe'); if(!box) return;
+    var v=(document.getElementById('chLink').value||'').trim();
+    if(!v || !/^https?:\/\//i.test(v)){ box.innerHTML=''; return; }
+    var existing=mySubFor(_submitFor);
+    var d=findDuplicate(v, existing&&existing.submission_id);
+    if(!d){ box.innerHTML=''; return; }
+    var mine=d.player_id===myPlayerId();
+    box.innerHTML='<div class="chdupe"><i class="ti ti-copy-off"></i><div><b>This link has already been sent in</b>'+
+      '<span>'+(mine?'You used it for \u201c'+esc((challengeById(d.challenge_id)||{}).title||'another challenge')+'\u201d.':'It was submitted by '+esc(dupeWho(d))+'.')+
+      ' Each challenge needs its own post, so this one will be held for a GCS admin to look at rather than approved automatically.</span></div></div>';
+  }
   function chPlatChanged(){
     var v=document.getElementById('chPlat').value, story=platIsStory(v);
     document.getElementById('chLinkWrap').style.display=story?'none':'';
     document.getElementById('chShotWrap').style.display=story?'':'none';
+    if(!story) chLinkCheck(); else { var b=document.getElementById('chDupe'); if(b) b.innerHTML=''; }
   }
   function chShotPicked(input){
     var f=input.files&&input.files[0]; if(!f) return;
@@ -4404,6 +4456,11 @@
     if(!story && !link){ chErr('Please paste the link to the post.'); return; }
     if(!story && !/^https?:\/\//i.test(link)){ chErr('That doesn\u2019t look like a link \u2014 it should start with https://'); return; }
     if(!chOpen(c)){ chErr('This challenge has closed.'); return; }
+    if(!story){
+      var existing0=mySubFor(c.id);
+      var dup=findDuplicate(link, existing0&&existing0.submission_id);
+      if(dup && !confirm('That link has already been submitted'+(dup.player_id===myPlayerId()?' by you':' by '+dupeWho(dup))+'.\n\nIt won\u2019t be approved automatically \u2014 a GCS admin will check it. Send it anyway?')) return;
+    }
     chErr('');
 
     var btn=document.getElementById('chSubmitBtn');
@@ -4442,7 +4499,20 @@
              whether it was auto-approved or is waiting for a human. */
           fetchSubs(function(){
             var saved=SUBS[id]||sub, host=document.getElementById('chDoneBody');
-            if(!host||!saved.auto_approved) return;
+            if(!host) return;
+            if(saved.duplicate_of){
+              var other=SUBS[saved.duplicate_of];
+              host.innerHTML=
+                '<div class="chsuccess">'+
+                  '<div class="tick dupe"><i class="ti ti-copy-off"></i></div>'+
+                  '<b>Sent \u2014 but held</b>'+
+                  '<p>That link had already been submitted'+(other?' by '+esc(dupeWho(other)):'')+', so it hasn\u2019t been approved automatically. A GCS admin will decide.</p>'+
+                  '<p style="font-size:13px">Next time, post your own photo and you\u2019ll get the XP straight away.</p>'+
+                  '<button class="cta chcta" onclick="openChallenge()"><i class="ti ti-arrow-left"></i> Back to the challenge</button>'+
+                '</div>';
+              return;
+            }
+            if(!saved.auto_approved) return;
             host.innerHTML=
               '<div class="chsuccess">'+
                 '<div class="tick"><i class="ti ti-bolt"></i></div>'+
@@ -4571,7 +4641,8 @@
                '<span>'+platLabel(s.platform)+' &middot; '+chWhen(s.submitted_at)+'</span></div>'+
              chStatusChip(s)+
            '</div>'+
-           (s.auto_result?'<div class="chperm'+(s.auto_approved?'':' no')+'"><i class="ti '+(s.auto_approved?'ti-robot':'ti-eye')+'"></i> '+esc(s.auto_result)+(s.auto_approved?' \u2014 auto-approved':'')+'</div>':'')+
+           (s.duplicate_of?'<div class="chflag"><i class="ti ti-copy-off"></i> Duplicate link \u2014 already submitted by '+esc(dupeWho(SUBS[s.duplicate_of])||'an earlier entry')+'</div>':'')+
+           (s.auto_result&&!s.duplicate_of?'<div class="chperm'+(s.auto_approved?'':' no')+'"><i class="ti '+(s.auto_approved?'ti-robot':'ti-eye')+'"></i> '+esc(s.auto_result)+(s.auto_approved?' \u2014 auto-approved':'')+'</div>':'')+
            (s.feature_permission?'<div class="chperm"><i class="ti ti-license"></i> Repost permission given</div>':'<div class="chperm no"><i class="ti ti-license-off"></i> No repost permission</div>')+
            (!s.guardian_confirmation?'<div class="chperm no"><i class="ti ti-alert-triangle"></i> Guardian box not ticked</div>':'')+
            '<div class="chsubact">'+
