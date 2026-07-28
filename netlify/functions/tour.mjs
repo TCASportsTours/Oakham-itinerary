@@ -168,6 +168,7 @@ export default async (req) => {
     //     the tag or hashtag was used, and nobody has looked at the picture. So this
     //     awards XP only. Featuring/reposting stays manual, and staff can still reject
     //     anything afterwards, which removes the XP again.
+    let chDupes = [];                        // links refused for being already in use
     if (type === "challenges") {
       // Existing submissions, so a link that has already been used can be spotted.
       let already = {};
@@ -214,12 +215,15 @@ export default async (req) => {
           const n = normUrl(sub.post_url);
           const prev = n ? seen[n] : null;
           if (prev && prev.submission_id !== sub.submission_id) {
-            sub.duplicate_of = prev.submission_id;
-            sub.duplicate_player = prev.player_id || "";
-            sub.duplicate_challenge = prev.challenge_id || "";
-            sub.auto_checked = true;
-            sub.auto_result = "duplicate: this link was already submitted";
-            continue;                              // stays pending for a human
+            // Refused, not stored. One post per challenge — go and take another photo.
+            chDupes.push({
+              key: k,
+              duplicate_of: prev.submission_id,
+              duplicate_player: prev.player_id || "",
+              duplicate_challenge: prev.challenge_id || "",
+            });
+            delete parsed[k];
+            continue;
           }
           if (n) seen[n] = sub;                    // claim it within this same request too
         }
@@ -248,6 +252,12 @@ export default async (req) => {
       }
     }
 
+    // Nothing left to save because every link in the request was already in use:
+    // store nothing and tell the phone why, so it can ask for a different post.
+    if (type === "challenges" && chDupes.length && !Object.keys(parsed).length) {
+      return reply(headers, 409, { ok: false, error: "duplicate", duplicates: chDupes });
+    }
+
     if (MERGE.has(type)) {
       // Merge this submission into whatever is already stored, by top-level key
       // (the per-device id for votes/pre-orders). Keeps everyone else's entries,
@@ -259,6 +269,9 @@ export default async (req) => {
       await store.set(key, JSON.stringify(cur));
     } else {
       await store.set(key, text);
+    }
+    if (type === "challenges" && chDupes.length) {
+      return reply(headers, 200, { ok: true, duplicates: chDupes });
     }
     return reply(headers, 200, { ok: true });
   }
