@@ -513,7 +513,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bp · show-tbc-fixtures</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bq · logout-url</div>
     </section>
 
     <!-- TODAY -->
@@ -3578,7 +3578,22 @@
     var sb=document.getElementById('staffBtn'); if(sb) sb.style.display='';
     renderTeamButtons();
   }
+  /* Testing escape hatch. Visiting the app with ?logout (or ?signout / ?reset) on the end of
+     the URL always signs you out and returns you to the role chooser, whatever role you were
+     in. Players and supporters have no Log out button by design — this lets us hop between
+     roles while checking a build without clearing browser data by hand.
+     ?reset also drops the cached tour data so the next load pulls it fresh from the server.
+     The parameter is stripped from the address bar afterwards so a reload doesn't re-trigger. */
+  function testSignOutRequested(){
+    var q=(location.search||'').toLowerCase();
+    if(!/[?&](logout|signout|reset)\b/.test(q)) return false;
+    if(/[?&]reset\b/.test(q)){ try{ localStorage.removeItem('gcs_cache_'+(SETTINGS.tourName||'tour')); }catch(e){} }
+    try{ clearPlayer(); clearSession(); }catch(e){}
+    try{ history.replaceState(null,'',location.pathname); }catch(e){}
+    return true;
+  }
   function resumeSession(){    // "stay logged in": resume the saved session on next open; on any problem, leave the welcome screen showing
+    if(testSignOutRequested()) return;                                                          // ?logout -> stay on the chooser
     var ph=document.querySelector('.phone'); if(ph && !ph.classList.contains('locked')) return;   // already in a session
     var s=loadSession();
     if(!s){ var p=loadPlayer(); if(p&&p.team) s={role:'player',team:p.team,name:p.name}; }        // back-compat with older builds
