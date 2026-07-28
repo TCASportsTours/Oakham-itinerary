@@ -524,6 +524,11 @@
   .chcountdown i{font-size:22px;color:#51cea7;flex:0 0 auto}
   .chcountdown b{display:block;font-size:16px;color:#7bdcc0}
   .chcountdown span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.55}
+  .chlocked{display:flex;gap:11px;align-items:flex-start;margin-top:16px;background:var(--surface);
+    border:1px solid var(--surface-line);border-radius:13px;padding:13px}
+  .chlocked i{font-size:20px;color:var(--faint);flex:0 0 auto}
+  .chlocked b{display:block;font-size:14px;color:var(--muted)}
+  .chlocked span{display:block;font-size:12px;color:var(--faint);margin-top:3px;line-height:1.5}
   .chcard.tourwide{border-color:rgba(119,119,201,.4);background:linear-gradient(160deg,rgba(119,119,201,.1),transparent 70%)}
   .chcard.tourwide .cheyebrow{color:#9a9ad6}
   .cheyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
@@ -735,7 +740,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cp · pre-tour</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cq · hide-dailies-until-monday</div>
     </section>
 
     <!-- TODAY -->
@@ -4541,8 +4546,16 @@
       });
     }
 
-    /* --- the other days, as compact rows --- */
+    /* --- the other days, as compact rows ---
+       Before the tournament starts none of them are listed at all: a row per locked day
+       is just noise in the build-up. One line says what's coming and what it's worth. */
     var others=dailyChallenges().filter(function(x){ return !c || x.id!==c.id; });
+    if(beforeTour && others.length){
+      var dxp=others.reduce(function(n,x){ return n+chXP(x)+chEarlyXP(x); },0);
+      h+='<div class="chlocked"><i class="ti ti-lock"></i><div><b>'+others.length+' daily challenge'+(others.length>1?'s':'')+' unlock on Monday</b>'+
+         '<span>A new one each morning of the tournament, worth '+dxp+' XP between them.</span></div></div>';
+      others=[];
+    }
     if(others.length){
       h+='<div class="eyebrow" style="margin-top:18px">The other days</div>';
       others.forEach(function(x){
