@@ -513,7 +513,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28br · logout-button</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bv · scoring-guide-staff-scorers</div>
     </section>
 
     <!-- TODAY -->
@@ -575,7 +575,7 @@
         <div class="tile acc-teal" onclick="openStaff()"><span class="tbadge"><i class="ti ti-user-star"></i></span><div>Staff &amp; coaches</div></div>
         <div class="tile acc-purple" onclick="openHandover()"><span class="tbadge"><i class="ti ti-heart-handshake"></i></span><div>Handover of Care</div></div>
         <div class="tile acc-orange" onclick="openHowTo()"><span class="tbadge"><i class="ti ti-help-circle"></i></span><div>How to use</div></div>
-        <div class="tile acc-purple" onclick="openScoring()"><span class="tbadge"><i class="ti ti-list-numbers"></i></span><div>Scoring app guide</div></div>
+        <div class="tile acc-purple" id="scoringTile" style="display:none" onclick="openScoring()"><span class="tbadge"><i class="ti ti-list-numbers"></i></span><div>Scoring app guide</div></div>
         <div class="tile acc-teal" onclick="openFeedback()"><span class="tbadge"><i class="ti ti-message-2-heart"></i></span><div>Send feedback</div></div>
         <div class="tile acc-orange pulse" onclick="openSocials()"><span class="tbadge"><i class="ti ti-brand-instagram"></i></span><div>Follow the tour</div></div>
         <div class="tile acc-orange" id="squadTile" style="display:none" onclick="openRoster()"><span class="tbadge"><i class="ti ti-clipboard-list"></i></span><div>Squad list</div></div>
@@ -1186,6 +1186,9 @@
     var _sw=document.getElementById('switchTeamBtn'), _lo=document.getElementById('logoutBtn'); if(_sw) _sw.style.display='none'; if(_lo) _lo.style.display='';   // Log out available to everyone: players and coaches need it to hand a phone over or fix a wrong team pick
     var crest=document.getElementById('hubCrest'); if(crest){ var lg=(TEAMLOGOS||{})[sq]||SETTINGS.badge; if(lg) crest.src=lg; }
     var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display=isStaff?'':'none';
+    /* Scoring app guide: tournament staff / GCS admin only. Players, supporters and team
+       coaches never score a match, so the tile is noise on their More screen. */
+    var scTile=document.getElementById('scoringTile'); if(scTile) scTile.style.display=isAdmin?'':'none';
     ['voteTile','alertTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display=isStaff?'':'none'; });
     var mt=document.getElementById('mealTile'); if(mt) mt.style.display=(isStaff && MEALS && MEALS.length)?'':'none';
     var rt=document.getElementById('rulesTile'); if(rt) rt.style.display=hasVal(SETTINGS.rulesUrl)?'':'none';
@@ -1207,7 +1210,7 @@
   function switchSquad(){
     isStaff=false; staffPending=false; isAdmin=false; _adminPending=false; currentPlayer=''; role='player'; pendingRole='player'; officialKind=''; officialName=''; _loginTracked=false; viewAll=false; clearPlayer(); clearSession();
     var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display='none';
-    ['voteTile','mealTile','alertTile','rulesTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
+    ['voteTile','mealTile','alertTile','rulesTile','scoringTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
     document.querySelector('.phone').classList.add('locked');
     document.querySelector('.phone').classList.remove('officials');
     showOnly('s-signin');
@@ -1822,6 +1825,8 @@
       '<div class="travelbox" style="margin:6px 0 4px"><div class="th"><i class="ti ti-trophy"></i> Live scoring &amp; full results</div>'+
       '<div style="font-size:13px;line-height:1.5;color:var(--muted);padding:2px 2px 10px">Watch our live stream and follow the scores, plus individual player stats, wagon wheels and more.</div>'+
       '<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box" onclick="openGCS()"><i class="ti ti-download"></i> Download it here</button>'+
+      /* Scorers and umpires keep the guide — they are the ones operating the scoring app.
+         It is hidden everywhere else: the More-screen tile is tournament staff / GCS admin only. */
       '<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box;margin-top:8px;background:rgba(119,119,201,.16);color:#9a9ad6;border:1px solid rgba(119,119,201,.4)" onclick="openScoring()"><i class="ti ti-list-numbers"></i> How to use the GCS Scoring App</button>'+
       ((hasVal(SETTINGS.rulesUrl)||(typeof RULES!=='undefined'&&RULES&&RULES.length))?'<button class="cta" onclick="openOfficialRules()" data-track="Rules & regs (officials)" style="width:100%;justify-content:center;box-sizing:border-box;margin-top:8px;background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.4)"><i class="ti ti-gavel"></i> Rules &amp; regulations</button>':'')+'</div>';
     if(officialName){ head+='<div class="readonly" style="justify-content:flex-start;margin:10px 0 2px">'+(officialKind==='umpire'?UMP_SVG:'<i class="ti ti-pencil"></i>')+' '+(officialKind==='umpire'?'Umpire':'Scorer')+' \u00b7 '+esc(officialName)+' <span style="margin-left:auto;color:#9a9ad6;font-weight:700;cursor:pointer" onclick="officialIdentityReset()">Change</span></div>'; }
@@ -1953,7 +1958,7 @@
   }
   function renderSOS(){
     var le=localEmergency(), loc=document.getElementById('sosLocal');
-    if(loc) loc.innerHTML='<div class="contactrow" onclick="sosCall(\''+le.dial+'\')" style="cursor:pointer"><div class="ic" style="background:rgba(255,124,26,.16);color:#ff9d52"><i class="ti ti-ambulance"></i></div><div style="flex:1;min-width:0"><b>Local emergency'+(SETTINGS.country?' · '+esc(SETTINGS.country):'')+'</b><span>'+esc(le.label)+'</span></div><i class="ti ti-phone" style="color:#ff9d52;font-size:20px"></i></div>';
+    if(loc) loc.innerHTML='<div class="contactrow" onclick="sosCall(\''+le.dial+'\')" style="cursor:pointer"><div class="ic" style="background:rgba(255,124,26,.16);color:#ff9d52"><i class="ti ti-ambulance"></i></div><div style="flex:1;min-width:0"><b>Local emergency'+(SETTINGS.country?' &middot; '+esc(SETTINGS.country):'')+'</b><span>'+esc(le.label)+'</span></div><i class="ti ti-phone" style="color:#ff9d52;font-size:20px"></i></div>';
     var mgr=document.getElementById('sosManager'); if(mgr) mgr.innerHTML = isSupporter() ? tmContactHTML(true) : sosCard('Tour manager', SETTINGS.tourManager||'', SETTINGS.tourManagerPhone||'', 'ti-user-star','contactManager');
     var ref=document.getElementById('sosReferee'); if(ref) ref.innerHTML=sosCard('Tournament Director', SETTINGS.matchReferee||'', SETTINGS.matchRefereePhone||'', 'ti-clipboard-check','contactReferee');
     var tch=document.getElementById('sosTech'); if(tch) tch.innerHTML=sosCard('Technical support', SETTINGS.techPartner||'', SETTINGS.techPartnerPhone||'', 'ti-tools','contactTech');
@@ -3224,10 +3229,13 @@
      set in Tour Details. Everyone makes their own way there and back, so the "abroad" tiles
      — travel money, roaming eSIMs, visas and landing cards — are all irrelevant and hidden.
      Any tour with a foreign country, or with a flight number filled in, behaves as before. */
+  function isUK(){
+    var hay=((SETTINGS.country||'')+' '+(SETTINGS.destination||'')).toLowerCase();
+    return /united kingdom|\buk\b|england|scotland|wales|northern ireland|britain/.test(hay);
+  }
   function isDomestic(){
     if(hasFlights()) return false;
-    var hay=((SETTINGS.country||'')+' '+(SETTINGS.destination||'')).toLowerCase();
-    return /united kingdom|\buk\b|england|scotland|wales|northern ireland|britain|british isles/.test(hay);
+    return isUK();
   }
   // Flights on this tour are the UK charter (BA2159 etc.) — only show the tile to teams the
   // flights actually belong to. If no "UK Teams" group is defined (other tours), show to all.
