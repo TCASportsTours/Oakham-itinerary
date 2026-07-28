@@ -513,7 +513,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bo · domestic-tour-mode</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bp · show-tbc-fixtures</div>
     </section>
 
     <!-- TODAY -->
@@ -827,6 +827,16 @@
     if(!isUrl) return raw;
     return placeFromUrl(raw) || 'View location';
   }
+  /* A fixture whose teams are still placeholders ("Group 1 1st", "Winner of game 17").
+     The time, pitch and format are real — only the two teams are waiting on results. */
+  function isTBCFixture(e){
+    if(!e||!e.teams||!e.teams.length) return false;
+    var tl=TEAMS_LIST||[];
+    return tl.indexOf(e.teams[0])<0 && tl.indexOf(e.teams[1])<0;
+  }
+  function tbcChip(e){
+    return isTBCFixture(e) ? '<div class="sub" style="color:#ff9d52;font-weight:600"><i class="ti ti-hourglass-low"></i> To be confirmed &mdash; depends on the standings</div>' : '';
+  }
   function rowHTML(e,staff){
     var dt=dispType(e), lbl=dispLabel(e), lc=locText(e);
     var tag=lbl?'<span class="typetag">'+lbl+'</span>':'';
@@ -834,6 +844,7 @@
       '<div class="t">'+esc(e.time)+'</div>'+
       '<div style="flex:1;min-width:0">'+tag+'<div class="ttl">'+esc(e.title)+'</div>'+
       (e.sub?'<div class="sub">'+esc(e.sub)+'</div>':'')+
+      tbcChip(e)+
       (lc?'<div class="sub"><i class="ti ti-map-pin"></i> '+esc(lc)+'</div>':'')+
       (e.kit?'<div class="sub"><i class="ti ti-shirt"></i> '+esc(e.kit)+'</div>':'')+
       tagFor(e,staff)+rollCallBtn(e)+lineupBtn(e)+'</div>'+
@@ -1055,7 +1066,11 @@
       if(viewAll) return true;   // tournament staff \u201call teams\u201d view: show every game/event
       if(e.teams&&e.teams.length){ var a=e.teams[0],b=e.teams[1];
         var aR=_tl.indexOf(a)>=0, bR=_tl.indexOf(b)>=0;
-        if(!aR&&!bR) return false;              // placeholder fixture (e.g. "Group 1 1st v Group 2 2nd") — hidden until the standings decide it; the generic round card (tagged 'all') shows meanwhile
+        // Placeholder fixture, e.g. "Group 1 1st v Group 2 2nd" or "Winner of game 17".
+        // Every team is at the same ground at the same time on a single-venue tournament,
+        // so show these to everyone (flagged "To be confirmed") rather than hiding the
+        // whole of finals day until the standings resolve.
+        if(!aR&&!bR) return true;
         return a===currentSquad||b===currentSquad; }
       return sqShows(e.sq); });
     var live=liveDayInfo();
