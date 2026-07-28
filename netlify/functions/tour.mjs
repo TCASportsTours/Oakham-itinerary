@@ -226,24 +226,48 @@ export default async (req) => {
 
         const plat = String(sub.platform || "");
         const rules = HOSTS[plat];
-        if (!rules || !sub.post_url) {
-          sub.auto_checked = true;                 // Stories, "other", and anything without a link
-          sub.auto_result = sub.post_url ? "manual: platform not auto-checkable" : "manual: no link";
-          continue;
-        }
-        let host = "";
-        try { host = new URL(String(sub.post_url)).hostname.replace(/^www\./i, ""); } catch { host = ""; }
-        const ok = !!host && rules.some((re) => re.test(host));
         sub.auto_checked = true;
-        if (ok) {
+
+        const approve = (why, verified) => {
           sub.status = "approved";
           sub.auto_approved = true;
-          sub.auto_result = "link matches " + plat;
+          sub.verified = !!verified;
+          sub.auto_result = why;
           sub.approved_at = Date.now();
           sub.approved_by = "Auto-check";
           sub.xp_awarded = base + early;
+        };
+
+        let host = "";
+        if (sub.post_url) {
+          try { host = new URL(String(sub.post_url)).hostname.replace(/^www\./i, ""); } catch { host = ""; }
+        }
+
+        // No link at all — a Story screenshot. There is no way to tell a Story from a
+        // photo of anything else, so this is approved on trust and flagged unverified
+        // for a spot check rather than left sitting in a queue.
+        if (!sub.post_url) {
+          approve("screenshot \u2014 not verifiable", false);
+          continue;
+        }
+
+        if (!host) { sub.auto_result = "that isn't a valid link"; continue; }
+
+        // Picked "Somewhere else" but pasted a link we recognise anyway: treat it as
+        // that platform. They chose the wrong item in the dropdown, nothing more.
+        if (!rules) {
+          const match = Object.keys(HOSTS).find((p) => HOSTS[p].some((re) => re.test(host)));
+          if (match) { approve("link is " + match + " \u2014 dropdown said other", true); continue; }
+          approve(host + " \u2014 not verifiable", false);
+          continue;
+        }
+
+        if (rules.some((re) => re.test(host))) {
+          approve("link matches " + plat, true);
         } else {
-          sub.auto_result = host ? ("link is " + host + ", not " + plat) : "that isn't a valid link";
+          // Said one platform, pasted another. That is a mistake worth catching, so it
+          // still waits for a human.
+          sub.auto_result = "link is " + host + ", not " + plat;
         }
       }
     }
