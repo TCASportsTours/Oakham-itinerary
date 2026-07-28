@@ -513,7 +513,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bv · scoring-guide-staff-scorers</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bw · officials-signout</div>
     </section>
 
     <!-- TODAY -->
@@ -1224,7 +1224,13 @@
     var _si=document.getElementById('s-signin'); if(_si)_si.classList.add('ready');
   }
   function logOut(){                       // full sign-out, returns to the role/team chooser
-    var who = isAdmin ? 'Tournament staff' : (currentSquad || 'this account');
+    var who;
+    if(isAdmin) who='Tournament staff';
+    else if(role==='official'){
+      var k={umpire:'Umpire',scorer:'Scorer',groundstaff:'Groundstaff',volunteer:'Volunteer'}[officialKind]||'Official';
+      who = officialName ? (k+' \u00b7 '+officialName) : k;
+    }
+    else who = currentSquad || 'this account';
     if(!confirm('Log out of '+who+'?\n\nYou\u2019ll go back to the sign-in screen and need to pick your role and team again.')) return;
     switchSquad();
   }
@@ -1795,6 +1801,9 @@
     showOnly('s-officials');
     document.getElementById('appTitle').textContent=SETTINGS.tourName||'Tour';
     document.getElementById('appSub').textContent='Scorer / umpire';
+    /* The Sign out button is in the markup but was never unhidden, so scorers, umpires,
+       groundstaff and volunteers had no way out of this view. Show it here. */
+    var so=document.getElementById('offSignOutBtn'); if(so) so.style.display='';
     renderOfficialList();
   }
   function offMatchBtn(e){
