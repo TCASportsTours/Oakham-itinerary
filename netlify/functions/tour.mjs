@@ -178,7 +178,6 @@ export default async (req) => {
       const HOSTS = {
         instagram: [/(^|\.)instagram\.com$/i, /(^|\.)instagr\.am$/i],
         facebook:  [/(^|\.)facebook\.com$/i, /(^|\.)fb\.com$/i, /(^|\.)fb\.watch$/i, /(^|\.)m\.facebook\.com$/i],
-        tiktok:    [/(^|\.)tiktok\.com$/i],
       };
       const clamp = (n, hi) => Math.max(0, Math.min(hi, parseInt(n, 10) || 0));
       // Compare links on host + path only. Instagram and TikTok bolt tracking junk onto
