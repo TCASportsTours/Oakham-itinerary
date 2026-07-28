@@ -216,12 +216,9 @@ export default async (req) => {
           const prev = n ? seen[n] : null;
           if (prev && prev.submission_id !== sub.submission_id) {
             // Refused, not stored. One post per challenge — go and take another photo.
-            chDupes.push({
-              key: k,
-              duplicate_of: prev.submission_id,
-              duplicate_player: prev.player_id || "",
-              duplicate_challenge: prev.challenge_id || "",
-            });
+            // Deliberately does NOT return who used the link first: the player being turned
+            // away has no need to know, and naming them only starts arguments.
+            chDupes.push({ key: k });
             delete parsed[k];
             continue;
           }
