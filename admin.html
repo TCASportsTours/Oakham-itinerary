@@ -1247,6 +1247,9 @@
     setIf('year',tour['tour year']||tour['year']);
     setIf('staffCode',tour['staff password']||tour['password']);
     setSheet('challengeName',tour['challenge name']||tour['tour challenge name']);
+    /* The brand hashtag was never read from the sheet, so it silently fell back to the
+       built-in default no matter what Tour Details said. */
+    setSheet('hashtag',tour['hashtag']||tour['brand hashtag']||tour['gcs hashtag']);
     setSheet('eventHashtag',tour['event hashtag']||tour['tournament hashtag']||tour['challenge hashtag']);
     setIf('adminCode',tour['tournament admin code']||tour['tournament staff password']||tour['admin code']||tour['organiser code']||tour['organizer code']);
     setIf('voteCloseDate',tour['vote close date']||tour['voting close date']||tour['vote closes']||tour['voting closes']);
@@ -1359,9 +1362,14 @@
         /* Day left blank, or set to All / Any / Tournament / Whole tour, makes this a
            tournament-long challenge: open from day one until the last day of the event. */
         var dk=day.trim();
-        var span = /^(pre|pre-tour|pre tour|before|beforehand|build-?up|0)$/i.test(dk) ? 'pre'
-                 : (/^(all|any|tournament|whole|whole tour|tour|anytime|ongoing)$/i.test(dk) || dk==='') ? 'tour'
-                 : 'day';
+        /* Deliberately loose. Anything mentioning "pre" or "before" is a pre-tour
+           challenge; anything mentioning all / any / whole / ongoing, or left blank,
+           runs the length of the tournament; a bare number is that tour day. */
+        var span;
+        if(/^\s*\d+\s*$/.test(dk))                                   span='day';
+        else if(/pre|before|build\s*-?\s*up|beforehand|early/i.test(dk)) span='pre';
+        else if(dk==='' || /all|any|whole|tournament|ongoing|tour|week|throughout/i.test(dk)) span='tour';
+        else                                                          span='tour';
         var d=parseInt(day,10); if(isNaN(d)) d=0;
         var seq=chs.filter(function(x){return x.span===span;}).length+1;
         chs.push({
@@ -1380,6 +1388,13 @@
       var rank={pre:0,day:1,tour:2};
       chs.sort(function(a,b){ return (rank[a.span]||1)-(rank[b.span]||1) || a.day-b.day; });
       S.challenges=chs;
+      /* Surfaced after import so a mistyped Day column shows up immediately instead of
+         a challenge quietly landing in the wrong section \u2014 or nowhere. */
+      S._chSummary = chs.length
+        ? (chs.filter(function(x){return x.span==='pre';}).length+' pre-tour, '+
+           chs.filter(function(x){return x.span==='day';}).length+' daily, '+
+           chs.filter(function(x){return x.span==='tour';}).length+' all-tournament')
+        : 'none found';
     }
 
     save();
@@ -1390,7 +1405,7 @@
     if(typeof renderWeatherPicker==='function') renderWeatherPicker();
     if(typeof populateAlertTeams==='function') populateAlertTeams();
     var sub=document.getElementById('topSub'); if(sub) sub.textContent=(S.settings.destination||'')+' \u00b7 staff console';
-    toast('Tour imported — review every tab, then Publish');
+    toast('Tour imported \u2014 challenges: '+(S._chSummary||'none found')+'. Review, then Publish');
   }
   // Download a fresh multi-tab template (headers + a couple of example rows + a How-to tab).
   function tourTemplate(){
