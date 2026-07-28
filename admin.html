@@ -1357,7 +1357,9 @@
           title:title,
           description:cpick(o,['description','detail','details','what to do','brief']),
           xp:parseInt(cpick(o,['xp','xp available','points']),10)||25,
+          opens:_normTime(cpick(o,['opens','opening time','open','starts','from']))||'09:00',
           closes:_normTime(cpick(o,["closes","closing time","close","deadline"])),
+          earlyXp:parseInt(cpick(o,['early bonus xp','early bonus','early xp','bonus xp','early bird']),10)||0,
           caption:cpick(o,['suggested caption','caption','caption idea'])
         });
       });

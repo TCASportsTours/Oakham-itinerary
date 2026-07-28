@@ -508,6 +508,12 @@
   .chpill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;
     background:rgba(255,255,255,.06);color:var(--muted)}
   .chpill.xp{background:rgba(255,124,26,.18);color:#ff9d52}
+  .chpill.early{background:rgba(81,206,167,.2);color:#7bdcc0}
+  .chearly{display:flex;gap:10px;align-items:flex-start;margin-top:12px;background:rgba(81,206,167,.13);
+    border:1px solid rgba(81,206,167,.4);border-radius:12px;padding:11px 12px}
+  .chearly i{font-size:20px;color:#51cea7;flex:0 0 auto}
+  .chearly b{display:block;font-size:14px;color:#7bdcc0}
+  .chearly span{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
   .chtags{display:flex;gap:10px;margin-top:12px}
   .chtags>div{flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 10px;min-width:0}
   .chtags span{display:block;font-size:10px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
@@ -648,7 +654,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bx · tour-challenge</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28by · challenge-autocheck</div>
     </section>
 
     <!-- TODAY -->
@@ -4087,18 +4093,39 @@
     return null;
   }
   function chXP(c){ var n=parseInt(c&&c.xp,10); return isNaN(n)?25:n; }
+  function chOpensAt(c){ return (c&&c.opens)?c.opens:'09:00'; }
+  function chEarlyXP(c){ var n=parseInt(c&&c.earlyXp,10); return isNaN(n)?10:n; }
+  /* The early-bird window: the first hour after the challenge opens. Submit inside it
+     and the bonus is added on top of the base XP. */
+  function chEarlyEndsMin(c){ return tmin(chOpensAt(c))+60; }
+  function chInEarly(c){
+    if(!c || !chEarlyXP(c)) return false;
+    if(parseInt(c.day,10)!==DEMO_TODAY) return false;
+    var n=nowMin();
+    return n>=tmin(chOpensAt(c)) && n<chEarlyEndsMin(c);
+  }
+  function chEarlyLeft(c){
+    var mins=chEarlyEndsMin(c)-nowMin();
+    if(mins<=0) return '';
+    if(mins<60) return mins+' min';
+    return Math.floor(mins/60)+'h '+(mins%60)+'m';
+  }
+  function minToHHMM(m){ m=Math.max(0,m)%1440; return ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+(m%60)).slice(-2); }
   function chOpen(c){
     if(!c) return false;
     if(parseInt(c.day,10)>DEMO_TODAY) return false;          // not released yet
     if(parseInt(c.day,10)<DEMO_TODAY) return false;          // yesterday's has closed
+    var now=nowMin();
+    if(now<tmin(chOpensAt(c))) return false;                 // not yet this morning
     if(!c.closes) return true;
-    var now=nowMin(), cl=tmin(c.closes);
+    var cl=tmin(c.closes);
     return !(cl && now>cl);
   }
   function chClosedReason(c){
     if(!c) return '';
     if(parseInt(c.day,10)>DEMO_TODAY) return 'Opens on day '+c.day;
     if(parseInt(c.day,10)<DEMO_TODAY) return 'This one has closed';
+    if(nowMin()<tmin(chOpensAt(c))) return 'Opens at '+chOpensAt(c);
     if(c.closes && nowMin()>tmin(c.closes)) return 'Closed at '+c.closes;
     return '';
   }
@@ -4177,7 +4204,14 @@
     var c=todaysChallenge(), me=myPlayerId(), h='';
 
     if(!CHALLENGES.length){
-      host.innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:12px"><i class="ti ti-info-circle"></i> No challenges have been added for this tour yet.</div>';
+      host.innerHTML='<div class="chintro"><b>Nothing published yet</b><p>'+
+        (isAdmin
+          ? 'Add rows to the <b>Challenges</b> tab of the tour spreadsheet (Day, Title, Description, XP, Opens, Closes, Early Bonus XP), then Import and Publish in the admin console.'
+          : 'No challenges have been set for this tour yet \u2014 check back shortly.')+'</p></div>';
+      return;
+    }
+    if(role==='player' && !myPlayerId()){
+      host.innerHTML='<div class="chintro"><b>Pick your name first</b><p>XP is saved against your GCS player profile, so we need to know who you are. Tap <b>Log out</b> on the Tour hub and sign back in choosing your name from your team list.</p></div>';
       return;
     }
 
@@ -4206,12 +4240,14 @@
            (c.description?'<div class="chdesc">'+esc(c.description)+'</div>':'')+
            '<div class="chrow">'+
              '<span class="chpill xp"><i class="ti ti-bolt"></i> '+chXP(c)+' XP</span>'+
+             (chEarlyXP(c)?'<span class="chpill'+(chInEarly(c)?' early':'')+'"><i class="ti ti-clock-bolt"></i> +'+chEarlyXP(c)+' early bird</span>':'')+
              (c.closes?'<span class="chpill"><i class="ti ti-clock-hour-4"></i> Closes '+esc(c.closes)+'</span>':'')+
            '</div>'+
            '<div class="chtags">'+
              '<div><span>Tag</span><b>@'+esc(igHandle())+'</b></div>'+
              '<div><span>Hashtag</span><b>#'+esc(tourHashtag())+'</b></div>'+
            '</div>'+
+           (chInEarly(c)&&!mine?'<div class="chearly"><i class="ti ti-clock-bolt"></i><div><b>Early bird: +'+chEarlyXP(c)+' XP</b><span>Get it in within '+esc(chEarlyLeft(c))+' (by '+esc(minToHHMM(chEarlyEndsMin(c)))+') and the bonus is yours.</span></div></div>':'')+
            (c.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText">'+esc(c.caption)+'</div>'+
              '<button class="chcopy" onclick="copyCaption()"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
            (mine
@@ -4388,7 +4424,11 @@
       submitted_at:Date.now(),
       approved_at:null,
       approved_by:'',
-      xp_awarded:0
+      xp_awarded:0,
+      /* Hints for the server-side auto-check. It clamps and re-decides these itself,
+         so editing them here gains nothing. */
+      xp_base:chXP(c),
+      early_bonus:chInEarly(c)?chEarlyXP(c):0
     };
 
     var send=function(){
@@ -4398,6 +4438,19 @@
         .then(function(){
           SUBS[id]=sub;
           showOnly('s-chdone');
+          /* Pull the server's verdict straight back so the player is told immediately
+             whether it was auto-approved or is waiting for a human. */
+          fetchSubs(function(){
+            var saved=SUBS[id]||sub, host=document.getElementById('chDoneBody');
+            if(!host||!saved.auto_approved) return;
+            host.innerHTML=
+              '<div class="chsuccess">'+
+                '<div class="tick"><i class="ti ti-bolt"></i></div>'+
+                '<b>+'+(parseInt(saved.xp_awarded,10)||0)+' XP</b>'+
+                '<p>Link checked and approved on the spot'+((parseInt(sub.early_bonus,10)||0)?', <b>including your +'+sub.early_bonus+' early bird bonus</b>':'')+'. It\u2019s already on your profile.</p>'+
+                '<button class="cta chcta" onclick="openChallenge()"><i class="ti ti-arrow-left"></i> Back to the challenge</button>'+
+              '</div>';
+          });
           document.getElementById('appTitle').textContent='Sent';
           document.getElementById('appSub').textContent='Nice one';
           document.getElementById('chDoneBody').innerHTML=
@@ -4518,6 +4571,7 @@
                '<span>'+platLabel(s.platform)+' &middot; '+chWhen(s.submitted_at)+'</span></div>'+
              chStatusChip(s)+
            '</div>'+
+           (s.auto_result?'<div class="chperm'+(s.auto_approved?'':' no')+'"><i class="ti '+(s.auto_approved?'ti-robot':'ti-eye')+'"></i> '+esc(s.auto_result)+(s.auto_approved?' \u2014 auto-approved':'')+'</div>':'')+
            (s.feature_permission?'<div class="chperm"><i class="ti ti-license"></i> Repost permission given</div>':'<div class="chperm no"><i class="ti ti-license-off"></i> No repost permission</div>')+
            (!s.guardian_confirmation?'<div class="chperm no"><i class="ti ti-alert-triangle"></i> Guardian box not ticked</div>':'')+
            '<div class="chsubact">'+
@@ -4639,10 +4693,13 @@
     var t1=document.getElementById('challengeTile');
     var t2=document.getElementById('myXPTile');
     var t3=document.getElementById('chAdminTile');
-    if(t1) t1.style.display=(on && chCanPlay())?'':'none';
-    if(t2) t2.style.display=(on && chCanPlay())?'':'none';
-    if(t3) t3.style.display=(on && isAdmin)?'':'none';
-    if(on && (chCanPlay()||isAdmin)) fetchSubs(chTileSubs);
+    /* Players see it whenever there are challenges. Tournament staff ALWAYS see the
+       approvals tile, even with nothing published, so an empty Challenges tab shows up
+       as a message on the screen rather than the feature vanishing without explanation. */
+    if(t1) t1.style.display=(on && role==='player')?'':'none';
+    if(t2) t2.style.display=(on && role==='player')?'':'none';
+    if(t3) t3.style.display=isAdmin?'':'none';
+    if(chCanPlay()||isAdmin) fetchSubs(chTileSubs);
   }
   function chTileSubs(){
     var c=todaysChallenge();
@@ -4653,8 +4710,11 @@
         s1.textContent = mine ? (mine.status==='approved'?'Done today':'Sent \u2014 awaiting') : (chOpen(c)?(chXP(c)+' XP today'):'Closed'); }
     }
     var s2=document.getElementById('chAdminTileSub');
-    if(s2){ var n=subsList().filter(function(x){return x.status==='pending';}).length;
-      s2.textContent = n ? (n+' waiting') : 'All clear'; }
+    if(s2){
+      if(!CHALLENGES.length){ s2.textContent='No challenges published'; }
+      else { var n=subsList().filter(function(x){return x.status==='pending';}).length;
+        s2.textContent = n ? (n+' waiting') : 'All clear'; }
+    }
   }
 
   function bootstrap(){
