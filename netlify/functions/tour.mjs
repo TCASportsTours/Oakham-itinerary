@@ -161,6 +161,52 @@ export default async (req) => {
       return reply(headers, 400, { ok: false, error: "refused: expected an object" });
     }
 
+    // --- Tour Challenge: verify the link actually belongs to the platform the family
+    //     said they used, and auto-approve when it does. Done here rather than on the
+    //     phone so the result can't be edited by whoever is submitting.
+    //     A matching link only proves the post is on that platform — it does NOT prove
+    //     the tag or hashtag was used, and nobody has looked at the picture. So this
+    //     awards XP only. Featuring/reposting stays manual, and staff can still reject
+    //     anything afterwards, which removes the XP again.
+    if (type === "challenges") {
+      const HOSTS = {
+        instagram: [/(^|\.)instagram\.com$/i, /(^|\.)instagr\.am$/i],
+        facebook:  [/(^|\.)facebook\.com$/i, /(^|\.)fb\.com$/i, /(^|\.)fb\.watch$/i, /(^|\.)m\.facebook\.com$/i],
+        tiktok:    [/(^|\.)tiktok\.com$/i],
+      };
+      const clamp = (n, hi) => Math.max(0, Math.min(hi, parseInt(n, 10) || 0));
+      for (const k of Object.keys(parsed)) {
+        const sub = parsed[k];
+        if (!sub || typeof sub !== "object") continue;
+        // Only ever auto-decide a brand-new pending submission. Anything a human has
+        // already actioned is passed straight through untouched.
+        if (sub.status !== "pending") continue;
+        const base = clamp(sub.xp_base, 100);
+        const early = clamp(sub.early_bonus, 50);
+        const plat = String(sub.platform || "");
+        const rules = HOSTS[plat];
+        if (!rules || !sub.post_url) {
+          sub.auto_checked = true;                 // Stories, "other", and anything without a link
+          sub.auto_result = sub.post_url ? "manual: platform not auto-checkable" : "manual: no link";
+          continue;
+        }
+        let host = "";
+        try { host = new URL(String(sub.post_url)).hostname.replace(/^www\./i, ""); } catch { host = ""; }
+        const ok = !!host && rules.some((re) => re.test(host));
+        sub.auto_checked = true;
+        if (ok) {
+          sub.status = "approved";
+          sub.auto_approved = true;
+          sub.auto_result = "link matches " + plat;
+          sub.approved_at = Date.now();
+          sub.approved_by = "Auto-check";
+          sub.xp_awarded = base + early;
+        } else {
+          sub.auto_result = host ? ("link is " + host + ", not " + plat) : "that isn't a valid link";
+        }
+      }
+    }
+
     if (MERGE.has(type)) {
       // Merge this submission into whatever is already stored, by top-level key
       // (the per-device id for votes/pre-orders). Keeps everyone else's entries,
