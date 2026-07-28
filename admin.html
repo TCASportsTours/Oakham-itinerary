@@ -1335,6 +1335,36 @@
       S.faq=faq;
     }
 
+    /* --- GCS Tour Challenge: one challenge per tour day ---------------------
+       Columns: Day | Title | Description | XP | Closes | Suggested Caption
+       The sheet is the source of truth: an empty (header-only) tab clears them. */
+    var chWS=findSheet(wb,['challenges','challenge','tour challenge','family challenge','gcs tour challenge']);
+    if(chWS){
+      function cpick(o,kws){
+        for(var k in o){ if(!o.hasOwnProperty(k))continue; var nk=k.toLowerCase().trim(); if(kws.indexOf(nk)>=0) return String(o[k]==null?'':o[k]).trim(); }
+        for(var k2 in o){ if(!o.hasOwnProperty(k2))continue; var nk2=k2.toLowerCase().trim(); for(var i=0;i<kws.length;i++){ if(kws[i].length>=4 && nk2.indexOf(kws[i])>=0) return String(o[k2]==null?'':o[k2]).trim(); } }
+        return '';
+      }
+      var chs=[];
+      sheetRows(chWS).forEach(function(o){
+        var day=cpick(o,['day','tour day']);
+        var title=cpick(o,['title','challenge','name']);
+        if(!title) return;
+        var d=parseInt(day,10); if(isNaN(d)) d=chs.length+1;
+        chs.push({
+          id:'d'+d,
+          day:d,
+          title:title,
+          description:cpick(o,['description','detail','details','what to do','brief']),
+          xp:parseInt(cpick(o,['xp','xp available','points']),10)||25,
+          closes:_normTime(cpick(o,["closes","closing time","close","deadline"])),
+          caption:cpick(o,['suggested caption','caption','caption idea'])
+        });
+      });
+      chs.sort(function(a,b){ return a.day-b.day; });
+      S.challenges=chs;
+    }
+
     save();
     renderDays(); renderTeams(); renderStaff(); renderPlayers();
     if(typeof renderExcursions==='function') renderExcursions();
@@ -1427,7 +1457,7 @@
     // room numbers and phone numbers MUST NOT be published this way. Before real data goes in, move the
     // roster to a separate, authenticated endpoint (e.g. /tour?type=roster checked server-side against the
     // staff password) and delete `roster:` from this return. The app already reads `d.roster` either way.
-    return {settings:S.settings, teams:S.teams, teamMeta:S.teamMeta||{}, teamLogos:S.teamLogos||{}, staff:S.staff||{}, players:S.players||{}, nums:S.nums||{}, roster:S.roster||{}, moreContent:S.moreContent||[], meals:S.meals||[], faq:S.faq||[], groups:S.groups||{}, departures:S.departures||{}, restaurants:S.restaurants||[], days:days, events:withSlots(), announcements:S.announcements};
+    return {settings:S.settings, teams:S.teams, teamMeta:S.teamMeta||{}, teamLogos:S.teamLogos||{}, staff:S.staff||{}, players:S.players||{}, nums:S.nums||{}, roster:S.roster||{}, moreContent:S.moreContent||[], meals:S.meals||[], faq:S.faq||[], groups:S.groups||{}, departures:S.departures||{}, restaurants:S.restaurants||[], challenges:S.challenges||[], days:days, events:withSlots(), announcements:S.announcements};
   }
   function renderPreview(){document.getElementById('preview').textContent=JSON.stringify(exportData(),null,2);}
 

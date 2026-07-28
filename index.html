@@ -485,7 +485,142 @@
   .alertBtn:active{transform:scale(.97)}
   .signin .tourbadge,.signin .hello,.signin .lead{opacity:0;transition:opacity .3s}
   .signin.ready .tourbadge,.signin.ready .hello,.signin.ready .lead{opacity:1}
-</style>
+
+  /* ===== GCS Tour Challenge ===== */
+  .xpstrip{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(255,124,26,.16),rgba(119,119,201,.16));
+    border:1px solid rgba(255,124,26,.32);border-radius:16px;padding:14px 16px;margin-top:12px}
+  .xpstrip.big{padding:18px}
+  .xpbig{display:flex;flex-direction:column;align-items:center;line-height:1;flex:0 0 auto}
+  .xpbig .n{font-size:34px;font-weight:800;font-style:italic;color:#ff9d52}
+  .xpstrip.big .xpbig .n{font-size:44px}
+  .xpbig .l{font-size:11px;color:var(--muted);letter-spacing:.12em;margin-top:3px}
+  .xpmeta{display:flex;flex:1;gap:10px;justify-content:space-between}
+  .xpmeta div{display:flex;flex-direction:column;align-items:center;min-width:0}
+  .xpmeta b{font-size:16px;color:#fff}
+  .xpmeta span{font-size:10px;color:var(--muted);margin-top:2px;text-align:center}
+
+  .chcard{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:16px;margin-top:14px}
+  .chcard.shut{opacity:.72}
+  .cheyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
+  .chtitle{font-weight:700;font-style:italic;font-size:23px;color:#fff;line-height:1.15;margin:8px 0 0}
+  .chdesc{font-size:14px;line-height:1.55;color:var(--muted);margin-top:8px}
+  .chrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .chpill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;
+    background:rgba(255,255,255,.06);color:var(--muted)}
+  .chpill.xp{background:rgba(255,124,26,.18);color:#ff9d52}
+  .chtags{display:flex;gap:10px;margin-top:12px}
+  .chtags>div{flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 10px;min-width:0}
+  .chtags span{display:block;font-size:10px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+  .chtags b{display:block;font-size:13px;color:#51cea7;margin-top:2px;word-break:break-all}
+  .chcap{margin-top:12px;background:rgba(119,119,201,.12);border:1px solid rgba(119,119,201,.3);border-radius:12px;padding:10px 12px}
+  .chcap .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a9ad6}
+  .chcap .t{font-size:13px;color:#fff;line-height:1.5;margin-top:4px}
+  .chcopy{margin-top:8px;width:100%;background:rgba(119,119,201,.2);color:#9a9ad6;border:1px solid rgba(119,119,201,.4);
+    border-radius:10px;padding:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+  .chcta{width:100%;justify-content:center;box-sizing:border-box;margin-top:14px}
+  .chdone{margin-top:14px}
+  .chnote{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .chchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;flex:0 0 auto}
+  .chchip.ok{background:rgba(81,206,167,.18);color:#7bdcc0}
+  .chchip.no{background:rgba(255,90,90,.16);color:#ff8b8b}
+  .chchip.wait{background:rgba(255,157,82,.16);color:#ff9d52}
+
+  .chmini{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
+    border-radius:12px;padding:11px 13px;margin-top:8px}
+  .chmini.locked{opacity:.5}
+  .chmini .d{font-size:11px;font-weight:700;color:#9a9ad6;flex:0 0 auto;min-width:40px}
+  .chmini b{display:block;font-size:14px;color:#fff}
+  .chmini span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+
+  .lbrow{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
+    border-radius:12px;padding:10px 13px;margin-top:7px}
+  .lbrow.mine{border-color:rgba(255,124,26,.5);background:rgba(255,124,26,.09)}
+  .lbrow .pos{font-size:13px;font-weight:800;color:var(--faint);min-width:20px}
+  .lbrow.mine .pos{color:#ff9d52}
+  .lbrow b{display:block;font-size:14px;color:#fff}
+  .lbrow span{display:block;font-size:11px;color:var(--muted);margin-top:1px}
+  .lbrow .xp{font-size:13px;font-weight:700;color:#51cea7;flex:0 0 auto}
+
+  .chform{margin-top:14px}
+  .chlab{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:14px 2px 6px}
+  .chinput{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--surface-line);color:#fff;
+    border-radius:11px;padding:12px 13px;font:inherit;font-size:15px}
+  .chinput:focus{outline:none;border-color:rgba(255,124,26,.6)}
+  .chhint{font-size:11px;color:var(--faint);margin:6px 2px 0;line-height:1.5}
+  .chupload{width:100%;background:rgba(81,206,167,.14);color:#7bdcc0;border:1px dashed rgba(81,206,167,.5);border-radius:11px;
+    padding:16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  .chprev{width:100%;border-radius:11px;margin-top:10px;border:1px solid var(--surface-line)}
+  .chshot{width:100%;border-radius:11px;margin-top:10px;border:1px solid var(--surface-line)}
+  .chcheck{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:13px;color:#fff;line-height:1.5;cursor:pointer}
+  .chcheck input{margin-top:2px;width:18px;height:18px;flex:0 0 auto;accent-color:#ff7c1a}
+  .chcheck i{color:var(--muted);font-style:normal;font-size:12px}
+  .chsafe{display:flex;gap:9px;align-items:flex-start;margin-top:14px;background:rgba(81,206,167,.1);
+    border:1px solid rgba(81,206,167,.28);border-radius:11px;padding:11px 12px;font-size:12px;color:#7bdcc0;line-height:1.5}
+  .chsafe i{font-size:16px;flex:0 0 auto}
+  .cherr{margin-top:10px;background:rgba(255,90,90,.14);border:1px solid rgba(255,90,90,.4);color:#ff8b8b;
+    border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5}
+
+  .chsuccess{text-align:center;padding:34px 18px}
+  .chsuccess .tick{width:78px;height:78px;border-radius:50%;background:rgba(81,206,167,.16);display:flex;align-items:center;
+    justify-content:center;margin:0 auto 16px}
+  .chsuccess .tick i{font-size:44px;color:#51cea7}
+  .chsuccess b{display:block;font-weight:700;font-style:italic;font-size:24px;color:#fff}
+  .chsuccess p{font-size:14px;color:var(--muted);line-height:1.6;margin:10px auto 0;max-width:280px}
+
+  .badgewrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;margin-top:8px}
+  .badge{background:var(--surface);border:1px solid var(--surface-line);border-radius:13px;padding:13px 9px;text-align:center}
+  .badge i{font-size:26px;color:#ff9d52}
+  .badge b{display:block;font-size:12px;color:#fff;margin-top:6px}
+  .badge span{display:block;font-size:10px;color:var(--muted);margin-top:3px;line-height:1.35}
+
+  .xprow{display:flex;align-items:flex-start;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
+    border-radius:12px;padding:11px 13px;margin-top:8px}
+  .xprow .ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .xprow .ic.ok{background:rgba(81,206,167,.16);color:#51cea7}
+  .xprow .ic.no{background:rgba(255,90,90,.14);color:#ff8b8b}
+  .xprow .ic.wait{background:rgba(255,157,82,.16);color:#ff9d52}
+  .xprow b{display:block;font-size:14px;color:#fff}
+  .xprow span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .xprow span.rej{color:#ff8b8b}
+  .xprow .amt{font-size:14px;font-weight:700;color:var(--faint);flex:0 0 auto}
+  .xprow .amt.ok{color:#51cea7}
+
+  .chadminhead{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
+    border-radius:13px;padding:13px;margin-top:12px}
+  .chadminhead b{display:block;font-size:15px;color:#fff}
+  .chadminhead span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .channounce{background:rgba(255,124,26,.18);color:#ff9d52;border:1px solid rgba(255,124,26,.4);border-radius:9px;
+    padding:8px 11px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;gap:5px}
+  .chtabs{display:flex;gap:6px;margin-top:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .chtabs button{background:var(--surface);border:1px solid var(--surface-line);color:var(--muted);border-radius:999px;
+    padding:7px 13px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
+  .chtabs button.on{background:rgba(255,124,26,.18);color:#ff9d52;border-color:rgba(255,124,26,.45)}
+  .chtabs button span{opacity:.7}
+
+  .chsub{background:var(--surface);border:1px solid var(--surface-line);border-radius:13px;padding:13px;margin-top:9px}
+  .chsubtop{display:flex;gap:10px;align-items:flex-start}
+  .chsubtop b{display:block;font-size:15px;color:#fff}
+  .chsubtop span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .chperm{display:flex;align-items:center;gap:6px;font-size:11px;color:#7bdcc0;margin-top:8px}
+  .chperm.no{color:var(--faint)}
+  .chsubact{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+  .chbtn{background:rgba(255,255,255,.06);border:1px solid var(--surface-line);color:var(--muted);border-radius:9px;
+    padding:7px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .chbtn.ok{background:rgba(81,206,167,.16);color:#7bdcc0;border-color:rgba(81,206,167,.4)}
+  .chbtn.no{background:rgba(255,90,90,.13);color:#ff8b8b;border-color:rgba(255,90,90,.32)}
+  .chbtn.feat.on{background:rgba(255,124,26,.2);color:#ff9d52;border-color:rgba(255,124,26,.45)}
+  .chbtn.bonus{background:rgba(119,119,201,.16);color:#9a9ad6;border-color:rgba(119,119,201,.4)}
+
+  .chintro{background:rgba(255,124,26,.1);border:1px solid rgba(255,124,26,.28);border-radius:13px;padding:14px;margin-top:12px}
+  .chintro b{display:block;font-weight:700;font-style:italic;font-size:18px;color:#fff}
+  .chintro p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .chhelp{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
+  .chhelp .ic{width:38px;height:38px;border-radius:11px;background:rgba(119,119,201,.16);color:#9a9ad6;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:19px}
+  .chhelp b{display:block;font-size:15px;color:#fff}
+  .chhelp p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:4px}
+
+  </style>
 </head>
 <body>
 <div class="phone locked">
@@ -513,7 +648,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bw · officials-signout</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bx · tour-challenge</div>
     </section>
 
     <!-- TODAY -->
@@ -581,6 +716,9 @@
         <div class="tile acc-orange" id="squadTile" style="display:none" onclick="openRoster()"><span class="tbadge"><i class="ti ti-clipboard-list"></i></span><div>Squad list</div></div>
         <div class="tile acc-purple" id="voteTile" style="display:none" onclick="openVoteResults()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>Players&rsquo; Player<span id="voteTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-teal" id="mealTile" style="display:none" onclick="openMealOrders()"><span class="tbadge"><i class="ti ti-tools-kitchen-2"></i></span><div>Meal pre-orders</div></div>
+        <div class="tile acc-orange" id="challengeTile" style="display:none" onclick="openChallenge()"><span class="tbadge"><i class="ti ti-bolt"></i></span><div>Tour Challenge<span id="challengeTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
+        <div class="tile acc-purple" id="myXPTile" style="display:none" onclick="openMyXP()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>My GCS XP</div></div>
+        <div class="tile acc-teal" id="chAdminTile" style="display:none" onclick="openChAdmin()"><span class="tbadge"><i class="ti ti-checkbox"></i></span><div>Challenge approvals<span id="chAdminTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-orange" id="alertTile" style="display:none" onclick="openSendAlert()"><span class="tbadge"><i class="ti ti-send"></i></span><div>Send alert</div></div>
       </div>
       </div>
@@ -621,6 +759,27 @@
       <div class="eyebrow" id="offEyebrow" style="color:#9a9ad6;margin-top:6px"><i class="ti ti-whistle"></i> Scorer / umpire &mdash; all matches</div>
       <div id="offMatchList"></div>
       <button class="squadopt" id="offSignOutBtn" style="margin-top:16px;opacity:.85;display:none" onclick="logOut()"><span class="dot" style="background:var(--surface);color:#fff"><i class="ti ti-logout"></i></span><span style="flex:1"><b>Sign out</b></span><i class="ti ti-chevron-right arr"></i></button>
+    </section>
+
+    <!-- GCS TOUR CHALLENGE -->
+    <section class="screen" id="s-challenge">
+      <button class="backbtn" onclick="appBack()"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="challengeBody"></div>
+    </section>
+    <section class="screen" id="s-chsubmit">
+      <button class="backbtn" onclick="openChallenge()"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="chSubmitBody"></div>
+    </section>
+    <section class="screen" id="s-chdone">
+      <div id="chDoneBody"></div>
+    </section>
+    <section class="screen" id="s-myxp">
+      <button class="backbtn" onclick="appBack()"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="myXPBody"></div>
+    </section>
+    <section class="screen" id="s-chadmin">
+      <button class="backbtn" onclick="appBack()"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="chAdminBody"></div>
     </section>
     <section class="screen" id="s-omatch">
       <button class="backbtn" onclick="showOfficials()"><i class="ti ti-chevron-left"></i> All matches</button>
@@ -1189,6 +1348,7 @@
     /* Scoring app guide: tournament staff / GCS admin only. Players, supporters and team
        coaches never score a match, so the tile is noise on their More screen. */
     var scTile=document.getElementById('scoringTile'); if(scTile) scTile.style.display=isAdmin?'':'none';
+    chTiles();
     ['voteTile','alertTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display=isStaff?'':'none'; });
     var mt=document.getElementById('mealTile'); if(mt) mt.style.display=(isStaff && MEALS && MEALS.length)?'':'none';
     var rt=document.getElementById('rulesTile'); if(rt) rt.style.display=hasVal(SETTINGS.rulesUrl)?'':'none';
@@ -1210,7 +1370,7 @@
   function switchSquad(){
     isStaff=false; staffPending=false; isAdmin=false; _adminPending=false; currentPlayer=''; role='player'; pendingRole='player'; officialKind=''; officialName=''; _loginTracked=false; viewAll=false; clearPlayer(); clearSession();
     var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display='none';
-    ['voteTile','mealTile','alertTile','rulesTile','scoringTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
+    ['voteTile','mealTile','alertTile','rulesTile','scoringTile','challengeTile','myXPTile','chAdminTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
     document.querySelector('.phone').classList.add('locked');
     document.querySelector('.phone').classList.remove('officials');
     showOnly('s-signin');
@@ -1401,7 +1561,7 @@
     var wl=document.getElementById('welcomeLead'); if(wl){ wl.textContent='Staff sign-in — choose your team.'; wl.style.color=''; wl.style.fontWeight=''; }
     renderTeamButtons();
   }
-  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1};
+  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1};
   function showOnly(id){
     var cur=document.querySelector('.screen.active'); var curId=cur?cur.id:'';
     if(curId && curId!=='s-detail') _screenScroll[curId]=screens.scrollTop;   // remember scroll (not the reused detail screen)
@@ -3714,7 +3874,9 @@
     RESTAURANTS=(d&&d.restaurants)||[];
     GROUPS=_obj(d&&d.groups);
     FAQ=(d&&Array.isArray(d.faq))?d.faq:[];
+    CHALLENGES=(d&&Array.isArray(d.challenges))?d.challenges:[];
     showRoleChooser(); renderAlertsFeed(); renderMore();
+    try{ chTiles(); }catch(e){}   // challenges may arrive after sign-in
     document.getElementById('appTitle').textContent=SETTINGS.tourName||'Tour';
     document.getElementById('appSub').textContent=SETTINGS.destination||'';
     var _tb=document.getElementById('tourBadge'); if(_tb&&SETTINGS.badge)_tb.src=SETTINGS.badge;
@@ -3864,6 +4026,635 @@
     fetchAlerts();
     if(!alertTimer) alertTimer=setInterval(function(){ if(!document.hidden) fetchAlerts(); },60000);
     if(!window._alertVis){ window._alertVis=1; document.addEventListener('visibilitychange',function(){ if(!document.hidden) fetchAlerts(); }); }
+  }
+
+  /* ==========================================================================
+     GCS TOUR CHALLENGE  —  family challenge, XP and leaderboards
+     --------------------------------------------------------------------------
+     Daily challenges come from the Challenges tab of the tour spreadsheet, so
+     every tour sets its own without a code change. Submissions live in the
+     "challenges" blob slot, keyed by submission id and merged server-side so two
+     phones submitting at once can't wipe each other.
+
+     XP is never stored as a running total. It is always summed from approved
+     submissions, so there is one source of truth and the number can't drift.
+
+     Nothing about the player is copied into a submission beyond player_id — the
+     name, team and age group are read from the signed-in profile / published
+     roster, exactly as the brief asks.
+     ========================================================================== */
+
+  var CHALLENGES=[], SUBS={}, _subsFetched=false, _chTimer=null;
+  var CH_PLATFORMS=[
+    {v:'instagram',      l:'Instagram post',   story:false},
+    {v:'instagram_story',l:'Instagram Story',  story:true },
+    {v:'facebook',       l:'Facebook post',    story:false},
+    {v:'facebook_story', l:'Facebook Story',   story:true },
+    {v:'tiktok',         l:'TikTok',           story:false},
+    {v:'other',          l:'Somewhere else',   story:false}
+  ];
+  function platLabel(v){ for(var i=0;i<CH_PLATFORMS.length;i++) if(CH_PLATFORMS[i].v===v) return CH_PLATFORMS[i].l; return v||'\u2014'; }
+  function platIsStory(v){ for(var i=0;i<CH_PLATFORMS.length;i++) if(CH_PLATFORMS[i].v===v) return CH_PLATFORMS[i].story; return false; }
+
+  /* ---- identity -------------------------------------------------------- */
+  /* player_id is derived from the signed-in profile, never typed in. Stable
+     across sessions and devices so a player's XP follows them. */
+  /* Minutes since midnight, local time on the phone. */
+  function nowMin(){ var d=new Date(); return d.getHours()*60+d.getMinutes(); }
+  function chSlug(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+  function myPlayerId(){
+    if(!currentSquad || !currentPlayer) return '';
+    return chSlug(currentSquad)+'__'+chSlug(currentPlayer);
+  }
+  function playerIdParts(pid){
+    var p=String(pid||'').split('__');
+    var team='', name='';
+    (TEAMS_LIST||[]).forEach(function(t){ if(chSlug(t)===p[0]) team=t; });
+    Object.keys(PLAYERS||{}).forEach(function(t){ (PLAYERS[t]||[]).forEach(function(n){ if(chSlug(n)===p[1] && (!team||chSlug(t)===p[0])) name=n; }); });
+    return {team:team||p[0]||'', name:name||(p[1]||'').replace(/-/g,' ')};
+  }
+  function chCanPlay(){ return role==='player' && !!myPlayerId(); }
+
+  /* ---- challenge lookup ------------------------------------------------- */
+  function challengeFor(day){
+    var d=parseInt(day,10);
+    for(var i=0;i<CHALLENGES.length;i++){ if(parseInt(CHALLENGES[i].day,10)===d) return CHALLENGES[i]; }
+    return null;
+  }
+  function todaysChallenge(){ return challengeFor(DEMO_TODAY); }
+  function challengeById(id){
+    for(var i=0;i<CHALLENGES.length;i++) if(CHALLENGES[i].id===id) return CHALLENGES[i];
+    return null;
+  }
+  function chXP(c){ var n=parseInt(c&&c.xp,10); return isNaN(n)?25:n; }
+  function chOpen(c){
+    if(!c) return false;
+    if(parseInt(c.day,10)>DEMO_TODAY) return false;          // not released yet
+    if(parseInt(c.day,10)<DEMO_TODAY) return false;          // yesterday's has closed
+    if(!c.closes) return true;
+    var now=nowMin(), cl=tmin(c.closes);
+    return !(cl && now>cl);
+  }
+  function chClosedReason(c){
+    if(!c) return '';
+    if(parseInt(c.day,10)>DEMO_TODAY) return 'Opens on day '+c.day;
+    if(parseInt(c.day,10)<DEMO_TODAY) return 'This one has closed';
+    if(c.closes && nowMin()>tmin(c.closes)) return 'Closed at '+c.closes;
+    return '';
+  }
+
+  /* ---- submissions ------------------------------------------------------ */
+  function fetchSubs(cb){
+    getJSON('?type=challenges').then(function(r){return r.ok?r.json():{};})
+      .then(function(o){ SUBS=(o&&typeof o==='object'&&!Array.isArray(o))?o:{}; _subsFetched=true; if(cb)cb(); })
+      .catch(function(){ if(cb)cb(); });
+  }
+  function subsList(){
+    return Object.keys(SUBS||{}).map(function(k){ return SUBS[k]; })
+      .filter(function(s){ return s && s.submission_id; })
+      .sort(function(a,b){ return (b.submitted_at||0)-(a.submitted_at||0); });
+  }
+  function mySubs(){ var me=myPlayerId(); return subsList().filter(function(s){ return s.player_id===me; }); }
+  function subFor(pid,cid){ var l=subsList(); for(var i=0;i<l.length;i++) if(l[i].player_id===pid&&l[i].challenge_id===cid) return l[i]; return null; }
+  function mySubFor(cid){ return subFor(myPlayerId(),cid); }
+
+  function xpFor(pid){
+    return subsList().reduce(function(n,s){ return n + ((s.player_id===pid && s.status==='approved') ? (parseInt(s.xp_awarded,10)||0) : 0); },0);
+  }
+  function countFor(pid,status){ return subsList().filter(function(s){ return s.player_id===pid && s.status===status; }).length; }
+
+  function playerBoard(){
+    var by={};
+    subsList().forEach(function(s){
+      if(s.status!=='approved') return;
+      by[s.player_id]=(by[s.player_id]||0)+(parseInt(s.xp_awarded,10)||0);
+    });
+    return Object.keys(by).map(function(pid){
+      var p=playerIdParts(pid); return {pid:pid,name:p.name,team:p.team,xp:by[pid]};
+    }).sort(function(a,b){ return b.xp-a.xp || a.name.localeCompare(b.name); });
+  }
+  function teamBoard(){
+    var by={};
+    playerBoard().forEach(function(r){ if(r.team) by[r.team]=(by[r.team]||0)+r.xp; });
+    (TEAMS_LIST||[]).forEach(function(t){ if(by[t]===undefined) by[t]=0; });
+    return Object.keys(by).map(function(t){ return {team:t,xp:by[t]}; })
+      .sort(function(a,b){ return b.xp-a.xp || a.team.localeCompare(b.team); });
+  }
+  function rankOf(list,match){ for(var i=0;i<list.length;i++) if(match(list[i])) return i+1; return 0; }
+  function ord(n){ if(!n) return '\u2014'; var s=['th','st','nd','rd'], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+
+  /* ---- badges: derived from the submissions, never stored ---------------- */
+  function badgesFor(pid){
+    var ap=subsList().filter(function(s){ return s.player_id===pid && s.status==='approved'; });
+    var feat=ap.filter(function(s){ return s.featured; }).length;
+    var out=[];
+    if(ap.length>=1) out.push({i:'ti-rocket',   t:'First Post',      d:'Completed your first challenge'});
+    if(ap.length>=3) out.push({i:'ti-flame',    t:'On a Roll',       d:'Three challenges completed'});
+    if(ap.length>=5) out.push({i:'ti-star',     t:'Tour Regular',    d:'Five challenges completed'});
+    if(CHALLENGES.length && ap.length>=CHALLENGES.length) out.push({i:'ti-crown', t:'Full House', d:'Every challenge on the tour'});
+    if(feat>=1)      out.push({i:'ti-sparkles', t:'Featured',        d:'GCS shared your content'});
+    if(xpFor(pid)>=100) out.push({i:'ti-medal', t:'Century',         d:'100 XP or more'});
+    return out;
+  }
+
+  /* ======================= PLAYER: main screen ============================ */
+  function openChallenge(){
+    showOnly('s-challenge');
+    document.getElementById('appTitle').textContent='GCS Tour Challenge';
+    document.getElementById('appSub').textContent='Earn XP for your profile';
+    renderChallenge();
+    fetchSubs(renderChallenge);
+    if(!_chTimer) _chTimer=setInterval(function(){ if(!document.hidden && document.getElementById('s-challenge').classList.contains('active')) fetchSubs(renderChallenge); },45000);
+  }
+  function chStatusChip(s){
+    if(!s) return '';
+    if(s.status==='approved') return '<span class="chchip ok"><i class="ti ti-circle-check"></i> Approved &middot; +'+(parseInt(s.xp_awarded,10)||0)+' XP</span>';
+    if(s.status==='rejected') return '<span class="chchip no"><i class="ti ti-circle-x"></i> Not accepted</span>';
+    return '<span class="chchip wait"><i class="ti ti-hourglass-low"></i> Waiting for approval</span>';
+  }
+  function renderChallenge(){
+    var host=document.getElementById('challengeBody'); if(!host) return;
+    var c=todaysChallenge(), me=myPlayerId(), h='';
+
+    if(!CHALLENGES.length){
+      host.innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:12px"><i class="ti ti-info-circle"></i> No challenges have been added for this tour yet.</div>';
+      return;
+    }
+
+    /* --- my XP strip --- */
+    if(chCanPlay()){
+      var pb=playerBoard(), tb=teamBoard();
+      var myXP=xpFor(me), myRank=rankOf(pb,function(r){return r.pid===me;});
+      var myTeamRank=rankOf(tb,function(r){return r.team===currentSquad;});
+      h+='<div class="xpstrip">'+
+           '<div class="xpbig"><span class="n">'+myXP+'</span><span class="l">XP</span></div>'+
+           '<div class="xpmeta">'+
+             '<div><b>'+countFor(me,'approved')+'</b><span>completed</span></div>'+
+             '<div><b>'+countFor(me,'pending')+'</b><span>awaiting</span></div>'+
+             '<div><b>'+ord(myRank)+'</b><span>you</span></div>'+
+             '<div><b>'+ord(myTeamRank)+'</b><span>team</span></div>'+
+           '</div>'+
+         '</div>';
+    }
+
+    /* --- today's challenge --- */
+    if(c){
+      var open=chOpen(c), mine=chCanPlay()?mySubFor(c.id):null, why=chClosedReason(c);
+      h+='<div class="chcard'+(open?'':' shut')+'">'+
+           '<div class="cheyebrow"><i class="ti ti-bolt"></i> Today\u2019s Family Challenge &middot; Day '+esc(String(c.day))+'</div>'+
+           '<div class="chtitle">'+esc(c.title||'Challenge')+'</div>'+
+           (c.description?'<div class="chdesc">'+esc(c.description)+'</div>':'')+
+           '<div class="chrow">'+
+             '<span class="chpill xp"><i class="ti ti-bolt"></i> '+chXP(c)+' XP</span>'+
+             (c.closes?'<span class="chpill"><i class="ti ti-clock-hour-4"></i> Closes '+esc(c.closes)+'</span>':'')+
+           '</div>'+
+           '<div class="chtags">'+
+             '<div><span>Tag</span><b>@'+esc(igHandle())+'</b></div>'+
+             '<div><span>Hashtag</span><b>#'+esc(tourHashtag())+'</b></div>'+
+           '</div>'+
+           (c.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText">'+esc(c.caption)+'</div>'+
+             '<button class="chcopy" onclick="copyCaption()"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
+           (mine
+             ? '<div class="chdone">'+chStatusChip(mine)+(mine.status==='rejected'&&mine.note?'<div class="chnote">'+esc(mine.note)+'</div>':'')+
+               (mine.status==='rejected'&&open?'<button class="cta chcta" onclick="openSubmit(\''+esc(c.id)+'\')"><i class="ti ti-refresh"></i> Try again</button>':'')+'</div>'
+             : (open
+                 ? '<button class="cta chcta" onclick="openSubmit(\''+esc(c.id)+'\')"><i class="ti ti-upload"></i> Submit challenge</button>'
+                 : '<div class="readonly" style="justify-content:flex-start;margin-top:10px"><i class="ti ti-lock"></i> '+esc(why||'Not open')+'</div>'))+
+         '</div>';
+    }
+
+    /* --- the rest of the tour --- */
+    var others=CHALLENGES.filter(function(x){ return !c || x.id!==c.id; });
+    if(others.length){
+      h+='<div class="eyebrow" style="margin-top:18px">All challenges</div>';
+      others.forEach(function(x){
+        var sub=chCanPlay()?mySubFor(x.id):null, locked=parseInt(x.day,10)>DEMO_TODAY;
+        h+='<div class="chmini'+(locked?' locked':'')+'">'+
+             '<div class="d">'+(locked?'<i class="ti ti-lock"></i>':'Day '+esc(String(x.day)))+'</div>'+
+             '<div style="flex:1;min-width:0"><b>'+(locked?'Unlocks on day '+esc(String(x.day)):esc(x.title||''))+'</b>'+
+               '<span>'+chXP(x)+' XP'+(sub?' &middot; '+(sub.status==='approved'?'done':sub.status==='pending'?'awaiting':'not accepted'):'')+'</span></div>'+
+             (sub&&sub.status==='approved'?'<i class="ti ti-circle-check" style="color:#51cea7;font-size:20px"></i>':'')+
+           '</div>';
+      });
+    }
+
+    /* --- leaderboards --- */
+    h+=boardHTML();
+
+    /* --- help --- */
+    h+='<div class="grid" style="margin-top:16px">'+
+         '<div class="tile acc-teal" onclick="openChHelpPlayer()"><span class="tbadge"><i class="ti ti-help-circle"></i></span><div>How it works</div></div>'+
+         '<div class="tile acc-purple" onclick="openChHelpParent()"><span class="tbadge"><i class="ti ti-users"></i></span><div>For parents</div></div>'+
+       '</div>';
+
+    host.innerHTML=h;
+  }
+
+  function boardHTML(){
+    var pb=playerBoard().slice(0,10), tb=teamBoard(), me=myPlayerId();
+    var h='<div class="eyebrow" style="margin-top:18px">Team leaderboard</div>';
+    if(!tb.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> No XP yet \u2014 be the first.</div>';
+    tb.forEach(function(r,i){
+      h+='<div class="lbrow'+(r.team===currentSquad?' mine':'')+'"><div class="pos">'+(i+1)+'</div>'+
+         '<div style="flex:1;min-width:0"><b>'+esc(r.team)+'</b></div><div class="xp">'+r.xp+' XP</div></div>';
+    });
+    h+='<div class="eyebrow" style="margin-top:16px">Top players</div>';
+    if(!pb.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> Nobody on the board yet.</div>';
+    pb.forEach(function(r,i){
+      h+='<div class="lbrow'+(r.pid===me?' mine':'')+'"><div class="pos">'+(i+1)+'</div>'+
+         '<div style="flex:1;min-width:0"><b>'+esc(r.name)+'</b><span>'+esc(r.team)+'</span></div><div class="xp">'+r.xp+' XP</div></div>';
+    });
+    return h;
+  }
+
+  function copyCaption(){
+    var t=document.getElementById('chCapText'); if(!t) return;
+    var txt=t.textContent+'\n\n@'+igHandle()+' #'+tourHashtag();
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Caption copied');},function(){chFallbackCopy(txt);}); }
+      else chFallbackCopy(txt);
+    }catch(e){ chFallbackCopy(txt); }
+  }
+  function chFallbackCopy(txt){
+    try{ var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('Caption copied'); }
+    catch(e){ toast('Couldn\u2019t copy \u2014 select it by hand'); }
+  }
+
+  /* ======================= PLAYER: submit ================================= */
+  var _submitFor='', _shotData='';
+  function openSubmit(cid){
+    if(!chCanPlay()){ toast('Sign in as a player to submit'); return; }
+    var c=challengeById(cid); if(!c) return;
+    _submitFor=cid; _shotData='';
+    showOnly('s-chsubmit');
+    document.getElementById('appTitle').textContent='Submit challenge';
+    document.getElementById('appSub').textContent=c.title||'';
+    var opts=CH_PLATFORMS.map(function(p){ return '<option value="'+p.v+'">'+p.l+'</option>'; }).join('');
+    document.getElementById('chSubmitBody').innerHTML=
+      '<div class="chcard" style="margin-top:6px">'+
+        '<div class="cheyebrow"><i class="ti ti-bolt"></i> '+chXP(c)+' XP</div>'+
+        '<div class="chtitle" style="font-size:19px">'+esc(c.title||'')+'</div>'+
+      '</div>'+
+      '<div class="chform">'+
+        '<label class="chlab">Where was it posted?</label>'+
+        '<select id="chPlat" class="chinput" onchange="chPlatChanged()">'+opts+'</select>'+
+
+        '<div id="chLinkWrap">'+
+          '<label class="chlab">Link to the post</label>'+
+          '<input id="chLink" class="chinput" type="url" inputmode="url" placeholder="Paste the link here" autocomplete="off">'+
+          '<div class="chhint">On Instagram: tap the three dots on the post &rarr; Copy link.</div>'+
+        '</div>'+
+
+        '<div id="chShotWrap" style="display:none">'+
+          '<label class="chlab">Upload a screenshot of the Story</label>'+
+          '<input id="chShot" type="file" accept="image/*" style="display:none" onchange="chShotPicked(this)">'+
+          '<button class="chupload" onclick="document.getElementById(\'chShot\').click()"><i class="ti ti-camera"></i> <span id="chShotLabel">Choose screenshot</span></button>'+
+          '<div id="chShotPrev"></div>'+
+          '<div class="chhint">Stories vanish after 24 hours, so we need a picture of it instead of a link.</div>'+
+        '</div>'+
+
+        '<label class="chcheck"><input type="checkbox" id="chGuardian"><span>My parent or guardian posted this, or said I could.</span></label>'+
+        '<label class="chcheck"><input type="checkbox" id="chFeature"><span>GCS can share or repost this. <i>(optional)</i></span></label>'+
+
+        '<div class="chsafe"><i class="ti ti-shield-check"></i><span>If other children are in the photo, please check their parents are happy before posting.</span></div>'+
+
+        '<button class="cta chcta" id="chSubmitBtn" onclick="submitChallenge()"><i class="ti ti-send"></i> Submit</button>'+
+        '<div id="chErr" class="cherr" style="display:none"></div>'+
+      '</div>';
+  }
+  function chPlatChanged(){
+    var v=document.getElementById('chPlat').value, story=platIsStory(v);
+    document.getElementById('chLinkWrap').style.display=story?'none':'';
+    document.getElementById('chShotWrap').style.display=story?'':'none';
+  }
+  function chShotPicked(input){
+    var f=input.files&&input.files[0]; if(!f) return;
+    if(!/^image\//.test(f.type)){ toast('That\u2019s not an image'); return; }
+    var fr=new FileReader();
+    fr.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        /* Shrink on the phone before it ever leaves it: long edge 1000px, JPEG.
+           Keeps a Story screenshot around 100-200KB instead of several MB. */
+        var max=1000, w=img.width, h=img.height;
+        if(w>h && w>max){ h=Math.round(h*max/w); w=max; } else if(h>=w && h>max){ w=Math.round(w*max/h); h=max; }
+        var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        _shotData=cv.toDataURL('image/jpeg',0.72);
+        document.getElementById('chShotLabel').textContent='Change screenshot';
+        document.getElementById('chShotPrev').innerHTML='<img src="'+_shotData+'" class="chprev" alt="Your screenshot">';
+      };
+      img.onerror=function(){ toast('Couldn\u2019t read that image'); };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(f);
+  }
+  function chErr(msg){
+    var e=document.getElementById('chErr');
+    if(!msg){ e.style.display='none'; return; }
+    e.textContent=msg; e.style.display='block';
+  }
+  function submitChallenge(){
+    var c=challengeById(_submitFor); if(!c) return;
+    var plat=document.getElementById('chPlat').value;
+    var story=platIsStory(plat);
+    var link=(document.getElementById('chLink').value||'').trim();
+    var guardian=document.getElementById('chGuardian').checked;
+    var feature=document.getElementById('chFeature').checked;
+
+    if(!guardian){ chErr('Please tick the box to confirm a parent or guardian posted this.'); return; }
+    if(story && !_shotData){ chErr('Please add a screenshot of the Story.'); return; }
+    if(!story && !link){ chErr('Please paste the link to the post.'); return; }
+    if(!story && !/^https?:\/\//i.test(link)){ chErr('That doesn\u2019t look like a link \u2014 it should start with https://'); return; }
+    if(!chOpen(c)){ chErr('This challenge has closed.'); return; }
+    chErr('');
+
+    var btn=document.getElementById('chSubmitBtn');
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2"></i> Sending\u2026';
+
+    var existing=mySubFor(c.id);
+    var id=(existing&&existing.submission_id)||('s'+Date.now().toString(36)+Math.random().toString(36).slice(2,8));
+    var sub={
+      submission_id:id,
+      player_id:myPlayerId(),
+      challenge_id:c.id,
+      platform:plat,
+      post_url:story?'':link,
+      story_screenshot:story?('shot_'+id):'',
+      guardian_confirmation:!!guardian,
+      feature_permission:!!feature,
+      status:'pending',
+      submitted_at:Date.now(),
+      approved_at:null,
+      approved_by:'',
+      xp_awarded:0
+    };
+
+    var send=function(){
+      var payload={}; payload[id]=sub;
+      fetch('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+        .then(function(r){ if(!r.ok) throw new Error('save failed'); return r.json(); })
+        .then(function(){
+          SUBS[id]=sub;
+          showOnly('s-chdone');
+          document.getElementById('appTitle').textContent='Sent';
+          document.getElementById('appSub').textContent='Nice one';
+          document.getElementById('chDoneBody').innerHTML=
+            '<div class="chsuccess">'+
+              '<div class="tick"><i class="ti ti-circle-check"></i></div>'+
+              '<b>Challenge sent</b>'+
+              '<p>A GCS admin will have a look shortly. Once it\u2019s approved, <b>'+chXP(c)+' XP</b> lands on your profile and you\u2019ll move up the leaderboard.</p>'+
+              '<button class="cta chcta" onclick="openChallenge()"><i class="ti ti-arrow-left"></i> Back to the challenge</button>'+
+            '</div>';
+          fetchSubs();
+        })
+        .catch(function(){
+          btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Submit';
+          chErr('Couldn\u2019t send that \u2014 check your signal and try again.');
+        });
+    };
+
+    if(story && _shotData){
+      fetch('/.netlify/functions/tour?type=shot&id='+encodeURIComponent(id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({data:_shotData})})
+        .then(function(r){ if(!r.ok) throw new Error('image failed'); send(); })
+        .catch(function(){
+          btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Submit';
+          chErr('That screenshot wouldn\u2019t upload \u2014 try a smaller one.');
+        });
+    } else send();
+  }
+
+  /* ======================= PLAYER: My GCS XP ============================== */
+  function openMyXP(){
+    if(!chCanPlay()){ toast('Sign in as a player to see your XP'); return; }
+    showOnly('s-myxp');
+    document.getElementById('appTitle').textContent='My GCS XP';
+    document.getElementById('appSub').textContent=currentPlayer+' \u00b7 '+currentSquad;
+    renderMyXP(); fetchSubs(renderMyXP);
+  }
+  function renderMyXP(){
+    var host=document.getElementById('myXPBody'); if(!host) return;
+    var me=myPlayerId(), pb=playerBoard(), tb=teamBoard();
+    var mine=mySubs(), badges=badgesFor(me);
+    var h='<div class="xpstrip big">'+
+            '<div class="xpbig"><span class="n">'+xpFor(me)+'</span><span class="l">XP</span></div>'+
+            '<div class="xpmeta">'+
+              '<div><b>'+countFor(me,'approved')+'</b><span>completed</span></div>'+
+              '<div><b>'+countFor(me,'pending')+'</b><span>awaiting</span></div>'+
+              '<div><b>'+ord(rankOf(pb,function(r){return r.pid===me;}))+'</b><span>player</span></div>'+
+              '<div><b>'+ord(rankOf(tb,function(r){return r.team===currentSquad;}))+'</b><span>team</span></div>'+
+            '</div>'+
+          '</div>';
+
+    h+='<div class="eyebrow" style="margin-top:16px">Badges</div>';
+    if(!badges.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> Complete a challenge to earn your first badge.</div>';
+    else { h+='<div class="badgewrap">'; badges.forEach(function(b){
+      h+='<div class="badge"><i class="ti '+b.i+'"></i><b>'+esc(b.t)+'</b><span>'+esc(b.d)+'</span></div>'; }); h+='</div>'; }
+
+    h+='<div class="eyebrow" style="margin-top:16px">XP history</div>';
+    if(!mine.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> Nothing submitted yet.</div>';
+    mine.forEach(function(s){
+      var c=challengeById(s.challenge_id);
+      h+='<div class="xprow">'+
+           '<div class="ic '+(s.status==='approved'?'ok':s.status==='rejected'?'no':'wait')+'"><i class="ti '+(s.status==='approved'?'ti-bolt':s.status==='rejected'?'ti-circle-x':'ti-hourglass-low')+'"></i></div>'+
+           '<div style="flex:1;min-width:0"><b>'+esc((c&&c.title)||s.challenge_id)+'</b>'+
+             '<span>'+platLabel(s.platform)+' &middot; '+chWhen(s.submitted_at)+(s.featured?' &middot; featured by GCS':'')+'</span>'+
+             (s.status==='rejected'&&s.note?'<span class="rej">'+esc(s.note)+'</span>':'')+'</div>'+
+           '<div class="amt '+(s.status==='approved'?'ok':'')+'">'+(s.status==='approved'?'+'+(parseInt(s.xp_awarded,10)||0):(s.status==='rejected'?'\u2014':'\u2026'))+'</div>'+
+         '</div>';
+    });
+    host.innerHTML=h;
+  }
+  function chWhen(ts){
+    if(!ts) return '';
+    var d=new Date(ts), n=new Date();
+    var same=d.toDateString()===n.toDateString();
+    var t=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+    return same?('today '+t):(d.getDate()+'/'+(d.getMonth()+1)+' '+t);
+  }
+
+  /* ======================= ADMIN: dashboard =============================== */
+  var _chFilter='pending';
+  function openChAdmin(){
+    if(!isAdmin){ toast('Tournament staff only'); return; }
+    showOnly('s-chadmin');
+    document.getElementById('appTitle').textContent='Tour Challenge';
+    document.getElementById('appSub').textContent='Submissions & XP';
+    renderChAdmin(); fetchSubs(renderChAdmin);
+  }
+  function chFilter(f){ _chFilter=f; renderChAdmin(); }
+  function renderChAdmin(){
+    var host=document.getElementById('chAdminBody'); if(!host) return;
+    var all=subsList();
+    var counts={pending:0,approved:0,rejected:0};
+    all.forEach(function(s){ if(counts[s.status]!==undefined) counts[s.status]++; });
+    var list=all.filter(function(s){ return _chFilter==='all'?true:s.status===_chFilter; });
+
+    var c=todaysChallenge();
+    var h='<div class="chadminhead">'+
+            '<div><b>'+(c?esc(c.title):'No challenge set for today')+'</b><span>'+(c?('Day '+c.day+' \u00b7 '+chXP(c)+' XP'+(c.closes?' \u00b7 closes '+esc(c.closes):'')):'Add one on the Challenges tab of the spreadsheet')+'</span></div>'+
+            (c?'<button class="channounce" onclick="announceChallenge()"><i class="ti ti-send"></i> Announce</button>':'')+
+          '</div>';
+
+    h+='<div class="chtabs">'+
+         ['pending','approved','rejected','all'].map(function(f){
+           var n=f==='all'?all.length:counts[f];
+           return '<button class="'+(_chFilter===f?'on':'')+'" onclick="chFilter(\''+f+'\')">'+f.charAt(0).toUpperCase()+f.slice(1)+' <span>'+n+'</span></button>';
+         }).join('')+
+       '</div>';
+
+    if(!list.length){
+      h+='<div class="readonly" style="justify-content:flex-start;margin-top:12px"><i class="ti ti-info-circle"></i> Nothing here.</div>';
+      host.innerHTML=h; return;
+    }
+
+    list.forEach(function(s){
+      var p=playerIdParts(s.player_id), ch=challengeById(s.challenge_id);
+      h+='<div class="chsub" id="sub-'+esc(s.submission_id)+'">'+
+           '<div class="chsubtop">'+
+             '<div style="flex:1;min-width:0"><b>'+esc(p.name||'Unknown player')+'</b>'+
+               '<span>'+esc(p.team||'')+' &middot; '+esc((ch&&ch.title)||s.challenge_id)+'</span>'+
+               '<span>'+platLabel(s.platform)+' &middot; '+chWhen(s.submitted_at)+'</span></div>'+
+             chStatusChip(s)+
+           '</div>'+
+           (s.feature_permission?'<div class="chperm"><i class="ti ti-license"></i> Repost permission given</div>':'<div class="chperm no"><i class="ti ti-license-off"></i> No repost permission</div>')+
+           (!s.guardian_confirmation?'<div class="chperm no"><i class="ti ti-alert-triangle"></i> Guardian box not ticked</div>':'')+
+           '<div class="chsubact">'+
+             (s.post_url?'<a class="chbtn view" href="'+attr(s.post_url)+'" target="_blank" rel="noopener"><i class="ti ti-external-link"></i> View post</a>':'')+
+             (s.story_screenshot?'<button class="chbtn view" onclick="viewShot(\''+esc(s.submission_id)+'\')"><i class="ti ti-photo"></i> View screenshot</button>':'')+
+             (s.status!=='approved'?'<button class="chbtn ok" onclick="chApprove(\''+esc(s.submission_id)+'\')"><i class="ti ti-check"></i> Approve</button>':'')+
+             (s.status!=='rejected'?'<button class="chbtn no" onclick="chReject(\''+esc(s.submission_id)+'\')"><i class="ti ti-x"></i> Reject</button>':'')+
+             (s.status==='approved'?'<button class="chbtn feat'+(s.featured?' on':'')+'" onclick="chFeature(\''+esc(s.submission_id)+'\')"><i class="ti ti-sparkles"></i> '+(s.featured?'Featured':'Feature')+'</button>':'')+
+             (s.status==='approved'?'<button class="chbtn bonus" onclick="chBonus(\''+esc(s.submission_id)+'\')"><i class="ti ti-bolt"></i> Bonus XP</button>':'')+
+           '</div>'+
+           '<div id="shot-'+esc(s.submission_id)+'"></div>'+
+         '</div>';
+    });
+    host.innerHTML=h;
+  }
+  function saveSub(s,cb){
+    var payload={}; payload[s.submission_id]=s;
+    fetch('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){ if(!r.ok) throw new Error('x'); SUBS[s.submission_id]=s; if(cb)cb(); renderChAdmin(); })
+      .catch(function(){ toast('Couldn\u2019t save \u2014 try again'); });
+  }
+  function chApprove(id){
+    var s=SUBS[id]; if(!s) return;
+    var c=challengeById(s.challenge_id);
+    s.status='approved'; s.approved_at=Date.now(); s.approved_by=(SETTINGS.tourManager||'GCS Admin');
+    if(!s.xp_awarded) s.xp_awarded=chXP(c);
+    saveSub(s,function(){
+      toast('Approved \u00b7 +'+s.xp_awarded+' XP');
+      var p=playerIdParts(s.player_id);
+      pushAlert('\u26a1 '+(p.name||'A player')+' earned '+s.xp_awarded+' XP',(c&&c.title)||'Tour Challenge');
+    });
+  }
+  function chReject(id){
+    var s=SUBS[id]; if(!s) return;
+    var why=prompt('Reason (the player will see this). Leave blank for none:','');
+    if(why===null) return;
+    s.status='rejected'; s.note=String(why||'').slice(0,160); s.xp_awarded=0; s.approved_at=Date.now(); s.approved_by=(SETTINGS.tourManager||'GCS Admin');
+    saveSub(s,function(){ toast('Rejected'); });
+  }
+  function chFeature(id){
+    var s=SUBS[id]; if(!s) return;
+    if(!s.feature_permission && !s.featured && !confirm('This family didn\u2019t give repost permission. Feature it anyway?')) return;
+    s.featured=!s.featured;
+    saveSub(s,function(){ toast(s.featured?'Marked as featured':'Unfeatured'); });
+  }
+  function chBonus(id){
+    var s=SUBS[id]; if(!s) return;
+    var n=prompt('Bonus XP to add:','10'); if(n===null) return;
+    var add=parseInt(n,10); if(isNaN(add)||!add){ toast('Enter a number'); return; }
+    s.xp_awarded=(parseInt(s.xp_awarded,10)||0)+add;
+    saveSub(s,function(){ toast('Now '+s.xp_awarded+' XP'); });
+  }
+  function viewShot(id){
+    var host=document.getElementById('shot-'+id); if(!host) return;
+    if(host.innerHTML){ host.innerHTML=''; return; }
+    host.innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-loader-2"></i> Loading\u2026</div>';
+    getJSON('?type=shot&id='+encodeURIComponent(id)).then(function(r){return r.json();})
+      .then(function(o){ host.innerHTML=(o&&o.data)?'<img src="'+o.data+'" class="chshot" alt="Story screenshot">':'<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-photo-off"></i> Screenshot not found.</div>'; })
+      .catch(function(){ host.innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-photo-off"></i> Couldn\u2019t load it.</div>'; });
+  }
+  function announceChallenge(){
+    var c=todaysChallenge(); if(!c) return;
+    if(!confirm('Send an alert to every phone about today\u2019s challenge?')) return;
+    pushAlert('\u26a1 Today\u2019s Family Challenge: '+(c.title||''),(c.description||'')+' \u2014 '+chXP(c)+' XP'+(c.closes?', closes '+c.closes:''));
+    toast('Alert sent');
+  }
+  /* Reuses the existing alerts system rather than inventing a second one. */
+  function pushAlert(title,body){
+    try{
+      var a={id:'ch'+Date.now().toString(36),ts:Date.now(),title:String(title||'').slice(0,120),body:String(body||'').slice(0,300),from:'GCS Tour Challenge'};
+      var next=[a].concat(ALERTS||[]).slice(0,20);
+      fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)})
+        .then(function(){ ALERTS=next; renderAlertsFeed(); }).catch(function(){});
+    }catch(e){}
+  }
+
+  /* ======================= Instructions =================================== */
+  function chHelpBlock(icon,title,body){
+    return '<div class="chhelp"><div class="ic"><i class="ti '+icon+'"></i></div><div><b>'+title+'</b><p>'+body+'</p></div></div>';
+  }
+  function openChHelpPlayer(){
+    showOnly('s-detail');
+    document.getElementById('appTitle').textContent='How it works';
+    document.getElementById('appSub').textContent='GCS Tour Challenge';
+    document.getElementById('detailBody').innerHTML=
+      '<div class="chintro"><b>Every day there\u2019s a new challenge.</b><p>Do it, get a grown-up to post it, send us the link \u2014 and XP lands on your GCS profile.</p></div>'+
+      chHelpBlock('ti-bolt','What is XP?','XP is points on your GCS player profile. Every challenge you complete adds more. The more you collect, the higher you climb on the leaderboard \u2014 and your XP counts towards your team\u2019s total too.')+
+      chHelpBlock('ti-camera','1. Do the challenge','Open the Tour Challenge screen to see today\u2019s one. It might be a team selfie, meeting a player from another country, or something daft. You\u2019ve got until the closing time shown.')+
+      chHelpBlock('ti-users','2. Ask a parent to post it','You don\u2019t need your own Instagram or TikTok. A parent or guardian posts it from their account, tags <b>@'+esc(igHandle())+'</b> and uses <b>#'+esc(tourHashtag())+'</b>. Tap <b>Copy caption &amp; tags</b> and it\u2019s all done for them.')+
+      chHelpBlock('ti-link','3. Send us the link','Tap <b>Submit challenge</b>, choose where it was posted and paste the link. If it was a Story, upload a screenshot instead \u2014 Stories disappear after a day.')+
+      chHelpBlock('ti-hourglass-low','4. Wait a bit','A GCS admin checks it. You\u2019ll see <b>Waiting for approval</b> until then \u2014 usually not long.')+
+      chHelpBlock('ti-trophy','5. Collect your XP','Once it\u2019s approved your XP goes up, the leaderboard updates and you might unlock a badge. Check <b>My GCS XP</b> any time to see where you are.')+
+      chHelpBlock('ti-help-circle','Not accepted?','Sometimes a submission gets sent back \u2014 usually a broken link or a missing tag. You\u2019ll see why, and you can have another go while the challenge is still open.')+
+      '<div class="chintro" style="margin-top:14px"><b>Climbing the leaderboard</b><p>Do every challenge \u2014 they all count. Get them in early. And if GCS shares your photo you get a Featured badge, which nobody can take off you.</p></div>';
+  }
+  function openChHelpParent(){
+    showOnly('s-detail');
+    document.getElementById('appTitle').textContent='For parents & guardians';
+    document.getElementById('appSub').textContent='GCS Tour Challenge';
+    document.getElementById('detailBody').innerHTML=
+      '<div class="chintro"><b>A quick word on the Family Challenge.</b><p>It\u2019s a daily photo or video challenge your child completes on tour. You post it, they submit the link in the app, and they collect XP on their GCS profile.</p></div>'+
+      chHelpBlock('ti-heart','Why we run it','Tours produce brilliant moments that nobody outside the ground ever sees. This gives families a reason to capture them, and gives the players something to collect along the way.')+
+      chHelpBlock('ti-shield-check','Your child does not need social media','That\u2019s the point of it being a <i>family</i> challenge. Everything is posted from your account, not theirs. All your child does in the app is paste the link.')+
+      chHelpBlock('ti-photo','How to share','Take the photo or video, post it to your own Instagram, Facebook or TikTok, tag <b>@'+esc(igHandle())+'</b> and add <b>#'+esc(tourHashtag())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot.')+
+      chHelpBlock('ti-link','Helping them submit','In the app: <b>Tour Challenge</b> &rarr; <b>Submit challenge</b> &rarr; pick where you posted it &rarr; paste the link. If you used a Story, send them a screenshot to upload instead, since Stories are gone within a day.')+
+      chHelpBlock('ti-license','Repost permission','There\u2019s an optional tick box giving GCS permission to share or repost. It is genuinely optional \u2014 leave it unticked and your child still gets the full XP. We only repost content where that box was ticked.')+
+      chHelpBlock('ti-users','Other people\u2019s children','Several challenges involve team photos. Please check with the other parents before posting a picture that clearly shows their child. If in doubt, leave it out or crop it \u2014 the XP is not worth an awkward conversation.')+
+      chHelpBlock('ti-eye-off','What not to post','Nothing showing room numbers, door numbers, room interiors or anything identifying where the players are sleeping. No location tags at the accommodation. Nothing in swimwear or changing rooms. Full names of other people\u2019s children are best avoided.')+
+      chHelpBlock('ti-lock','Privacy','Your post stays on your account, under your own privacy settings \u2014 we never get access to it. Inside the app, submissions are visible only to your child and GCS tournament staff. The leaderboard shows first names, team and XP, nothing else.')+
+      chHelpBlock('ti-clipboard-check','What happens next','A GCS administrator reviews every submission before any XP is awarded and before anything is ever reposted. If something isn\u2019t right we send it back with a reason rather than simply ignoring it.')+
+      chHelpBlock('ti-message-2','Any concerns','Speak to your team manager or the GCS safeguarding lead on site at any point. If you want a post removed from our channels after we\u2019ve shared it, just ask and we\u2019ll take it down.')+
+      '<div class="chintro" style="margin-top:14px"><b>Not compulsory</b><p>No child is disadvantaged for not taking part. It\u2019s meant to be a bit of fun on the side of the cricket.</p></div>';
+  }
+
+  /* Tile visibility for the Tour Challenge. Players get the challenge and their XP;
+     tournament staff get the approvals queue. Supporters and team coaches get neither. */
+  function chTiles(){
+    var on = CHALLENGES.length>0;
+    var t1=document.getElementById('challengeTile');
+    var t2=document.getElementById('myXPTile');
+    var t3=document.getElementById('chAdminTile');
+    if(t1) t1.style.display=(on && chCanPlay())?'':'none';
+    if(t2) t2.style.display=(on && chCanPlay())?'':'none';
+    if(t3) t3.style.display=(on && isAdmin)?'':'none';
+    if(on && (chCanPlay()||isAdmin)) fetchSubs(chTileSubs);
+  }
+  function chTileSubs(){
+    var c=todaysChallenge();
+    var s1=document.getElementById('challengeTileSub');
+    if(s1){
+      if(!c) s1.textContent='';
+      else { var mine=chCanPlay()?mySubFor(c.id):null;
+        s1.textContent = mine ? (mine.status==='approved'?'Done today':'Sent \u2014 awaiting') : (chOpen(c)?(chXP(c)+' XP today'):'Closed'); }
+    }
+    var s2=document.getElementById('chAdminTileSub');
+    if(s2){ var n=subsList().filter(function(x){return x.status==='pending';}).length;
+      s2.textContent = n ? (n+' waiting') : 'All clear'; }
   }
 
   function bootstrap(){
