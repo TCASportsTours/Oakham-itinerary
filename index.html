@@ -486,7 +486,7 @@
   .signin .tourbadge,.signin .hello,.signin .lead{opacity:0;transition:opacity .3s}
   .signin.ready .tourbadge,.signin.ready .hello,.signin.ready .lead{opacity:1}
 
-  /* ===== GCS Tour Challenge ===== */
+  /* ===== GCS Challenge (Tour Challenge) ===== */
   .xpstrip{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(255,124,26,.16),rgba(119,119,201,.16));
     border:1px solid rgba(255,124,26,.32);border-radius:16px;padding:14px 16px;margin-top:12px}
   .xpstrip.big{padding:18px}
@@ -532,6 +532,12 @@
   .chmore{margin-top:9px;margin-right:7px;background:rgba(255,255,255,.06);border:1px solid var(--surface-line);
     color:var(--muted);border-radius:9px;padding:7px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;
     display:inline-flex;align-items:center;gap:5px}
+  .chpick{display:flex;gap:11px;align-items:flex-start;margin-top:8px;background:var(--surface);
+    border:1px solid var(--surface-line);border-radius:11px;padding:12px;cursor:pointer}
+  .chpick input{margin-top:2px;width:18px;height:18px;flex:0 0 auto;accent-color:#ff7c1a}
+  .chpick b{display:block;font-size:14px;color:#fff;font-weight:600}
+  .chpick i{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .chremember{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint);margin-top:9px}
   .chcheck.perm{background:rgba(119,119,201,.1);border:1px solid rgba(119,119,201,.3);border-radius:11px;padding:11px 12px}
   .chdupe.stop{background:rgba(255,90,90,.13);border-color:rgba(255,90,90,.45)}
   .chdupe.stop i{color:#ff8b8b}
@@ -653,6 +659,12 @@
   .chbtn.no{background:rgba(255,90,90,.13);color:#ff8b8b;border-color:rgba(255,90,90,.32)}
   .chbtn.feat.on{background:rgba(255,124,26,.2);color:#ff9d52;border-color:rgba(255,124,26,.45)}
   .chbtn.bonus{background:rgba(119,119,201,.16);color:#9a9ad6;border-color:rgba(119,119,201,.4)}
+  .chbtn.view.seen{background:rgba(81,206,167,.12);color:#7bdcc0;border-color:rgba(81,206,167,.3)}
+  .chbtn.undo{background:transparent;color:var(--faint);border-style:dashed}
+  .chsettled{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:7px 11px;border-radius:9px}
+  .chsettled.ok{background:rgba(81,206,167,.18);color:#7bdcc0}
+  .chsettled.no{background:rgba(255,90,90,.16);color:#ff8b8b}
+  .chsub.settled{border-color:rgba(81,206,167,.3);background:rgba(81,206,167,.05)}
 
   .chintro{background:rgba(255,124,26,.1);border:1px solid rgba(255,124,26,.28);border-radius:13px;padding:14px;margin-top:12px}
   .chintro b{display:block;font-weight:700;font-style:italic;font-size:18px;color:#fff}
@@ -691,7 +703,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cd · player-takes-photo</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28ch · remember-answers</div>
     </section>
 
     <!-- TODAY -->
@@ -759,7 +771,7 @@
         <div class="tile acc-orange" id="squadTile" style="display:none" onclick="openRoster()"><span class="tbadge"><i class="ti ti-clipboard-list"></i></span><div>Squad list</div></div>
         <div class="tile acc-purple" id="voteTile" style="display:none" onclick="openVoteResults()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>Players&rsquo; Player<span id="voteTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-teal" id="mealTile" style="display:none" onclick="openMealOrders()"><span class="tbadge"><i class="ti ti-tools-kitchen-2"></i></span><div>Meal pre-orders</div></div>
-        <div class="tile acc-orange" id="challengeTile" style="display:none" onclick="openChallenge()"><span class="tbadge"><i class="ti ti-bolt"></i></span><div>Tour Challenge<span id="challengeTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
+        <div class="tile acc-orange" id="challengeTile" style="display:none" onclick="openChallenge()"><span class="tbadge"><i class="ti ti-bolt"></i></span><div><span id="challengeTileName">Tour Challenge</span><span id="challengeTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-purple" id="myXPTile" style="display:none" onclick="openMyXP()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>My GCS XP</div></div>
         <div class="tile acc-teal" id="chAdminTile" style="display:none" onclick="openChAdmin()"><span class="tbadge"><i class="ti ti-checkbox"></i></span><div>Challenge approvals<span id="chAdminTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-orange" id="alertTile" style="display:none" onclick="openSendAlert()"><span class="tbadge"><i class="ti ti-send"></i></span><div>Send alert</div></div>
@@ -4088,12 +4100,13 @@
      ========================================================================== */
 
   var CHALLENGES=[], SUBS={}, _subsFetched=false, _chTimer=null;
+  /* Named per tour from Tour Details, so the next tour renames it without a code change. */
+  function chName(){ return hasVal(SETTINGS.challengeName)?String(SETTINGS.challengeName):'GCS Oakham Challenge'; }
   var CH_PLATFORMS=[
     {v:'instagram',      l:'Instagram post',   story:false},
     {v:'instagram_story',l:'Instagram Story',  story:true },
     {v:'facebook',       l:'Facebook post',    story:false},
     {v:'facebook_story', l:'Facebook Story',   story:true },
-    {v:'tiktok',         l:'TikTok',           story:false},
     {v:'other',          l:'Somewhere else',   story:false}
   ];
   function platLabel(v){ for(var i=0;i<CH_PLATFORMS.length;i++) if(CH_PLATFORMS[i].v===v) return CH_PLATFORMS[i].l; return v||'\u2014'; }
@@ -4119,7 +4132,7 @@
   function chCanPlay(){ return role==='player' && !!myPlayerId(); }
 
   /* Same rule the server uses: compare links on host + path only, so the tracking
-     junk Instagram and TikTok append to a shared link doesn't disguise a repeat. */
+     junk Instagram and Facebook append to a shared link doesn't disguise a repeat. */
   function normPostUrl(u){
     try{
       var x=new URL(String(u).trim());
@@ -4264,7 +4277,7 @@
   /* ======================= PLAYER: main screen ============================ */
   function openChallenge(){
     showOnly('s-challenge');
-    document.getElementById('appTitle').textContent='GCS Tour Challenge';
+    document.getElementById('appTitle').textContent=chName();
     document.getElementById('appSub').textContent='Earn XP for your profile';
     renderChallenge();
     fetchSubs(renderChallenge);
@@ -4298,8 +4311,7 @@
          '<ol>'+
            '<li><b>Do today\u2019s challenge.</b> It changes every day and closes at the time shown below.</li>'+
            '<li><b>You take the photo or video.</b> It\u2019s your tour \u2014 you\u2019re the one who\u2019s there.</li>'+
-           '<li><b>Send it to a parent or guardian</b> along with the caption. Tap <i>Copy caption &amp; tags</i> and it\u2019s ready to paste.</li>'+
-           '<li><b>They post it from their account</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>#'+esc(tourHashtag())+'</b>. You don\u2019t need your own social media.</li>'+
+           '<li><b>Post it</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>#'+esc(tourHashtag())+'</b>. Tap <i>Copy caption &amp; tags</i> and it\u2019s ready to paste. No account of your own? Send it to a parent and they\u2019ll post it for you.</li>'+
            '<li><b>Come back and tap Submit challenge</b>, then paste the link. Story instead? Upload a screenshot.</li>'+
            '<li><b>Collect your XP.</b> Most links are checked and approved on the spot.</li>'+
          '</ol>'+
@@ -4415,6 +4427,12 @@
 
   /* ======================= PLAYER: submit ================================= */
   var _submitFor='', _shotData='';
+  /* Answers a player has already given once are remembered on their own device, so
+     four challenges in four days isn't four rounds of the same tick boxes. They stay
+     visible and changeable every time \u2014 remembered, not hidden. */
+  function chPrefsKey(){ return 'gcs_chprefs_'+(SETTINGS.tourName||'tour')+'_'+myPlayerId(); }
+  function loadChPrefs(){ try{ return JSON.parse(localStorage.getItem(chPrefsKey())||'{}')||{}; }catch(e){ return {}; } }
+  function saveChPrefs(p){ try{ localStorage.setItem(chPrefsKey(), JSON.stringify(p||{})); }catch(e){} }
   function openSubmit(cid){
     if(!chCanPlay()){ toast('Sign in as a player to submit'); return; }
     var c=challengeById(cid); if(!c) return;
@@ -4422,7 +4440,9 @@
     showOnly('s-chsubmit');
     document.getElementById('appTitle').textContent='Submit challenge';
     document.getElementById('appSub').textContent=c.title||'';
-    var opts=CH_PLATFORMS.map(function(p){ return '<option value="'+p.v+'">'+p.l+'</option>'; }).join('');
+    var prefs=loadChPrefs();
+    var remembered=!!(prefs.who||prefs.feature!==undefined);
+    var opts=CH_PLATFORMS.map(function(p){ return '<option value="'+p.v+'"'+(prefs.platform===p.v?' selected':'')+'>'+p.l+'</option>'; }).join('');
     document.getElementById('chSubmitBody').innerHTML=
       '<div class="chcard" style="margin-top:6px">'+
         '<div class="cheyebrow"><i class="ti ti-bolt"></i> '+chXP(c)+' XP</div>'+
@@ -4447,14 +4467,19 @@
           '<div class="chhint">Stories vanish after 24 hours, so we need a picture of it instead of a link.</div>'+
         '</div>'+
 
-        '<label class="chcheck"><input type="checkbox" id="chGuardian"><span>My parent or guardian posted this, or said I could.</span></label>'+
-        '<label class="chcheck perm"><input type="checkbox" id="chFeature" checked><span>GCS can share or repost this. <i>Untick if you\u2019d rather we didn\u2019t \u2014 you still get the full XP either way.</i></span></label>'+
+        '<label class="chlab" style="margin-top:18px">Who posted it?</label>'+
+        '<label class="chpick"><input type="radio" name="chWho" value="self"'+(prefs.who==='self'?' checked':'')+' onchange="chWhoChanged()"><span><b>I posted it from my own account</b><i>You\u2019re 13 or over and it went up from your Instagram or Facebook.</i></span></label>'+
+        '<label class="chpick"><input type="radio" name="chWho" value="guardian"'+(prefs.who==='guardian'?' checked':'')+' onchange="chWhoChanged()"><span><b>A parent or guardian posted it for me</b><i>It went up from their account. Same XP either way.</i></span></label>'+
+        '<label class="chcheck perm"><input type="checkbox" id="chFeature"'+((prefs.feature===undefined||prefs.feature)?' checked':'')+'><span>GCS can share or repost this. <i>Untick if you\u2019d rather we didn\u2019t \u2014 you still get the full XP either way.</i></span></label>'+
+        (remembered?'<div class="chremember"><i class="ti ti-history"></i> Filled in from last time \u2014 change anything that\u2019s different.</div>':'')+
 
-        '<div class="chsafe"><i class="ti ti-shield-check"></i><span>If other children are in the photo, please check their parents are happy before posting.</span></div>'+
+        '<div class="chsafe" id="chSelfNote" style="display:none"><i class="ti ti-shield-check"></i><span><b>Before you post it:</b> if other players are clearly in the shot, check they and their parents are happy with it going up. Nothing showing room numbers, room doors or where you\u2019re sleeping. If you\u2019re not sure, ask a coach.</span></div>'+
+        '<div class="chsafe" id="chGuardNote" style="display:none"><i class="ti ti-shield-check"></i><span>If other players are clearly in the photo, whoever posts it should check their parents are happy first.</span></div>'+
 
         '<button class="cta chcta" id="chSubmitBtn" onclick="submitChallenge()"><i class="ti ti-send"></i> Submit</button>'+
         '<div id="chErr" class="cherr" style="display:none"></div>'+
       '</div>';
+    chPlatChanged(); chWhoChanged();          // reflect any remembered answers
   }
   /* Warn the moment a link is pasted that has been used before, rather than letting
      them submit and find out afterwards. */
@@ -4474,6 +4499,14 @@
       '<span>'+(mine?'You already used it for \u201c'+esc((challengeById(d.challenge_id)||{}).title||'another challenge')+'\u201d.':'It has already been sent in for this tour.')+
       ' Every challenge needs its own post \u2014 ask a parent to share a new photo, then paste that link here.</span></div></div>';
     if(btn){ btn.disabled=true; btn.classList.add('blocked'); }
+  }
+  /* Different reminder depending on who is doing the posting. A player posting from their
+     own account is the only adult in the loop, so they get the fuller version. */
+  function chWhoChanged(){
+    var el=document.querySelector('input[name="chWho"]:checked'), v=el?el.value:'';
+    var a=document.getElementById('chSelfNote'), b=document.getElementById('chGuardNote');
+    if(a) a.style.display=(v==='self')?'':'none';
+    if(b) b.style.display=(v==='guardian')?'':'none';
   }
   function chPlatChanged(){
     var v=document.getElementById('chPlat').value, story=platIsStory(v);
@@ -4513,10 +4546,11 @@
     var plat=document.getElementById('chPlat').value;
     var story=platIsStory(plat);
     var link=(document.getElementById('chLink').value||'').trim();
-    var guardian=document.getElementById('chGuardian').checked;
+    var whoEl=document.querySelector('input[name="chWho"]:checked');
+    var who=whoEl?whoEl.value:'';
     var feature=document.getElementById('chFeature').checked;
 
-    if(!guardian){ chErr('Please tick the box to confirm a parent or guardian posted this.'); return; }
+    if(!who){ chErr('Please say who posted it.'); return; }
     if(story && !_shotData){ chErr('Please add a screenshot of the Story.'); return; }
     if(!story && !link){ chErr('Please paste the link to the post.'); return; }
     if(!story && !/^https?:\/\//i.test(link)){ chErr('That doesn\u2019t look like a link \u2014 it should start with https://'); return; }
@@ -4531,6 +4565,7 @@
       }
     }
     chErr('');
+    saveChPrefs({who:who, feature:!!feature, platform:plat});
 
     var btn=document.getElementById('chSubmitBtn');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2"></i> Sending\u2026';
@@ -4544,7 +4579,10 @@
       platform:plat,
       post_url:story?'':link,
       story_screenshot:story?('shot_'+id):'',
-      guardian_confirmation:!!guardian,
+      /* Kept for the record: true when an adult did the posting. posted_by carries the
+         detail, so the two routes can be told apart later without guessing. */
+      posted_by:who,
+      guardian_confirmation:(who==='guardian'),
       feature_permission:!!feature,
       status:'pending',
       submitted_at:Date.now(),
@@ -4678,20 +4716,31 @@
 
   /* ======================= ADMIN: dashboard =============================== */
   var _chFilter='pending';
+  /* Anything actioned since this screen was opened stays on the list where it was,
+     showing its new state, instead of vanishing the instant you approve it. Cleared
+     when you switch tab or reopen the screen. */
+  var _chSticky={}, _chSeen={};
   function openChAdmin(){
     if(!isAdmin){ toast('Tournament staff only'); return; }
     showOnly('s-chadmin');
-    document.getElementById('appTitle').textContent='Tour Challenge';
+    _chSticky={};
+    document.getElementById('appTitle').textContent=chName();
     document.getElementById('appSub').textContent='Submissions & XP';
     renderChAdmin(); fetchSubs(renderChAdmin);
   }
-  function chFilter(f){ _chFilter=f; renderChAdmin(); }
+  function chFilter(f){ _chFilter=f; _chSticky={}; renderChAdmin(); }
+  /* Deferred: re-rendering inside the click can cancel the browser opening the tab. */
+  function chMarkSeen(id){ _chSeen[id]=1; setTimeout(renderChAdmin,400); }
   function renderChAdmin(){
     var host=document.getElementById('chAdminBody'); if(!host) return;
     var all=subsList();
     var counts={pending:0,approved:0,rejected:0};
     all.forEach(function(s){ if(counts[s.status]!==undefined) counts[s.status]++; });
-    var list=all.filter(function(s){ return _chFilter==='all'?true:s.status===_chFilter; });
+    var list=all.filter(function(s){
+      if(_chFilter==='all') return true;
+      if(s.status===_chFilter) return true;
+      return !!_chSticky[s.submission_id];        // just actioned: stays put
+    });
 
     var c=todaysChallenge();
     var h='<div class="chadminhead">'+
@@ -4713,7 +4762,8 @@
 
     list.forEach(function(s){
       var p=playerIdParts(s.player_id), ch=challengeById(s.challenge_id);
-      h+='<div class="chsub" id="sub-'+esc(s.submission_id)+'">'+
+      var settled=!!_chSticky[s.submission_id];
+      h+='<div class="chsub'+(settled?' settled':'')+'" id="sub-'+esc(s.submission_id)+'">'+
            '<div class="chsubtop">'+
              '<div style="flex:1;min-width:0"><b>'+esc(p.name||'Unknown player')+'</b>'+
                '<span>'+esc(p.team||'')+' &middot; '+esc((ch&&ch.title)||s.challenge_id)+'</span>'+
@@ -4723,12 +4773,19 @@
            (s.duplicate_of?'<div class="chflag"><i class="ti ti-copy-off"></i> Duplicate link \u2014 already submitted by '+esc(dupeWho(SUBS[s.duplicate_of])||'an earlier entry')+'</div>':'')+
            (s.auto_result&&!s.duplicate_of?'<div class="chperm'+(s.auto_approved?'':' no')+'"><i class="ti '+(s.auto_approved?'ti-robot':'ti-eye')+'"></i> '+esc(s.auto_result)+(s.auto_approved?' \u2014 auto-approved':'')+'</div>':'')+
            (s.feature_permission?'<div class="chperm"><i class="ti ti-license"></i> Repost permission given</div>':'<div class="chperm no"><i class="ti ti-license-off"></i> No repost permission</div>')+
-           (!s.guardian_confirmation?'<div class="chperm no"><i class="ti ti-alert-triangle"></i> Guardian box not ticked</div>':'')+
+           (s.posted_by==='self'?'<div class="chperm"><i class="ti ti-user"></i> Posted by the player from their own account</div>':
+            s.posted_by==='guardian'?'<div class="chperm"><i class="ti ti-users"></i> Posted by a parent or guardian</div>':
+            (!s.guardian_confirmation?'<div class="chperm no"><i class="ti ti-alert-triangle"></i> Not stated who posted it</div>':''))+
            '<div class="chsubact">'+
-             (s.post_url?'<a class="chbtn view" href="'+attr(s.post_url)+'" target="_blank" rel="noopener"><i class="ti ti-external-link"></i> View post</a>':'')+
+             (s.post_url?'<a class="chbtn view'+(_chSeen[s.submission_id]?' seen':'')+'" href="'+attr(s.post_url)+'" target="_blank" rel="noopener" onclick="chMarkSeen(\''+esc(s.submission_id)+'\')"><i class="ti '+(_chSeen[s.submission_id]?'ti-eye-check':'ti-external-link')+'"></i> '+(_chSeen[s.submission_id]?'Opened':'View post')+'</a>':'')+
              (s.story_screenshot?'<button class="chbtn view" onclick="viewShot(\''+esc(s.submission_id)+'\')"><i class="ti ti-photo"></i> View screenshot</button>':'')+
-             (s.status!=='approved'?'<button class="chbtn ok" onclick="chApprove(\''+esc(s.submission_id)+'\')"><i class="ti ti-check"></i> Approve</button>':'')+
-             (s.status!=='rejected'?'<button class="chbtn no" onclick="chReject(\''+esc(s.submission_id)+'\')"><i class="ti ti-x"></i> Reject</button>':'')+
+             /* Once you've settled it, the Approve/Reject pair is replaced by the result.
+                One decision, one click \u2014 no way to double-approve or undo by accident. */
+             (settled
+               ? '<span class="chsettled '+(s.status==='approved'?'ok':'no')+'"><i class="ti '+(s.status==='approved'?'ti-circle-check':'ti-circle-x')+'"></i> '+(s.status==='approved'?('Confirmed \u00b7 +'+(parseInt(s.xp_awarded,10)||0)+' XP'):'Rejected')+'</span>'+
+                 '<button class="chbtn undo" onclick="chUndo(\''+esc(s.submission_id)+'\')"><i class="ti ti-rotate"></i> Undo</button>'
+               : (s.status!=='approved'?'<button class="chbtn ok" onclick="chApprove(\''+esc(s.submission_id)+'\')"><i class="ti ti-check"></i> Approve</button>':'')+
+                 (s.status!=='rejected'?'<button class="chbtn no" onclick="chReject(\''+esc(s.submission_id)+'\')"><i class="ti ti-x"></i> Reject</button>':''))+
              (s.status==='approved'?'<button class="chbtn feat'+(s.featured?' on':'')+'" onclick="chFeature(\''+esc(s.submission_id)+'\')"><i class="ti ti-sparkles"></i> '+(s.featured?'Featured':'Feature')+'</button>':'')+
              (s.status==='approved'?'<button class="chbtn bonus" onclick="chBonus(\''+esc(s.submission_id)+'\')"><i class="ti ti-bolt"></i> Bonus XP</button>':'')+
            '</div>'+
@@ -4744,22 +4801,34 @@
       .catch(function(){ toast('Couldn\u2019t save \u2014 try again'); });
   }
   function chApprove(id){
-    var s=SUBS[id]; if(!s) return;
+    var s=SUBS[id]; if(!s||_chSticky[id]) return;      // one decision, one click
+    _chSticky[id]=1;
     var c=challengeById(s.challenge_id);
     s.status='approved'; s.approved_at=Date.now(); s.approved_by=(SETTINGS.tourManager||'GCS Admin');
     if(!s.xp_awarded) s.xp_awarded=chXP(c);
     saveSub(s,function(){
       toast('Approved \u00b7 +'+s.xp_awarded+' XP');
       var p=playerIdParts(s.player_id);
-      pushAlert('\u26a1 '+(p.name||'A player')+' earned '+s.xp_awarded+' XP',(c&&c.title)||'Tour Challenge');
+      pushAlert('\u26a1 '+(p.name||'A player')+' earned '+s.xp_awarded+' XP',(c&&c.title)||chName());
     });
   }
   function chReject(id){
-    var s=SUBS[id]; if(!s) return;
+    var s=SUBS[id]; if(!s||_chSticky[id]) return;
     var why=prompt('Reason (the player will see this). Leave blank for none:','');
     if(why===null) return;
+    _chSticky[id]=1;
     s.status='rejected'; s.note=String(why||'').slice(0,160); s.xp_awarded=0; s.approved_at=Date.now(); s.approved_by=(SETTINGS.tourManager||'GCS Admin');
     saveSub(s,function(){ toast('Rejected'); });
+  }
+  /* Puts a submission back in the queue if it was settled by mistake. Clears the XP,
+     so a wrongly-approved entry doesn't leave points behind. */
+  function chUndo(id){
+    var s=SUBS[id]; if(!s) return;
+    if(!confirm('Put this back to Pending? Any XP awarded for it is removed.')) return;
+    s.status='pending'; s.xp_awarded=0; s.approved_at=null; s.approved_by=''; s.note='';
+    s.auto_approved=false; s.featured=false;
+    delete _chSticky[id];
+    saveSub(s,function(){ toast('Back to pending'); });
   }
   function chFeature(id){
     var s=SUBS[id]; if(!s) return;
@@ -4791,7 +4860,7 @@
   /* Reuses the existing alerts system rather than inventing a second one. */
   function pushAlert(title,body){
     try{
-      var a={id:'ch'+Date.now().toString(36),ts:Date.now(),title:String(title||'').slice(0,120),body:String(body||'').slice(0,300),from:'GCS Tour Challenge'};
+      var a={id:'ch'+Date.now().toString(36),ts:Date.now(),title:String(title||'').slice(0,120),body:String(body||'').slice(0,300),from:chName()};
       var next=[a].concat(ALERTS||[]).slice(0,20);
       fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)})
         .then(function(){ ALERTS=next; renderAlertsFeed(); }).catch(function(){});
@@ -4805,13 +4874,13 @@
   function openChHelpPlayer(){
     showOnly('s-detail');
     document.getElementById('appTitle').textContent='How it works';
-    document.getElementById('appSub').textContent='GCS Tour Challenge';
+    document.getElementById('appSub').textContent=chName();
     document.getElementById('detailBody').innerHTML=
       '<div class="chintro"><b>Every day there\u2019s a new challenge.</b><p>Do it, get a grown-up to post it, send us the link \u2014 and XP lands on your GCS profile.</p></div>'+
       chHelpBlock('ti-bolt','What is XP?','XP is points on your GCS player profile. Every challenge you complete adds more. The more you collect, the higher you climb on the leaderboard \u2014 and your XP counts towards your team\u2019s total too.')+
       chHelpBlock('ti-camera','1. Take the photo yourself','Open the Tour Challenge screen to see today\u2019s one. It might be a team selfie, meeting a player from another team, or something daft. <b>You</b> take the picture \u2014 you\u2019re the one who\u2019s actually there. You\u2019ve got until the closing time shown.')+
-      chHelpBlock('ti-send','2. Send it to a parent','Message the photo to your mum, dad or guardian. Tap <b>Copy caption &amp; tags</b> and send them that too, so all they have to do is paste it.')+
-      chHelpBlock('ti-users','3. They post it','You don\u2019t need your own Instagram or TikTok. It goes up from their account, tagging <b>@'+esc(igHandle())+'</b> and using <b>#'+esc(tourHashtag())+'</b>. Then ask them to send you the link back.')+
+      chHelpBlock('ti-brand-instagram','2. Post it','Put it on Instagram or Facebook, tag <b>@'+esc(igHandle())+'</b> and use <b>#'+esc(tourHashtag())+'</b>. Tap <b>Copy caption &amp; tags</b> and paste \u2014 nothing to type.')+
+      chHelpBlock('ti-users','If you haven\u2019t got an account','No problem, and no disadvantage. Send the photo and the copied caption to a parent or guardian, they post it from their account and send you the link back. You still get the full XP.')+
       chHelpBlock('ti-link','4. Send us the link','Tap <b>Submit challenge</b>, choose where it was posted and paste the link. If it was a Story, upload a screenshot instead \u2014 Stories disappear after a day.')+
       chHelpBlock('ti-hourglass-low','5. Wait a moment','Most links are checked and approved on the spot. A few come to a GCS admin \u2014 you\u2019ll see <b>Waiting for approval</b> until they get to it.')+
       chHelpBlock('ti-trophy','6. Collect your XP','Once it\u2019s approved your XP goes up, the leaderboard updates and you might unlock a badge. Check <b>My GCS XP</b> any time to see where you are.')+
@@ -4821,24 +4890,21 @@
   function openChHelpParent(){
     showOnly('s-detail');
     document.getElementById('appTitle').textContent='For parents & guardians';
-    document.getElementById('appSub').textContent='GCS Tour Challenge';
+    document.getElementById('appSub').textContent=chName();
     document.getElementById('detailBody').innerHTML=
-      '<div class="chintro"><b>A quick word on the Family Challenge.</b><p>It\u2019s a daily photo or video challenge your child completes on tour. You post it, they submit the link in the app, and they collect XP on their GCS profile.</p></div>'+
+      '<div class="chintro"><b>A quick word on the '+esc(chName())+'.</b><p>A daily photo challenge your child completes on tour. Most players post it themselves and paste the link into the app to collect XP on their GCS profile. Some will need you to post it for them \u2014 that\u2019s the only bit that might land on you.</p></div>'+
       chHelpBlock('ti-heart','Why we run it','Tours produce brilliant moments that nobody outside the ground ever sees. This gives families a reason to capture them, and gives the players something to collect along the way.')+
-      chHelpBlock('ti-shield-check','Your child does not need social media','That\u2019s the point of it being a <i>family</i> challenge. Everything is posted from your account, not theirs. All your child does in the app is paste the link.')+
-      chHelpBlock('ti-camera','Who does what','<b>Your child takes the photo</b> \u2014 they\u2019re the one at the ground. They send it to you with the caption. <b>You post it</b> from your own account and send them the link back. That\u2019s the whole job.')+
-      chHelpBlock('ti-photo','How to share','Post the photo or video to your own Instagram, Facebook or TikTok, tag <b>@'+esc(igHandle())+'</b> and add <b>#'+esc(tourHashtag())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot, so there\u2019s nothing to type.')+
-      chHelpBlock('ti-link','Helping them submit','In the app: <b>Tour Challenge</b> &rarr; <b>Submit challenge</b> &rarr; pick where you posted it &rarr; paste the link. If you used a Story, send them a screenshot to upload instead, since Stories are gone within a day.')+
+      chHelpBlock('ti-shield-check','No account needed','A player without their own Instagram or Facebook is not left out \u2014 a parent posts on their behalf and they collect exactly the same XP. Nobody has to set up an account to take part.')+
+      chHelpBlock('ti-camera','Who does what','Most players do the whole thing themselves \u2014 take the photo, post it, paste the link into the app. <b>You only need to step in if your child hasn\u2019t got an account of their own.</b> In that case they send you the photo and caption, you post it, and you send them the link back.')+
+      chHelpBlock('ti-photo','How to share','Post the photo or video to your own Instagram or Facebook, tag <b>@'+esc(igHandle())+'</b> and add <b>#'+esc(tourHashtag())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot, so there\u2019s nothing to type.')+
+      chHelpBlock('ti-link','Helping them submit','In the app: <b>'+esc(chName())+'</b> &rarr; <b>Submit challenge</b> &rarr; pick where it was posted &rarr; paste the link. If a Story was used, they upload a screenshot instead, since Stories are gone within a day.')+
       chHelpBlock('ti-license','Repost permission','There\u2019s an optional tick box giving GCS permission to share or repost. It is genuinely optional \u2014 leave it unticked and your child still gets the full XP. We only repost content where that box was ticked.')+
       chHelpBlock('ti-users','Other people\u2019s children','Several challenges involve team photos. Please check with the other parents before posting a picture that clearly shows their child. If in doubt, leave it out or crop it \u2014 the XP is not worth an awkward conversation.')+
       chHelpBlock('ti-eye-off','What not to post','Nothing showing room numbers, door numbers, room interiors or anything identifying where the players are sleeping. No location tags at the accommodation. Nothing in swimwear or changing rooms. Full names of other people\u2019s children are best avoided.')+
       chHelpBlock('ti-lock','Privacy','Your post stays on your account, under your own privacy settings \u2014 we never get access to it. Inside the app, submissions are visible only to your child and GCS tournament staff. The leaderboard shows first names, team and XP, nothing else.')+
       chHelpBlock('ti-clipboard-check','What happens next','A GCS administrator reviews every submission before any XP is awarded and before anything is ever reposted. If something isn\u2019t right we send it back with a reason rather than simply ignoring it.')+
       chHelpBlock('ti-message-2','Any concerns','Speak to your team manager or the GCS safeguarding lead on site at any point. If you want a post removed from our channels after we\u2019ve shared it, just ask and we\u2019ll take it down.')+
-      '<div class="chintro" style="margin-top:14px"><b>Fair warning</b><p>This only works if the two of you talk to each other. Your child has to send you a photo and a caption, and you have to send a link back \u2014 every day, four days running.</p>'+
-      '<p>Which means that for once, you might actually hear from them while they\u2019re away. Consider it a feature rather than a bug.</p>'+
-      '<p style="font-size:12.5px">Worth agreeing before they go: which app you\u2019ll use, and roughly when. Most families find the gap between supper and lights out works best \u2014 the challenge has usually closed by breakfast the next morning.</p></div>'+
-      '<div class="chintro" style="margin-top:12px"><b>Not compulsory</b><p>No child is disadvantaged for not taking part. It\u2019s meant to be a bit of fun on the side of the cricket.</p></div>';
+      '<div class="chintro" style="margin-top:14px"><b>Not compulsory</b><p>No child is disadvantaged for not taking part, and nobody is worse off for posting from a parent\u2019s account instead of their own. It\u2019s meant to be a bit of fun on the side of the cricket.</p></div>';
   }
 
   /* Tile visibility for the Tour Challenge. Players get the challenge and their XP;
@@ -4857,6 +4923,7 @@
     if(chCanPlay()||isAdmin) fetchSubs(chTileSubs);
   }
   function chTileSubs(){
+    var nm=document.getElementById('challengeTileName'); if(nm) nm.textContent=chName();
     var c=todaysChallenge();
     var s1=document.getElementById('challengeTileSub');
     if(s1){

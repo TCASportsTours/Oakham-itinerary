@@ -1246,6 +1246,7 @@
     setIf('country',tour['country']);
     setIf('year',tour['tour year']||tour['year']);
     setIf('staffCode',tour['staff password']||tour['password']);
+    setSheet('challengeName',tour['challenge name']||tour['tour challenge name']);
     setIf('adminCode',tour['tournament admin code']||tour['tournament staff password']||tour['admin code']||tour['organiser code']||tour['organizer code']);
     setIf('voteCloseDate',tour['vote close date']||tour['voting close date']||tour['vote closes']||tour['voting closes']);
     setIf('voteCloseTime',tour['vote close time']||tour['voting close time']||tour['vote close']);
@@ -1618,7 +1619,7 @@
     })).then(function(res){ toast(res.every(Boolean)?'All submitted test data cleared \u2713':'Some slots still have data — the backend function may need redeploying'); });
   }
   function resetThisDevice(){
-    var pref=['gcs_order_','gcs_ballot_','gcs_ballotdone_','gcs_ballotconf_','gcs_player_','gcs_pack_'];
+    var pref=['gcs_order_','gcs_ballot_','gcs_ballotdone_','gcs_ballotconf_','gcs_player_','gcs_pack_','gcs_chprefs_'];
     try{ Object.keys(localStorage).forEach(function(k){ if(pref.some(function(p){return k.indexOf(p)===0;})) localStorage.removeItem(k); }); }catch(e){}
     try{localStorage.removeItem('gcs_acked');}catch(e){}
     toast('This device reset — reopen the app to start fresh');
