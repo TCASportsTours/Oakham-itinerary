@@ -515,6 +515,24 @@
   .chdupe{display:flex;gap:10px;align-items:flex-start;margin-top:9px;background:rgba(255,157,82,.13);
     border:1px solid rgba(255,157,82,.42);border-radius:11px;padding:11px 12px}
   .chdupe i{font-size:19px;color:#ff9d52;flex:0 0 auto}
+  .chsteps{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:15px;margin-top:12px}
+  .chsteps .hd{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
+  .chsteps ol{margin:10px 0 0;padding-left:20px}
+  .chsteps li{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:7px}
+  .chsteps li b{color:#fff;font-weight:600}
+  .chsteps li i{font-style:italic;color:#9a9ad6}
+  .chrule{display:flex;gap:10px;align-items:flex-start;margin-top:11px;background:rgba(81,206,167,.11);
+    border:1px solid rgba(81,206,167,.34);border-radius:11px;padding:11px 12px}
+  .chrule.alt{background:rgba(119,119,201,.12);border-color:rgba(119,119,201,.34)}
+  .chrule i{font-size:19px;color:#51cea7;flex:0 0 auto}
+  .chrule.alt i{color:#9a9ad6}
+  .chrule b{display:block;font-size:13px;color:#7bdcc0}
+  .chrule.alt b{color:#9a9ad6}
+  .chrule span{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .chmore{margin-top:9px;margin-right:7px;background:rgba(255,255,255,.06);border:1px solid var(--surface-line);
+    color:var(--muted);border-radius:9px;padding:7px 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:5px}
+  .chcheck.perm{background:rgba(119,119,201,.1);border:1px solid rgba(119,119,201,.3);border-radius:11px;padding:11px 12px}
   .chdupe.stop{background:rgba(255,90,90,.13);border-color:rgba(255,90,90,.45)}
   .chdupe.stop i{color:#ff8b8b}
   .chdupe.stop b{color:#ff8b8b}
@@ -667,7 +685,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28ca · block-duplicates</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cb · how-to-compete</div>
     </section>
 
     <!-- TODAY -->
@@ -4255,6 +4273,24 @@
       return;
     }
 
+    /* --- how to compete: always at the top, so nobody has to go looking --- */
+    h+='<div class="chsteps">'+
+         '<div class="hd"><i class="ti ti-flag"></i> How to compete</div>'+
+         '<ol>'+
+           '<li><b>Do today\u2019s challenge.</b> It changes every day and closes at the time shown below.</li>'+
+           '<li><b>A parent or guardian takes the photo or video.</b> You don\u2019t need your own social media account.</li>'+
+           '<li><b>They post it from their account</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>#'+esc(tourHashtag())+'</b>. Tap <i>Copy caption &amp; tags</i> and send it to them.</li>'+
+           '<li><b>Come back and tap Submit challenge</b>, then paste the link. Story instead? Upload a screenshot.</li>'+
+           '<li><b>Collect your XP.</b> Most links are checked and approved on the spot.</li>'+
+         '</ol>'+
+         '<div class="chrule"><i class="ti ti-users"></i><div><b>Photos with other players in them</b>'+
+           '<span>If anyone else\u2019s child is clearly in the shot, their parent needs to be happy for it to be posted. Ask first \u2014 or crop them out. If you\u2019re not sure, don\u2019t post it.</span></div></div>'+
+         '<div class="chrule alt"><i class="ti ti-copy-off"></i><div><b>One post per challenge</b>'+
+           '<span>You can\u2019t send in a link somebody else has already used, or reuse your own from another day. Every challenge needs its own photo.</span></div></div>'+
+         '<button class="chmore" onclick="openChHelpPlayer()"><i class="ti ti-help-circle"></i> More detail</button>'+
+         '<button class="chmore" onclick="openChHelpParent()"><i class="ti ti-users"></i> Show a parent</button>'+
+       '</div>';
+
     /* --- my XP strip --- */
     if(chCanPlay()){
       var pb=playerBoard(), tb=teamBoard();
@@ -4392,7 +4428,7 @@
         '</div>'+
 
         '<label class="chcheck"><input type="checkbox" id="chGuardian"><span>My parent or guardian posted this, or said I could.</span></label>'+
-        '<label class="chcheck"><input type="checkbox" id="chFeature"><span>GCS can share or repost this. <i>(optional)</i></span></label>'+
+        '<label class="chcheck perm"><input type="checkbox" id="chFeature" checked><span>GCS can share or repost this. <i>Untick if you\u2019d rather we didn\u2019t \u2014 you still get the full XP either way.</i></span></label>'+
 
         '<div class="chsafe"><i class="ti ti-shield-check"></i><span>If other children are in the photo, please check their parents are happy before posting.</span></div>'+
 
@@ -4412,8 +4448,10 @@
     var d=findDuplicate(v, existing&&existing.submission_id);
     if(!d){ clear(); return; }
     var mine=d.player_id===myPlayerId();
+    /* Never names the other player. If it was their own post we can say so, because
+       that is genuinely useful; otherwise it stays anonymous. */
     box.innerHTML='<div class="chdupe stop"><i class="ti ti-ban"></i><div><b>That post has already been used</b>'+
-      '<span>'+(mine?'You used it for \u201c'+esc((challengeById(d.challenge_id)||{}).title||'another challenge')+'\u201d.':'It was submitted by '+esc(dupeWho(d))+'.')+
+      '<span>'+(mine?'You already used it for \u201c'+esc((challengeById(d.challenge_id)||{}).title||'another challenge')+'\u201d.':'It has already been sent in for this tour.')+
       ' Every challenge needs its own post \u2014 ask a parent to share a new photo, then paste that link here.</span></div></div>';
     if(btn){ btn.disabled=true; btn.classList.add('blocked'); }
   }
@@ -4468,7 +4506,7 @@
       var dup=findDuplicate(link, existing0&&existing0.submission_id);
       if(dup){
         chLinkCheck();
-        chErr('That post has already been used'+(dup.player_id===myPlayerId()?' by you':' by '+dupeWho(dup))+'. Post a different photo and paste the new link.');
+        chErr('That post has already been used'+(dup.player_id===myPlayerId()?' by you':'')+'. Post a different photo and paste the new link.');
         return;
       }
     }
@@ -4540,9 +4578,7 @@
         .catch(function(err){
           btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Submit';
           if(err&&err.dupe){
-            var d0=(err.dupe.duplicates&&err.dupe.duplicates[0])||{};
-            var other=SUBS[d0.duplicate_of];
-            chErr('Somebody just used that post'+(other?' \u2014 '+dupeWho(other):'')+'. Nothing was sent. Post a different photo and paste the new link.');
+            chErr('That post has just been used by someone else. Nothing was sent \u2014 post a different photo and paste the new link.');
             fetchSubs(chLinkCheck);
             return;
           }
