@@ -1247,6 +1247,7 @@
     setIf('year',tour['tour year']||tour['year']);
     setIf('staffCode',tour['staff password']||tour['password']);
     setSheet('challengeName',tour['challenge name']||tour['tour challenge name']);
+    setSheet('eventHashtag',tour['event hashtag']||tour['tournament hashtag']||tour['challenge hashtag']);
     setIf('adminCode',tour['tournament admin code']||tour['tournament staff password']||tour['admin code']||tour['organiser code']||tour['organizer code']);
     setIf('voteCloseDate',tour['vote close date']||tour['voting close date']||tour['vote closes']||tour['voting closes']);
     setIf('voteCloseTime',tour['vote close time']||tour['voting close time']||tour['vote close']);
@@ -1355,9 +1356,17 @@
         var day=cpick(o,['day','tour day']);
         var title=cpick(o,['title','challenge','name']);
         if(!title) return;
-        var d=parseInt(day,10); if(isNaN(d)) d=chs.length+1;
+        /* Day left blank, or set to All / Any / Tournament / Whole tour, makes this a
+           tournament-long challenge: open from day one until the last day of the event. */
+        var dk=day.trim();
+        var span = /^(pre|pre-tour|pre tour|before|beforehand|build-?up|0)$/i.test(dk) ? 'pre'
+                 : (/^(all|any|tournament|whole|whole tour|tour|anytime|ongoing)$/i.test(dk) || dk==='') ? 'tour'
+                 : 'day';
+        var d=parseInt(day,10); if(isNaN(d)) d=0;
+        var seq=chs.filter(function(x){return x.span===span;}).length+1;
         chs.push({
-          id:'d'+d,
+          id:(span==='pre'?'p':span==='tour'?'t':'d')+(span==='day'?d:seq),
+          span:span,
           day:d,
           title:title,
           description:cpick(o,['description','detail','details','what to do','brief']),
@@ -1368,7 +1377,8 @@
           caption:cpick(o,['suggested caption','caption','caption idea'])
         });
       });
-      chs.sort(function(a,b){ return a.day-b.day; });
+      var rank={pre:0,day:1,tour:2};
+      chs.sort(function(a,b){ return (rank[a.span]||1)-(rank[b.span]||1) || a.day-b.day; });
       S.challenges=chs;
     }
 

@@ -501,6 +501,31 @@
 
   .chcard{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:16px;margin-top:14px}
   .chcard.shut{opacity:.72}
+  .chhead{display:flex;gap:12px;align-items:flex-start}
+  .xpbadge{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-width:60px;padding:9px 8px;border-radius:13px;background:rgba(119,119,201,.18);border:1px solid rgba(119,119,201,.4);line-height:1}
+  .xpbadge .n{font-size:22px;font-weight:800;font-style:italic;color:#9a9ad6}
+  .xpbadge .l{font-size:9px;letter-spacing:.14em;color:var(--muted);margin-top:3px}
+  .xpbadge.big{min-width:70px;padding:11px 9px;background:rgba(255,124,26,.2);border-color:rgba(255,124,26,.5)}
+  .xpbadge.big .n{font-size:30px;color:#ff9d52}
+  .xpbadge .plus{display:block;font-size:9px;font-weight:700;color:#7bdcc0;margin-top:5px;white-space:nowrap}
+  .xpbadge.mini{min-width:46px;padding:5px 6px;border-radius:10px;background:rgba(255,255,255,.05);border-color:var(--surface-line)}
+  .xpbadge.mini .n{font-size:15px;color:#fff}
+  .xpbadge.mini .l{font-size:8px}
+  .chwhere{font-size:12px;color:var(--muted);line-height:1.55;background:rgba(255,124,26,.09);
+    border:1px solid rgba(255,124,26,.26);border-radius:11px;padding:10px 12px;margin-top:9px}
+  .chwhere b{color:#ff9d52}
+  .chcard.pretour{border-color:rgba(81,206,167,.42);background:linear-gradient(160deg,rgba(81,206,167,.1),transparent 70%)}
+  .chcard.pretour .cheyebrow{color:#7bdcc0}
+  .chcard.pretour .xpbadge{background:rgba(81,206,167,.18);border-color:rgba(81,206,167,.42)}
+  .chcard.pretour .xpbadge .n{color:#7bdcc0}
+  .chcountdown{display:flex;gap:11px;align-items:flex-start;margin-top:12px;background:rgba(81,206,167,.12);
+    border:1px solid rgba(81,206,167,.38);border-radius:13px;padding:13px}
+  .chcountdown i{font-size:22px;color:#51cea7;flex:0 0 auto}
+  .chcountdown b{display:block;font-size:16px;color:#7bdcc0}
+  .chcountdown span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.55}
+  .chcard.tourwide{border-color:rgba(119,119,201,.4);background:linear-gradient(160deg,rgba(119,119,201,.1),transparent 70%)}
+  .chcard.tourwide .cheyebrow{color:#9a9ad6}
   .cheyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
   .chtitle{font-weight:700;font-style:italic;font-size:23px;color:#fff;line-height:1.15;margin:8px 0 0}
   .chdesc{font-size:14px;line-height:1.55;color:var(--muted);margin-top:8px}
@@ -512,6 +537,11 @@
   .chearly{display:flex;gap:10px;align-items:flex-start;margin-top:12px;background:rgba(81,206,167,.13);
     border:1px solid rgba(81,206,167,.4);border-radius:12px;padding:11px 12px}
   .chearly i{font-size:20px;color:#51cea7;flex:0 0 auto}
+  .chfirst{display:flex;gap:10px;align-items:flex-start;margin-top:10px;background:rgba(255,124,26,.11);
+    border:1px solid rgba(255,124,26,.36);border-radius:12px;padding:11px 12px}
+  .chfirst i{font-size:20px;color:#ff9d52;flex:0 0 auto}
+  .chfirst b{display:block;font-size:14px;color:#ff9d52}
+  .chfirst span{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
   .chdupe{display:flex;gap:10px;align-items:flex-start;margin-top:9px;background:rgba(255,157,82,.13);
     border:1px solid rgba(255,157,82,.42);border-radius:11px;padding:11px 12px}
   .chdupe i{font-size:19px;color:#ff9d52;flex:0 0 auto}
@@ -644,6 +674,8 @@
   .chtabs button{background:var(--surface);border:1px solid var(--surface-line);color:var(--muted);border-radius:999px;
     padding:7px 13px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
   .chtabs button.on{background:rgba(255,124,26,.18);color:#ff9d52;border-color:rgba(255,124,26,.45)}
+  .chtabs button.warn{color:#9a9ad6}
+  .chtabs button.warn.on{background:rgba(119,119,201,.2);color:#9a9ad6;border-color:rgba(119,119,201,.5)}
   .chtabs button span{opacity:.7}
 
   .chsub{background:var(--surface);border:1px solid var(--surface-line);border-radius:13px;padding:13px;margin-top:9px}
@@ -703,7 +735,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28ch · remember-answers</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cp · pre-tour</div>
     </section>
 
     <!-- TODAY -->
@@ -3323,6 +3355,12 @@
   function instaUrl(){ return normUrl(hasVal(SETTINGS.instagramUrl)?SETTINGS.instagramUrl:DEFAULT_INSTAGRAM); }
   function fbUrl(){ return normUrl(hasVal(SETTINGS.facebookUrl)?SETTINGS.facebookUrl:DEFAULT_FACEBOOK); }
   function tourHashtag(){ return hasVal(SETTINGS.hashtag)?String(SETTINGS.hashtag).replace(/^#/,''):DEFAULT_HASHTAG; }
+  /* The event hashtag. Set it explicitly in Tour Details > Event Hashtag; otherwise it
+     is guessed from the destination, which is rarely what you'd have chosen. */
+  function eventHashtag(){
+    if(hasVal(SETTINGS.eventHashtag)) return String(SETTINGS.eventHashtag).replace(/^#/,'').replace(/\s+/g,'');
+    return tourTag();
+  }
   function tourTag(){
     var d=String(SETTINGS.destination||'').replace(/\b20\d{2}\b/g,'').replace(/[^A-Za-z0-9 ]/g,' ').trim();
     if(!d) return '';
@@ -3330,7 +3368,7 @@
   }
   function igHandle(){ var m=String(instaUrl()).match(/instagram\.com\/([^\/?#]+)/i); return m?m[1]:'globalcricketseries'; }
   function socialTagLine(){
-    var tags=['#'+tourHashtag()]; var tt=tourTag(); if(tt) tags.push('#'+tt);
+    var tags=['#'+tourHashtag()]; var tt=eventHashtag(); if(tt && tt!==tourHashtag()) tags.push('#'+tt);
     return '@'+igHandle()+' '+tags.join(' ');
   }
   function copyTag(){
@@ -4159,9 +4197,26 @@
   }
 
   /* ---- challenge lookup ------------------------------------------------- */
+  /* Two kinds of challenge: one per tour day, and tournament-long ones that stay open
+     from day one until the event finishes. */
+  function isTourWide(c){ return !!c && c.span==='tour'; }
+  function isPreTour(c){ return !!c && c.span==='pre'; }
+  /* 'before' / 'during' / 'after'. Falls back to 'during' when the dates can't be read
+     and the tour day is being set by hand. */
+  function tourPhase(){ var l=liveDayInfo(); return l?l.phase:'during'; }
+  function daysUntilTour(){ var l=liveDayInfo(); return (l&&l.phase==='before')?l.daysUntil:0; }
+  function preChallenges(){ return CHALLENGES.filter(isPreTour); }
+  function dailyChallenges(){ return CHALLENGES.filter(function(c){ return !isTourWide(c) && !isPreTour(c); }); }
+  function tourChallenges(){ return CHALLENGES.filter(isTourWide); }
+  /* Last day of the tournament, taken from the highest daily challenge day. */
+  function lastTourDay(){
+    var m=0; dailyChallenges().forEach(function(c){ var d=parseInt(c.day,10)||0; if(d>m) m=d; });
+    return m||99;
+  }
   function challengeFor(day){
     var d=parseInt(day,10);
-    for(var i=0;i<CHALLENGES.length;i++){ if(parseInt(CHALLENGES[i].day,10)===d) return CHALLENGES[i]; }
+    var dl=dailyChallenges();
+    for(var i=0;i<dl.length;i++){ if(parseInt(dl[i].day,10)===d) return dl[i]; }
     return null;
   }
   function todaysChallenge(){ return challengeFor(DEMO_TODAY); }
@@ -4176,7 +4231,7 @@
      and the bonus is added on top of the base XP. */
   function chEarlyEndsMin(c){ return tmin(chOpensAt(c))+60; }
   function chInEarly(c){
-    if(!c || !chEarlyXP(c)) return false;
+    if(!c || isTourWide(c) || isPreTour(c) || !chEarlyXP(c)) return false;
     if(parseInt(c.day,10)!==DEMO_TODAY) return false;
     var n=nowMin();
     return n>=tmin(chOpensAt(c)) && n<chEarlyEndsMin(c);
@@ -4190,9 +4245,27 @@
   function minToHHMM(m){ m=Math.max(0,m)%1440; return ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+(m%60)).slice(-2); }
   function chOpen(c){
     if(!c) return false;
+    var now=nowMin();
+    /* Once the tournament is over nothing reopens. The tour-day counter clamps to the
+       last day, so without this the final day's challenge would come back to life at
+       09:00 every morning afterwards. */
+    if(tourPhase()==='after') return false;
+    if(isPreTour(c)){
+      // Live from the moment it's published, through the build-up and arrival day,
+      // then gone. Nothing to do with it once the cricket has started.
+      if(tourPhase()==='after') return false;
+      if(DEMO_TODAY>1) return false;
+      if(tourPhase()!=='before' && c.closes && now>tmin(c.closes)) return false;
+      return true;
+    }
+    if(isTourWide(c)){
+      // Open right through the tournament; only the closing time on the final day bites.
+      if(DEMO_TODAY>lastTourDay()) return false;
+      if(DEMO_TODAY===lastTourDay() && c.closes && now>tmin(c.closes)) return false;
+      return true;
+    }
     if(parseInt(c.day,10)>DEMO_TODAY) return false;          // not released yet
     if(parseInt(c.day,10)<DEMO_TODAY) return false;          // yesterday's has closed
-    var now=nowMin();
     if(now<tmin(chOpensAt(c))) return false;                 // not yet this morning
     if(!c.closes) return true;
     var cl=tmin(c.closes);
@@ -4200,6 +4273,9 @@
   }
   function chClosedReason(c){
     if(!c) return '';
+    if(tourPhase()==='after') return 'The tournament has finished';
+    if(isPreTour(c)) return 'Closed \u2014 the tournament has started';
+    if(isTourWide(c)) return 'This one has closed';
     if(parseInt(c.day,10)>DEMO_TODAY) return 'Opens on day '+c.day;
     if(parseInt(c.day,10)<DEMO_TODAY) return 'This one has closed';
     if(nowMin()<tmin(chOpensAt(c))) return 'Opens at '+chOpensAt(c);
@@ -4251,16 +4327,39 @@
      Every badge is always shown. Unearned ones sit greyed out with how far off
      you are, so there is something to aim at rather than an empty shelf.
      All of it is derived from the submissions — nothing is stored. */
+  /* Whoever has the earliest approved submission for a challenge was first to complete it.
+     Judged on when they submitted, not when an admin got round to approving it, so a slow
+     approval queue can't cost anyone the badge. Rejected entries don't hold the spot. */
+  function firstFinisher(cid){
+    var best=null;
+    subsList().forEach(function(s){
+      if(s.status!=='approved' || s.challenge_id!==cid) return;
+      var t=s.submitted_at||0;
+      if(!best || t<best.t) best={t:t, pid:s.player_id};
+    });
+    return best?best.pid:'';
+  }
+  function firstFinishes(pid){
+    var seen={}, n=0;
+    subsList().forEach(function(s){
+      if(s.status!=='approved' || !s.challenge_id || seen[s.challenge_id]) return;
+      seen[s.challenge_id]=1;
+      if(firstFinisher(s.challenge_id)===pid) n++;
+    });
+    return n;
+  }
   function badgeState(pid){
     var ap=subsList().filter(function(s){ return s.player_id===pid && s.status==='approved'; });
     var done=ap.length;
     var feat=ap.filter(function(s){ return s.featured; }).length;
     var early=ap.filter(function(s){ return (parseInt(s.early_bonus,10)||0)>0; }).length;
+    var first=firstFinishes(pid);
     var xp=xpFor(pid);
     var total=CHALLENGES.length||0;
     var defs=[
       {i:'ti-rocket',     t:'First Post',   d:'Complete your first challenge',        have:done,  goal:1},
       {i:'ti-clock-bolt', t:'Early Bird',   d:'Earn an early bird bonus',             have:early, goal:1},
+      {i:'ti-flag-2',     t:'Trailblazer',  d:'Be the first to complete a challenge', have:first, goal:1},
       {i:'ti-flame',      t:'On a Roll',    d:'Complete three challenges',            have:done,  goal:3},
       {i:'ti-star',       t:'Tour Regular', d:'Complete five challenges',             have:done,  goal:5},
       {i:'ti-sparkles',   t:'Featured',     d:'Get your photo shared by GCS',         have:feat,  goal:1},
@@ -4311,7 +4410,7 @@
          '<ol>'+
            '<li><b>Do today\u2019s challenge.</b> It changes every day and closes at the time shown below.</li>'+
            '<li><b>You take the photo or video.</b> It\u2019s your tour \u2014 you\u2019re the one who\u2019s there.</li>'+
-           '<li><b>Post it</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>#'+esc(tourHashtag())+'</b>. Tap <i>Copy caption &amp; tags</i> and it\u2019s ready to paste. No account of your own? Send it to a parent and they\u2019ll post it for you.</li>'+
+           '<li><b>Post it</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>'+esc(socialTagLine().replace('@'+igHandle()+' ',''))+'</b>. Tap <i>Copy caption &amp; tags</i> and it\u2019s ready to paste. No account of your own? Send it to a parent and they\u2019ll post it for you.</li>'+
            '<li><b>Come back and tap Submit challenge</b>, then paste the link. Story instead? Upload a screenshot.</li>'+
            '<li><b>Collect your XP.</b> Most links are checked and approved on the spot.</li>'+
          '</ol>'+
@@ -4339,23 +4438,73 @@
          '</div>';
     }
 
-    /* --- today's challenge --- */
+    /* --- everything you can actually do right now, daily and tournament-long
+           together in one list rather than split into separate sections --- */
+    var pre=preChallenges().filter(function(x){ return chOpen(x) || (chCanPlay()&&mySubFor(x.id)); });
+    var beforeTour=(tourPhase()==='before');
+    if(beforeTour){
+      var du=daysUntilTour();
+      h+='<div class="chcountdown"><i class="ti ti-plane-departure"></i><div><b>'+(du?(du===1?'One day to go':du+' days to go'):'Tournament starts tomorrow')+'</b>'+
+         '<span>Get a head start \u2014 the challenges below are live now, and the daily ones unlock on day one.</span></div></div>';
+    }
+    if(pre.length){
+      h+='<div class="eyebrow" style="margin-top:18px">Before you go</div>';
+      pre.forEach(function(x){
+        var sub=chCanPlay()?mySubFor(x.id):null, open=chOpen(x);
+        h+='<div class="chcard pretour'+(open?'':' shut')+'">'+
+             '<div class="chhead">'+
+               '<div style="flex:1;min-width:0">'+
+                 '<div class="cheyebrow"><i class="ti ti-luggage"></i> Before the tournament</div>'+
+                 '<div class="chtitle" style="font-size:20px">'+esc(x.title||'')+'</div>'+
+               '</div>'+
+               '<div class="xpbadge"><span class="n">'+chXP(x)+'</span><span class="l">XP</span></div>'+
+             '</div>'+
+             (x.description?'<div class="chdesc">'+esc(x.description)+'</div>':'')+
+             '<div class="chrow"><span class="chpill"><i class="ti ti-clock-hour-4"></i> Closes end of day 1</span></div>'+
+             (!sub&&open&&!firstFinisher(x.id)?'<div class="chfirst"><i class="ti ti-flag-2"></i><div><b>Nobody has done this one yet</b><span>First one in takes the Trailblazer badge.</span></div></div>':'')+
+             (x.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText'+esc(x.id)+'">'+esc(x.caption)+'</div>'+
+               '<button class="chcopy" onclick="copyCaptionFor(\''+esc(x.id)+'\')"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
+             (sub
+               ? '<div class="chdone">'+chStatusChip(sub)+(sub.status==='rejected'&&sub.note?'<div class="chnote">'+esc(sub.note)+'</div>':'')+
+                 (sub.status==='rejected'&&open?'<button class="cta chcta" onclick="openSubmit(\''+esc(x.id)+'\')"><i class="ti ti-refresh"></i> Try again</button>':'')+'</div>'
+               : (open
+                   ? '<button class="cta chcta" onclick="openSubmit(\''+esc(x.id)+'\')"><i class="ti ti-upload"></i> Submit challenge</button>'
+                   : '<div class="readonly" style="justify-content:flex-start;margin-top:10px"><i class="ti ti-lock"></i> '+esc(chClosedReason(x))+'</div>'))+
+           '</div>';
+      });
+    }
+
+    var twOpen=tourChallenges();
+    if(beforeTour) c=null;                    // day 1 isn't "today" until the tour starts
+    if(c || twOpen.length){
+      var dTot=dailyChallenges().reduce(function(n,x){ return n+chXP(x)+chEarlyXP(x); },0);
+      var tTot=twOpen.reduce(function(n,x){ return n+chXP(x); },0);
+      h+='<div class="eyebrow" style="margin-top:18px">Open now</div>';
+      if(dTot&&tTot) h+='<div class="chwhere"><i class="ti ti-bolt"></i> <b>'+dTot+' XP</b> is in the daily challenges and <b>'+tTot+' XP</b> in the all-tournament ones. Turning up every day is where the points are.</div>';
+    }
+
     if(c){
       var open=chOpen(c), mine=chCanPlay()?mySubFor(c.id):null, why=chClosedReason(c);
       h+='<div class="chcard'+(open?'':' shut')+'">'+
-           '<div class="cheyebrow"><i class="ti ti-bolt"></i> Today\u2019s Family Challenge &middot; Day '+esc(String(c.day))+'</div>'+
-           '<div class="chtitle">'+esc(c.title||'Challenge')+'</div>'+
+           '<div class="chhead">'+
+             '<div style="flex:1;min-width:0">'+
+               '<div class="cheyebrow"><i class="ti ti-bolt"></i> Today\u2019s Challenge &middot; Day '+esc(String(c.day))+'</div>'+
+               '<div class="chtitle">'+esc(c.title||'Challenge')+'</div>'+
+             '</div>'+
+             '<div class="xpbadge big"><span class="n">'+chXP(c)+'</span><span class="l">XP</span>'+
+               (chEarlyXP(c)?'<span class="plus">+'+chEarlyXP(c)+' early</span>':'')+'</div>'+
+           '</div>'+
            (c.description?'<div class="chdesc">'+esc(c.description)+'</div>':'')+
            '<div class="chrow">'+
-             '<span class="chpill xp"><i class="ti ti-bolt"></i> '+chXP(c)+' XP</span>'+
-             (chEarlyXP(c)?'<span class="chpill'+(chInEarly(c)?' early':'')+'"><i class="ti ti-clock-bolt"></i> +'+chEarlyXP(c)+' early bird</span>':'')+
+             (chInEarly(c)?'<span class="chpill early"><i class="ti ti-clock-bolt"></i> Early bird live \u00b7 '+esc(chEarlyLeft(c))+' left</span>':'')+
              (c.closes?'<span class="chpill"><i class="ti ti-clock-hour-4"></i> Closes '+esc(c.closes)+'</span>':'')+
            '</div>'+
            '<div class="chtags">'+
              '<div><span>Tag</span><b>@'+esc(igHandle())+'</b></div>'+
-             '<div><span>Hashtag</span><b>#'+esc(tourHashtag())+'</b></div>'+
+             '<div><span>Hashtags</span><b>#'+esc(tourHashtag())+(eventHashtag()&&eventHashtag()!==tourHashtag()?'<br>#'+esc(eventHashtag()):'')+'</b></div>'+
            '</div>'+
            (chInEarly(c)&&!mine?'<div class="chearly"><i class="ti ti-clock-bolt"></i><div><b>Early bird: +'+chEarlyXP(c)+' XP</b><span>Get it in within '+esc(chEarlyLeft(c))+' (by '+esc(minToHHMM(chEarlyEndsMin(c)))+') and the bonus is yours.</span></div></div>':'')+
+           (!mine&&open&&!firstFinisher(c.id)?'<div class="chfirst"><i class="ti ti-flag-2"></i><div><b>Nobody has done this one yet</b><span>First one in takes the Trailblazer badge.</span></div></div>':'')+
            (c.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText">'+esc(c.caption)+'</div>'+
              '<button class="chcopy" onclick="copyCaption()"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
            (mine
@@ -4367,16 +4516,42 @@
          '</div>';
     }
 
-    /* --- the rest of the tour --- */
-    var others=CHALLENGES.filter(function(x){ return !c || x.id!==c.id; });
+    /* --- tournament-long challenges, in the same list as today's --- */
+    var tw=twOpen;
+    if(tw.length){
+      tw.forEach(function(x){
+        var sub=chCanPlay()?mySubFor(x.id):null, open=chOpen(x);
+        h+='<div class="chcard tourwide'+(open?'':' shut')+'">'+
+             '<div class="chhead">'+
+               '<div style="flex:1;min-width:0">'+
+                 '<div class="cheyebrow"><i class="ti ti-infinity"></i> Any time before the end</div>'+
+                 '<div class="chtitle" style="font-size:20px">'+esc(x.title||'')+'</div>'+
+               '</div>'+
+               '<div class="xpbadge"><span class="n">'+chXP(x)+'</span><span class="l">XP</span></div>'+
+             '</div>'+
+             (x.description?'<div class="chdesc">'+esc(x.description)+'</div>':'')+
+             '<div class="chrow"><span class="chpill"><i class="ti ti-calendar"></i> Closes end of day '+lastTourDay()+'</span></div>'+
+             (sub
+               ? '<div class="chdone">'+chStatusChip(sub)+(sub.status==='rejected'&&sub.note?'<div class="chnote">'+esc(sub.note)+'</div>':'')+
+                 (sub.status==='rejected'&&open?'<button class="cta chcta" onclick="openSubmit(\''+esc(x.id)+'\')"><i class="ti ti-refresh"></i> Try again</button>':'')+'</div>'
+               : (open
+                   ? '<button class="cta chcta" onclick="openSubmit(\''+esc(x.id)+'\')"><i class="ti ti-upload"></i> Submit challenge</button>'
+                   : '<div class="readonly" style="justify-content:flex-start;margin-top:10px"><i class="ti ti-lock"></i> Closed</div>'))+
+           '</div>';
+      });
+    }
+
+    /* --- the other days, as compact rows --- */
+    var others=dailyChallenges().filter(function(x){ return !c || x.id!==c.id; });
     if(others.length){
-      h+='<div class="eyebrow" style="margin-top:18px">All challenges</div>';
+      h+='<div class="eyebrow" style="margin-top:18px">The other days</div>';
       others.forEach(function(x){
         var sub=chCanPlay()?mySubFor(x.id):null, locked=parseInt(x.day,10)>DEMO_TODAY;
         h+='<div class="chmini'+(locked?' locked':'')+'">'+
              '<div class="d">'+(locked?'<i class="ti ti-lock"></i>':'Day '+esc(String(x.day)))+'</div>'+
              '<div style="flex:1;min-width:0"><b>'+(locked?'Unlocks on day '+esc(String(x.day)):esc(x.title||''))+'</b>'+
-               '<span>'+chXP(x)+' XP'+(sub?' &middot; '+(sub.status==='approved'?'done':sub.status==='pending'?'awaiting':'not accepted'):'')+'</span></div>'+
+               '<span>'+(sub?(sub.status==='approved'?'Done':sub.status==='pending'?'Awaiting approval':'Not accepted'):(locked?'Locked':'Not done'))+'</span></div>'+
+             '<div class="xpbadge mini"><span class="n">'+chXP(x)+'</span><span class="l">XP</span></div>'+
              (sub&&sub.status==='approved'?'<i class="ti ti-circle-check" style="color:#51cea7;font-size:20px"></i>':'')+
            '</div>';
       });
@@ -4411,9 +4586,15 @@
     return h;
   }
 
+  function copyCaptionFor(id){
+    var t=document.getElementById('chCapText'+id); if(!t) return;
+    chCopyText(t.textContent+'\n\n'+socialTagLine());
+  }
   function copyCaption(){
     var t=document.getElementById('chCapText'); if(!t) return;
-    var txt=t.textContent+'\n\n@'+igHandle()+' #'+tourHashtag();
+    chCopyText(t.textContent+'\n\n'+socialTagLine());
+  }
+  function chCopyText(txt){
     try{
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){toast('Caption copied');},function(){chFallbackCopy(txt);}); }
       else chFallbackCopy(txt);
@@ -4734,10 +4915,14 @@
   function renderChAdmin(){
     var host=document.getElementById('chAdminBody'); if(!host) return;
     var all=subsList();
-    var counts={pending:0,approved:0,rejected:0};
-    all.forEach(function(s){ if(counts[s.status]!==undefined) counts[s.status]++; });
+    var counts={pending:0,approved:0,rejected:0,unverified:0};
+    all.forEach(function(s){
+      if(counts[s.status]!==undefined) counts[s.status]++;
+      if(s.status==='approved' && s.auto_approved && s.verified===false) counts.unverified++;
+    });
     var list=all.filter(function(s){
       if(_chFilter==='all') return true;
+      if(_chFilter==='unverified') return s.status==='approved' && s.auto_approved && s.verified===false;
       if(s.status===_chFilter) return true;
       return !!_chSticky[s.submission_id];        // just actioned: stays put
     });
@@ -4749,9 +4934,10 @@
           '</div>';
 
     h+='<div class="chtabs">'+
-         ['pending','approved','rejected','all'].map(function(f){
+         ['pending','unverified','approved','rejected','all'].map(function(f){
            var n=f==='all'?all.length:counts[f];
-           return '<button class="'+(_chFilter===f?'on':'')+'" onclick="chFilter(\''+f+'\')">'+f.charAt(0).toUpperCase()+f.slice(1)+' <span>'+n+'</span></button>';
+           var lbl=f.charAt(0).toUpperCase()+f.slice(1);
+           return '<button class="'+(_chFilter===f?'on':'')+(f==='unverified'?' warn':'')+'" onclick="chFilter(\''+f+'\')">'+lbl+' <span>'+n+'</span></button>';
          }).join('')+
        '</div>';
 
@@ -4771,6 +4957,7 @@
              chStatusChip(s)+
            '</div>'+
            (s.duplicate_of?'<div class="chflag"><i class="ti ti-copy-off"></i> Duplicate link \u2014 already submitted by '+esc(dupeWho(SUBS[s.duplicate_of])||'an earlier entry')+'</div>':'')+
+           (s.status==='approved'&&s.auto_approved&&s.verified===false?'<div class="chflag"><i class="ti ti-eye-exclamation"></i> Approved on trust \u2014 nothing to check the link against. Worth a look.</div>':'')+
            (s.auto_result&&!s.duplicate_of?'<div class="chperm'+(s.auto_approved?'':' no')+'"><i class="ti '+(s.auto_approved?'ti-robot':'ti-eye')+'"></i> '+esc(s.auto_result)+(s.auto_approved?' \u2014 auto-approved':'')+'</div>':'')+
            (s.feature_permission?'<div class="chperm"><i class="ti ti-license"></i> Repost permission given</div>':'<div class="chperm no"><i class="ti ti-license-off"></i> No repost permission</div>')+
            (s.posted_by==='self'?'<div class="chperm"><i class="ti ti-user"></i> Posted by the player from their own account</div>':
@@ -4854,7 +5041,7 @@
   function announceChallenge(){
     var c=todaysChallenge(); if(!c) return;
     if(!confirm('Send an alert to every phone about today\u2019s challenge?')) return;
-    pushAlert('\u26a1 Today\u2019s Family Challenge: '+(c.title||''),(c.description||'')+' \u2014 '+chXP(c)+' XP'+(c.closes?', closes '+c.closes:''));
+    pushAlert('\u26a1 Today\u2019s Challenge: '+(c.title||''),(c.description||'')+' \u2014 '+chXP(c)+' XP'+(c.closes?', closes '+c.closes:'')+'. Tag '+socialTagLine());
     toast('Alert sent');
   }
   /* Reuses the existing alerts system rather than inventing a second one. */
@@ -4879,7 +5066,7 @@
       '<div class="chintro"><b>Every day there\u2019s a new challenge.</b><p>Do it, get a grown-up to post it, send us the link \u2014 and XP lands on your GCS profile.</p></div>'+
       chHelpBlock('ti-bolt','What is XP?','XP is points on your GCS player profile. Every challenge you complete adds more. The more you collect, the higher you climb on the leaderboard \u2014 and your XP counts towards your team\u2019s total too.')+
       chHelpBlock('ti-camera','1. Take the photo yourself','Open the Tour Challenge screen to see today\u2019s one. It might be a team selfie, meeting a player from another team, or something daft. <b>You</b> take the picture \u2014 you\u2019re the one who\u2019s actually there. You\u2019ve got until the closing time shown.')+
-      chHelpBlock('ti-brand-instagram','2. Post it','Put it on Instagram or Facebook, tag <b>@'+esc(igHandle())+'</b> and use <b>#'+esc(tourHashtag())+'</b>. Tap <b>Copy caption &amp; tags</b> and paste \u2014 nothing to type.')+
+      chHelpBlock('ti-brand-instagram','2. Post it','Put it on Instagram or Facebook and use <b>'+esc(socialTagLine())+'</b>. Tap <b>Copy caption &amp; tags</b> and paste \u2014 nothing to type. The '+(eventHashtag()?'<b>#'+esc(eventHashtag())+'</b> tag is how we find your post, so don\u2019t drop it.':'tags are how we find your post.')+'')+
       chHelpBlock('ti-users','If you haven\u2019t got an account','No problem, and no disadvantage. Send the photo and the copied caption to a parent or guardian, they post it from their account and send you the link back. You still get the full XP.')+
       chHelpBlock('ti-link','4. Send us the link','Tap <b>Submit challenge</b>, choose where it was posted and paste the link. If it was a Story, upload a screenshot instead \u2014 Stories disappear after a day.')+
       chHelpBlock('ti-hourglass-low','5. Wait a moment','Most links are checked and approved on the spot. A few come to a GCS admin \u2014 you\u2019ll see <b>Waiting for approval</b> until they get to it.')+
@@ -4896,7 +5083,7 @@
       chHelpBlock('ti-heart','Why we run it','Tours produce brilliant moments that nobody outside the ground ever sees. This gives families a reason to capture them, and gives the players something to collect along the way.')+
       chHelpBlock('ti-shield-check','No account needed','A player without their own Instagram or Facebook is not left out \u2014 a parent posts on their behalf and they collect exactly the same XP. Nobody has to set up an account to take part.')+
       chHelpBlock('ti-camera','Who does what','Most players do the whole thing themselves \u2014 take the photo, post it, paste the link into the app. <b>You only need to step in if your child hasn\u2019t got an account of their own.</b> In that case they send you the photo and caption, you post it, and you send them the link back.')+
-      chHelpBlock('ti-photo','How to share','Post the photo or video to your own Instagram or Facebook, tag <b>@'+esc(igHandle())+'</b> and add <b>#'+esc(tourHashtag())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot, so there\u2019s nothing to type.')+
+      chHelpBlock('ti-photo','How to share','Post the photo or video to your own Instagram or Facebook and include <b>'+esc(socialTagLine())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot, so there\u2019s nothing to type.')+
       chHelpBlock('ti-link','Helping them submit','In the app: <b>'+esc(chName())+'</b> &rarr; <b>Submit challenge</b> &rarr; pick where it was posted &rarr; paste the link. If a Story was used, they upload a screenshot instead, since Stories are gone within a day.')+
       chHelpBlock('ti-license','Repost permission','There\u2019s an optional tick box giving GCS permission to share or repost. It is genuinely optional \u2014 leave it unticked and your child still gets the full XP. We only repost content where that box was ticked.')+
       chHelpBlock('ti-users','Other people\u2019s children','Several challenges involve team photos. Please check with the other parents before posting a picture that clearly shows their child. If in doubt, leave it out or crop it \u2014 the XP is not worth an awkward conversation.')+
@@ -4934,8 +5121,11 @@
     var s2=document.getElementById('chAdminTileSub');
     if(s2){
       if(!CHALLENGES.length){ s2.textContent='No challenges published'; }
-      else { var n=subsList().filter(function(x){return x.status==='pending';}).length;
-        s2.textContent = n ? (n+' waiting') : 'All clear'; }
+      else {
+        var n=subsList().filter(function(x){return x.status==='pending';}).length;
+        var u=subsList().filter(function(x){return x.status==='approved'&&x.auto_approved&&x.verified===false;}).length;
+        s2.textContent = n ? (n+' waiting') : (u? (u+' to spot check') : 'All clear');
+      }
     }
   }
 
