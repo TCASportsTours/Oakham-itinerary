@@ -1,0 +1,4 @@
+# GCS Tour App — Netlify configuration
+[build]
+  publish = "."
+  functions = "netlify/functions"

@@ -1,0 +1,31 @@
+{
+  "name": "GCS Oakham 26",
+  "short_name": "GCS Oakham 26",
+  "description": "Schedule, fixtures, squads, packing list and contacts for the GCS England U13s tournament at Oakham School.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#161615",
+  "theme_color": "#161615",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
