@@ -227,6 +227,10 @@
       <button class="btn" onclick="clearSlot('votes','Players\u2019 Player votes')"><i class="ti ti-trophy"></i> Clear Players&rsquo; Player votes</button>
       <button class="btn" onclick="clearAllTest()"><i class="ti ti-trash"></i> Clear both</button>
     </div>
+    <div class="pubrow" style="margin-top:8px">
+      <button class="btn" onclick="clearChallenges()"><i class="ti ti-bolt"></i> Clear GCS Tour Challenge responses</button>
+    </div>
+    <div class="hint" style="margin-top:6px">Removes every challenge submission <b>and the Story screenshots that came with them</b>, which resets everyone&rsquo;s XP, badges and both leaderboards back to zero. The challenges themselves come from the spreadsheet and are not affected.</div>
     <div class="hint" style="margin-top:8px">Testing on this same phone/browser? This also resets <b>your own</b> saved name, order and vote so you can run the first-time flow again (it only affects this device):</div>
     <div class="pubrow">
       <button class="btn ghost" onclick="resetThisDevice()"><i class="ti ti-device-mobile"></i> Reset my picks on this device</button>
@@ -1575,6 +1579,34 @@
         return {ok:n===0, remaining:n};
       })
       .catch(function(){ toast('Clear failed — are you online and on the live admin?'); return {ok:false}; });
+  }
+  /* Challenge submissions live in the "challenges" slot, but each Story screenshot is a
+     blob of its own (shot_<id>). Clearing the list alone would leave those orphaned and
+     taking up space forever, so delete them first, then the list. */
+  function clearChallenges(){
+    if(!confirm('Clear every GCS Tour Challenge submission?\n\nThis wipes all XP, badges and leaderboard positions for every player, and deletes the uploaded Story screenshots. It can\u2019t be undone.')) return;
+    if(!confirm('Last check \u2014 really delete all challenge submissions and their screenshots?')) return;
+    toast('Clearing\u2026');
+    getJSON('?type=challenges').then(function(r){return r.json();})
+      .then(function(all){
+        var subs=(all&&typeof all==='object'&&!Array.isArray(all))?all:{};
+        var shots=Object.keys(subs).filter(function(k){ return subs[k]&&subs[k].story_screenshot; });
+        return Promise.all(shots.map(function(k){
+          return fetch('/.netlify/functions/tour?type=shot&id='+encodeURIComponent(k),{method:'DELETE'}).catch(function(){});
+        })).then(function(){ return shots.length; });
+      })
+      .then(function(nShots){
+        return fetch('/.netlify/functions/tour?type=challenges',{method:'DELETE'})
+          .then(function(){ return getJSON('?type=challenges'); })
+          .then(function(r){ return r.json(); })
+          .then(function(after){
+            var n=slotCount(after);
+            toast(n===0
+              ? ('Challenge responses cleared \u2713'+(nShots?(' \u00b7 '+nShots+' screenshot'+(nShots>1?'s':'')+' removed'):''))
+              : ('Challenges: '+n+' still there \u2014 the backend function may need redeploying'));
+          });
+      })
+      .catch(function(){ toast('Clear failed \u2014 are you online and on the live admin?'); });
   }
   function clearAllTest(){
     if(!confirm('Clear meal pre-orders AND Players\u2019 Player votes for everyone? This can\u2019t be undone.')) return;
