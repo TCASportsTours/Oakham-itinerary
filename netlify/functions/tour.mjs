@@ -169,12 +169,35 @@ export default async (req) => {
     //     awards XP only. Featuring/reposting stays manual, and staff can still reject
     //     anything afterwards, which removes the XP again.
     if (type === "challenges") {
+      // Existing submissions, so a link that has already been used can be spotted.
+      let already = {};
+      try { already = JSON.parse((await store.get("challenges")) || "{}"); } catch { already = {}; }
+      if (!already || typeof already !== "object" || Array.isArray(already)) already = {};
+
       const HOSTS = {
         instagram: [/(^|\.)instagram\.com$/i, /(^|\.)instagr\.am$/i],
         facebook:  [/(^|\.)facebook\.com$/i, /(^|\.)fb\.com$/i, /(^|\.)fb\.watch$/i, /(^|\.)m\.facebook\.com$/i],
         tiktok:    [/(^|\.)tiktok\.com$/i],
       };
       const clamp = (n, hi) => Math.max(0, Math.min(hi, parseInt(n, 10) || 0));
+      // Compare links on host + path only. Instagram and TikTok bolt tracking junk onto
+      // the end of a shared link (?igsh=..., ?_t=...), so the same post copied twice looks
+      // like two different URLs unless the query string is thrown away first.
+      const normUrl = (u) => {
+        try {
+          const x = new URL(String(u).trim());
+          return x.hostname.toLowerCase().replace(/^www\./, "").replace(/^m\./, "") +
+                 x.pathname.replace(/\/+$/, "").toLowerCase();
+        } catch { return String(u || "").trim().toLowerCase().replace(/\/+$/, ""); }
+      };
+      // Every link already in the system, so a repeat can be traced back to who used it.
+      const seen = {};
+      for (const k of Object.keys(already)) {
+        const a = already[k];
+        if (!a || !a.post_url || a.status === "rejected") continue;
+        const n = normUrl(a.post_url);
+        if (n && !seen[n]) seen[n] = a;
+      }
       for (const k of Object.keys(parsed)) {
         const sub = parsed[k];
         if (!sub || typeof sub !== "object") continue;
@@ -183,6 +206,24 @@ export default async (req) => {
         if (sub.status !== "pending") continue;
         const base = clamp(sub.xp_base, 100);
         const early = clamp(sub.early_bonus, 50);
+        // --- Has this exact post been submitted before? -------------------
+        // A duplicate is never auto-approved. It is held with a flag naming the earlier
+        // submission, because the honest cases (one parent's team photo, two siblings)
+        // and the dishonest ones (reusing yesterday's post) look identical to a machine.
+        if (sub.post_url) {
+          const n = normUrl(sub.post_url);
+          const prev = n ? seen[n] : null;
+          if (prev && prev.submission_id !== sub.submission_id) {
+            sub.duplicate_of = prev.submission_id;
+            sub.duplicate_player = prev.player_id || "";
+            sub.duplicate_challenge = prev.challenge_id || "";
+            sub.auto_checked = true;
+            sub.auto_result = "duplicate: this link was already submitted";
+            continue;                              // stays pending for a human
+          }
+          if (n) seen[n] = sub;                    // claim it within this same request too
+        }
+
         const plat = String(sub.platform || "");
         const rules = HOSTS[plat];
         if (!rules || !sub.post_url) {
