@@ -513,7 +513,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bq · logout-url</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28br · logout-button</div>
     </section>
 
     <!-- TODAY -->
@@ -1183,7 +1183,7 @@
     trackLogin();
     document.querySelector('.phone').classList.remove('locked');
     document.getElementById('moreSquad').textContent= isAdmin ? 'GCS Admin' : (sq + (isStaff? (currentPlayer?' · '+currentPlayer+' (Staff)':' · Staff') : (role==='supporter'?' · Supporter':(currentPlayer?' · '+currentPlayer:''))));
-    var _sw=document.getElementById('switchTeamBtn'), _lo=document.getElementById('logoutBtn'); if(_sw) _sw.style.display='none'; if(_lo) _lo.style.display=isAdmin?'':'none';   // Log out is Tournament-staff only; players/supporters/coaches stay signed in
+    var _sw=document.getElementById('switchTeamBtn'), _lo=document.getElementById('logoutBtn'); if(_sw) _sw.style.display='none'; if(_lo) _lo.style.display='';   // Log out available to everyone: players and coaches need it to hand a phone over or fix a wrong team pick
     var crest=document.getElementById('hubCrest'); if(crest){ var lg=(TEAMLOGOS||{})[sq]||SETTINGS.badge; if(lg) crest.src=lg; }
     var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display=isStaff?'':'none';
     ['voteTile','alertTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display=isStaff?'':'none'; });
@@ -1220,7 +1220,11 @@
     showRoleChooser();
     var _si=document.getElementById('s-signin'); if(_si)_si.classList.add('ready');
   }
-  function logOut(){ switchSquad(); }   // full sign-out, returns to the role/team chooser (handy for testing)
+  function logOut(){                       // full sign-out, returns to the role/team chooser
+    var who = isAdmin ? 'Tournament staff' : (currentSquad || 'this account');
+    if(!confirm('Log out of '+who+'?\n\nYou\u2019ll go back to the sign-in screen and need to pick your role and team again.')) return;
+    switchSquad();
+  }
   /* ===== Staff: send an alert from inside the app (mirrors the admin) ===== */
   function openSendAlert(){
     if(!isStaff) return;
