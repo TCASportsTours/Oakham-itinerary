@@ -669,6 +669,17 @@
   .xprow .amt{font-size:14px;font-weight:700;color:var(--faint);flex:0 0 auto}
   .xprow .amt.ok{color:#51cea7}
 
+  .chloaded{background:rgba(119,119,201,.1);border:1px solid rgba(119,119,201,.3);border-radius:13px;padding:12px 13px;margin-top:12px}
+  .chloaded>b{display:block;font-size:14px;color:#9a9ad6}
+  .chloaded>span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+  .chloadlist{margin-top:9px;border-top:1px solid rgba(255,255,255,.07);padding-top:8px}
+  .chloadlist div{font-size:12px;color:var(--muted);padding:3px 0;line-height:1.45}
+  .chloadlist i{font-style:normal;font-weight:700;color:#fff;display:inline-block;min-width:44px}
+  .chloadlist b{color:#ff9d52;font-weight:600}
+  .chloadlist em{font-style:normal;color:var(--faint)}
+  .chwarn{display:flex;gap:7px;align-items:flex-start;margin-top:9px;font-size:11.5px;line-height:1.5;color:#ff9d52;
+    background:rgba(255,157,82,.13);border:1px solid rgba(255,157,82,.35);border-radius:9px;padding:8px 10px}
+  .chwarn i{font-size:15px;flex:0 0 auto}
   .chadminhead{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
     border-radius:13px;padding:13px;margin-top:12px}
   .chadminhead b{display:block;font-size:15px;color:#fff}
@@ -740,7 +751,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cq · hide-dailies-until-monday</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cs · show-closed-challenges</div>
     </section>
 
     <!-- TODAY -->
@@ -4445,7 +4456,9 @@
 
     /* --- everything you can actually do right now, daily and tournament-long
            together in one list rather than split into separate sections --- */
-    var pre=preChallenges().filter(function(x){ return chOpen(x) || (chCanPlay()&&mySubFor(x.id)); });
+    /* Listed whether open or not. A challenge disappearing without explanation is far
+       more confusing than one sitting there greyed out saying why it's shut. */
+    var pre=preChallenges();
     var beforeTour=(tourPhase()==='before');
     if(beforeTour){
       var du=daysUntilTour();
@@ -4465,7 +4478,7 @@
                '<div class="xpbadge"><span class="n">'+chXP(x)+'</span><span class="l">XP</span></div>'+
              '</div>'+
              (x.description?'<div class="chdesc">'+esc(x.description)+'</div>':'')+
-             '<div class="chrow"><span class="chpill"><i class="ti ti-clock-hour-4"></i> Closes end of day 1</span></div>'+
+             '<div class="chrow"><span class="chpill"><i class="ti ti-clock-hour-4"></i> '+(open?'Closes end of day 1':esc(chClosedReason(x)||'Closed'))+'</span></div>'+
              (!sub&&open&&!firstFinisher(x.id)?'<div class="chfirst"><i class="ti ti-flag-2"></i><div><b>Nobody has done this one yet</b><span>First one in takes the Trailblazer badge.</span></div></div>':'')+
              (x.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText'+esc(x.id)+'">'+esc(x.caption)+'</div>'+
                '<button class="chcopy" onclick="copyCaptionFor(\''+esc(x.id)+'\')"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
@@ -4940,8 +4953,20 @@
       return !!_chSticky[s.submission_id];        // just actioned: stays put
     });
 
+    /* What the app has actually got, so a challenge that isn't appearing can be traced
+       to how its Day column was read rather than guessed at. */
+    var np=preChallenges().length, nd=dailyChallenges().length, nt=tourChallenges().length;
+    var h='<div class="chloaded"><b>Challenges loaded: '+CHALLENGES.length+'</b>'+
+          '<span>'+np+' pre-tour \u00b7 '+nd+' daily \u00b7 '+nt+' all-tournament \u00b7 phase: '+tourPhase()+' \u00b7 tour day '+DEMO_TODAY+'</span>'+
+          (np&&DEMO_TODAY>1?'<div class="chwarn"><i class="ti ti-alert-triangle"></i> The tour day is set to '+DEMO_TODAY+', so pre-tour challenges are shut. They only run up to the end of day 1 \u2014 set the day back to 1 in admin.html to see them live.</div>':'')+
+          (CHALLENGES.length?'<div class="chloadlist">'+CHALLENGES.map(function(x){
+              return '<div><i>'+(x.span==='pre'?'Pre':x.span==='tour'?'All':'Day '+x.day)+'</i> '+esc(x.title||'(no title)')+
+                     ' <b>'+chXP(x)+' XP</b> <em>'+(chOpen(x)?'open now':esc(chClosedReason(x)||'closed'))+'</em></div>';
+            }).join('')+'</div>':'')+
+          '</div>';
+
     var c=todaysChallenge();
-    var h='<div class="chadminhead">'+
+    h+='<div class="chadminhead">'+
             '<div><b>'+(c?esc(c.title):'No challenge set for today')+'</b><span>'+(c?('Day '+c.day+' \u00b7 '+chXP(c)+' XP'+(c.closes?' \u00b7 closes '+esc(c.closes):'')):'Add one on the Challenges tab of the spreadsheet')+'</span></div>'+
             (c?'<button class="channounce" onclick="announceChallenge()"><i class="ti ti-send"></i> Announce</button>':'')+
           '</div>';
