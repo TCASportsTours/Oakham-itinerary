@@ -18,7 +18,7 @@ import { getStore } from "@netlify/blobs";
 //           votes, pre-orders and check-ins are MERGED by their top-level keys
 //           so two phones submitting at the same moment can't wipe each other.
 
-const MERGE = new Set(["checkins", "votes", "preorders", "lineups", "feedback", "departures"]);
+const MERGE = new Set(["checkins", "votes", "preorders", "lineups", "feedback", "departures", "challenges"]);
 
 export default async (req) => {
   const headers = {
@@ -41,6 +41,35 @@ export default async (req) => {
   const type = url.searchParams.get("type") || "";
   const key = type ? type : "current";            // "current" = the published itinerary
 
+  // --- Story screenshots: one blob per submission (key "shot_<id>").
+  //     Kept out of the main challenges list so that list stays small and fast to poll —
+  //     an image is only ever fetched when an admin actually opens that submission.
+  //     The id is whitelisted so this can never be pointed at "current" or any other slot.
+  if (type === "shot") {
+    const id = String(url.searchParams.get("id") || "");
+    if (!/^[A-Za-z0-9_-]{6,64}$/.test(id)) return reply(headers, 400, { ok: false, error: "bad id" });
+    const skey = "shot_" + id;
+    if (req.method === "GET") {
+      const d = await store.get(skey);
+      return new Response(d != null ? d : "null", { headers });
+    }
+    if (req.method === "DELETE") {
+      await store.set(skey, "null");
+      return reply(headers, 200, { ok: true, cleared: skey });
+    }
+    if (req.method === "POST") {
+      const body = await req.text();
+      if (body.length > 4_000_000) return reply(headers, 413, { ok: false, error: "image too large" });
+      let img;
+      try { img = JSON.parse(body); } catch { return reply(headers, 400, { ok: false, error: "invalid JSON" }); }
+      if (!img || typeof img.data !== "string" || !/^data:image\//.test(img.data)) {
+        return reply(headers, 400, { ok: false, error: "refused: not an image" });
+      }
+      await store.set(skey, body);
+      return reply(headers, 200, { ok: true });
+    }
+  }
+
   // DELETE: wipe a test-data slot back to empty so a tour can be re-tested from scratch.
   // Restricted to the submission slots so a stray/hostile call can NEVER clear the published tour.
   if (req.method === "DELETE") {
@@ -58,7 +87,7 @@ export default async (req) => {
       await store.set(key, "{}");
       return reply(headers, 200, { ok: true, cleared: key });
     }
-    const RESETTABLE = new Set(["votes", "preorders", "checkins", "stats"]);
+    const RESETTABLE = new Set(["votes", "preorders", "checkins", "stats", "challenges"]);
     if (!RESETTABLE.has(type)) return reply(headers, 400, { ok: false, error: "refused: that slot can't be cleared" });
     await store.set(key, "{}");
     return reply(headers, 200, { ok: true, cleared: key });
