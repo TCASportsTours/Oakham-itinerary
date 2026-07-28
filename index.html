@@ -515,6 +515,10 @@
   .chdupe{display:flex;gap:10px;align-items:flex-start;margin-top:9px;background:rgba(255,157,82,.13);
     border:1px solid rgba(255,157,82,.42);border-radius:11px;padding:11px 12px}
   .chdupe i{font-size:19px;color:#ff9d52;flex:0 0 auto}
+  .chdupe.stop{background:rgba(255,90,90,.13);border-color:rgba(255,90,90,.45)}
+  .chdupe.stop i{color:#ff8b8b}
+  .chdupe.stop b{color:#ff8b8b}
+  .cta.blocked{opacity:.4;pointer-events:none}
   .chdupe b{display:block;font-size:13px;color:#ff9d52}
   .chdupe span{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
   .chflag{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:#ff9d52;margin-top:8px;
@@ -663,7 +667,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28bz · duplicate-links</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28ca · block-duplicates</div>
     </section>
 
     <!-- TODAY -->
@@ -4400,15 +4404,18 @@
      them submit and find out afterwards. */
   function chLinkCheck(){
     var box=document.getElementById('chDupe'); if(!box) return;
+    var btn=document.getElementById('chSubmitBtn');
     var v=(document.getElementById('chLink').value||'').trim();
-    if(!v || !/^https?:\/\//i.test(v)){ box.innerHTML=''; return; }
+    var clear=function(){ box.innerHTML=''; if(btn){ btn.disabled=false; btn.classList.remove('blocked'); } };
+    if(!v || !/^https?:\/\//i.test(v)){ clear(); return; }
     var existing=mySubFor(_submitFor);
     var d=findDuplicate(v, existing&&existing.submission_id);
-    if(!d){ box.innerHTML=''; return; }
+    if(!d){ clear(); return; }
     var mine=d.player_id===myPlayerId();
-    box.innerHTML='<div class="chdupe"><i class="ti ti-copy-off"></i><div><b>This link has already been sent in</b>'+
+    box.innerHTML='<div class="chdupe stop"><i class="ti ti-ban"></i><div><b>That post has already been used</b>'+
       '<span>'+(mine?'You used it for \u201c'+esc((challengeById(d.challenge_id)||{}).title||'another challenge')+'\u201d.':'It was submitted by '+esc(dupeWho(d))+'.')+
-      ' Each challenge needs its own post, so this one will be held for a GCS admin to look at rather than approved automatically.</span></div></div>';
+      ' Every challenge needs its own post \u2014 ask a parent to share a new photo, then paste that link here.</span></div></div>';
+    if(btn){ btn.disabled=true; btn.classList.add('blocked'); }
   }
   function chPlatChanged(){
     var v=document.getElementById('chPlat').value, story=platIsStory(v);
@@ -4459,7 +4466,11 @@
     if(!story){
       var existing0=mySubFor(c.id);
       var dup=findDuplicate(link, existing0&&existing0.submission_id);
-      if(dup && !confirm('That link has already been submitted'+(dup.player_id===myPlayerId()?' by you':' by '+dupeWho(dup))+'.\n\nIt won\u2019t be approved automatically \u2014 a GCS admin will check it. Send it anyway?')) return;
+      if(dup){
+        chLinkCheck();
+        chErr('That post has already been used'+(dup.player_id===myPlayerId()?' by you':' by '+dupeWho(dup))+'. Post a different photo and paste the new link.');
+        return;
+      }
     }
     chErr('');
 
@@ -4491,7 +4502,13 @@
     var send=function(){
       var payload={}; payload[id]=sub;
       fetch('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
-        .then(function(r){ if(!r.ok) throw new Error('save failed'); return r.json(); })
+        .then(function(r){
+          /* 409 = the server found the link already in use between this phone loading the
+             list and hitting Submit. Nothing was saved. */
+          if(r.status===409) return r.json().then(function(j){ var e=new Error('duplicate'); e.dupe=j; throw e; });
+          if(!r.ok) throw new Error('save failed');
+          return r.json();
+        })
         .then(function(){
           SUBS[id]=sub;
           showOnly('s-chdone');
@@ -4500,18 +4517,6 @@
           fetchSubs(function(){
             var saved=SUBS[id]||sub, host=document.getElementById('chDoneBody');
             if(!host) return;
-            if(saved.duplicate_of){
-              var other=SUBS[saved.duplicate_of];
-              host.innerHTML=
-                '<div class="chsuccess">'+
-                  '<div class="tick dupe"><i class="ti ti-copy-off"></i></div>'+
-                  '<b>Sent \u2014 but held</b>'+
-                  '<p>That link had already been submitted'+(other?' by '+esc(dupeWho(other)):'')+', so it hasn\u2019t been approved automatically. A GCS admin will decide.</p>'+
-                  '<p style="font-size:13px">Next time, post your own photo and you\u2019ll get the XP straight away.</p>'+
-                  '<button class="cta chcta" onclick="openChallenge()"><i class="ti ti-arrow-left"></i> Back to the challenge</button>'+
-                '</div>';
-              return;
-            }
             if(!saved.auto_approved) return;
             host.innerHTML=
               '<div class="chsuccess">'+
@@ -4532,8 +4537,15 @@
             '</div>';
           fetchSubs();
         })
-        .catch(function(){
+        .catch(function(err){
           btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Submit';
+          if(err&&err.dupe){
+            var d0=(err.dupe.duplicates&&err.dupe.duplicates[0])||{};
+            var other=SUBS[d0.duplicate_of];
+            chErr('Somebody just used that post'+(other?' \u2014 '+dupeWho(other):'')+'. Nothing was sent. Post a different photo and paste the new link.');
+            fetchSubs(chLinkCheck);
+            return;
+          }
           chErr('Couldn\u2019t send that \u2014 check your signal and try again.');
         });
     };
