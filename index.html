@@ -793,7 +793,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29df · more-sections</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dg · pitch-on-card</div>
     </section>
 
     <!-- TODAY -->
@@ -1113,7 +1113,15 @@
   }
   function locText(e){   // a readable place name for the schedule card — never a raw URL
     var raw=String(e&&e.loc||''), isUrl=/^https?:\/\//i.test(raw);
-    if(isMatch(e)){ var g=(e.meta&&e.meta.ground)?String(e.meta.ground).trim():''; if(g) return g; }
+    /* Every game at a single-venue tournament is at the same ground, so the ground alone
+       tells nobody anything. Lead with the pitch, which is the bit they need. */
+    if(isMatch(e)){
+      var g=(e.meta&&e.meta.ground)?String(e.meta.ground).trim():'';
+      var p=(e.meta&&e.meta.pitch)?String(e.meta.pitch).trim():'';
+      if(p&&g) return p+' \u00b7 '+g;
+      if(p) return p;
+      if(g) return g;
+    }
     if(!raw) return '';
     if(!isUrl) return raw;
     return placeFromUrl(raw) || 'View location';
