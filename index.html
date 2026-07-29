@@ -552,6 +552,8 @@
   .chdupe i{font-size:19px;color:#ff9d52;flex:0 0 auto}
   .chsteps{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:15px;margin-top:12px}
   .chsteps .hd{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
+  .chwhy{font-size:12.5px;color:#7bdcc0;line-height:1.55;margin-top:8px;background:rgba(81,206,167,.1);
+    border-left:2px solid rgba(81,206,167,.5);border-radius:0 8px 8px 0;padding:8px 10px}
   .chsteps ol{margin:10px 0 0;padding-left:20px}
   .chsteps li{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:7px}
   .chsteps li b{color:#fff;font-weight:600}
@@ -573,6 +575,7 @@
   .chpick b{display:block;font-size:14px;color:#fff;font-weight:600}
   .chpick i{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
   .chremember{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint);margin-top:9px}
+
   .chcheck.perm{background:rgba(119,119,201,.1);border:1px solid rgba(119,119,201,.3);border-radius:11px;padding:11px 12px}
   .chdupe.stop{background:rgba(255,90,90,.13);border-color:rgba(255,90,90,.45)}
   .chdupe.stop i{color:#ff8b8b}
@@ -751,7 +754,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28ct · hashtag-fix</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cv · no-medical-form</div>
     </section>
 
     <!-- TODAY -->
@@ -2364,7 +2367,7 @@
       h+='<div class="tile acc-teal" onclick="openTravelMoney()"><span class="tbadge"><i class="ti ti-credit-card"></i></span><div>Travel money</div></div>';
       h+='<div class="tile acc-orange" onclick="openEsim()"><span class="tbadge"><i class="ti ti-device-mobile"></i></span><div>Mobile data</div></div>';
     }
-    h+='<div class="tile acc-teal" onclick="openPaperwork()"><span class="tbadge"><i class="ti ti-files"></i></span><div>Paperwork</div></div>';
+    if(hasPaperwork()) h+='<div class="tile acc-teal" onclick="openPaperwork()"><span class="tbadge"><i class="ti ti-files"></i></span><div>Paperwork</div></div>';
     if(showShop()) h+='<div class="tile acc-purple" onclick="openShop()"><span class="tbadge"><i class="ti ti-shopping-bag"></i></span><div>Shop &middot; kit &amp; merch</div></div>';
     h+='</div></div>';
     // 3) + 4) Pre-order menus and the Packing list. Before the tour starts the packing
@@ -3365,6 +3368,10 @@
         : '<div class="readonly" style="justify-content:flex-start"><i class="ti ti-headset"></i> Contact TCA Sports Tours if you need this.</div>')+
       '</div>';
   }
+  /* Nothing to put on the Paperwork screen once landing cards and visas are off for a
+     domestic tour and no behaviour contract is set, so the tile hides rather than
+     opening an empty page. */
+  function hasPaperwork(){ return !isDomestic() || showBehaviour(); }
   function showBehaviour(){ if(SETTINGS.behaviourShow===false) return false; return hasVal(SETTINGS.behaviourUrl); }
   function shopUrl(){ return normUrl(hasVal(SETTINGS.shopUrl)?SETTINGS.shopUrl:DEFAULT_SHOP); }
   function showShop(){ return SETTINGS.shopShow!==false; }   // on by default; hidden only when the sheet/toggle says No
@@ -3446,13 +3453,9 @@
     if(showBehaviour()) h+=paperCard({icon:'ti-writing-sign', title:'Behaviour contract',
       body:'Every player confirms they\u2019ve read and agreed to the tour code of conduct, with a copy to a parent or guardian. Complete it before you travel.',
       url:SETTINGS.behaviourUrl, btn:'Open the behaviour contract'});
-    h+=dom
-      ? paperCard({icon:'ti-file-certificate', title:'Consent & medical form',
-          body:'Required for every player. Your club or school consent and medical form, with up-to-date emergency contact details, any medication and any dietary needs. Hand a copy to your team manager on arrival.',
-          url:SETTINGS.consentUrl, btn:'Open the consent form'})
-      : paperCard({icon:'ti-file-certificate', title:'Consent to travel',
-          body:'Required for any player <b>under 18 travelling without their own parent or guardian</b>. To complete it you\u2019ll need:<br>&bull; the signed consent-to-travel form<br>&bull; a copy of <b>both parents\u2019 / guardians\u2019 passports</b> with the signature page clearly visible<br>&bull; the player\u2019s <b>original birth certificate</b>',
-          url:SETTINGS.consentUrl, btn:'Open the consent form'});
+    if(!dom) h+=paperCard({icon:'ti-file-certificate', title:'Consent to travel',
+      body:'Required for any player <b>under 18 travelling without their own parent or guardian</b>. To complete it you\u2019ll need:<br>&bull; the signed consent-to-travel form<br>&bull; a copy of <b>both parents\u2019 / guardians\u2019 passports</b> with the signature page clearly visible<br>&bull; the player\u2019s <b>original birth certificate</b>',
+      url:SETTINGS.consentUrl, btn:'Open the consent form'});
     if(!dom) h+=paperCard({icon:'ti-id-badge-2', title:'Visas',
       body:'Check the entry requirements for <b>'+esc(country)+'</b> and apply for any visa you need in good time. Requirements depend on your nationality, so check the official page for your passport.',
       url:SETTINGS.visaUrl, btn:'Check visa requirements'});
@@ -4423,6 +4426,7 @@
     /* --- how to compete: always at the top, so nobody has to go looking --- */
     h+='<div class="chsteps">'+
          '<div class="hd"><i class="ti ti-flag"></i> How to compete</div>'+
+         '<div class="chwhy">Half of these need you to talk to someone from another team. That\u2019s the point \u2014 you\u2019ll know half the tournament by Thursday.</div>'+
          '<ol>'+
            '<li><b>Do today\u2019s challenge.</b> It changes every day and closes at the time shown below.</li>'+
            '<li><b>You take the photo or video.</b> It\u2019s your tour \u2014 you\u2019re the one who\u2019s there.</li>'+
@@ -5101,7 +5105,8 @@
     document.getElementById('appTitle').textContent='How it works';
     document.getElementById('appSub').textContent=chName();
     document.getElementById('detailBody').innerHTML=
-      '<div class="chintro"><b>Every day there\u2019s a new challenge.</b><p>Do it, get a grown-up to post it, send us the link \u2014 and XP lands on your GCS profile.</p></div>'+
+      '<div class="chintro"><b>Every day there\u2019s a new challenge.</b><p>Do it, post it, send us the link \u2014 and XP lands on your GCS profile.</p>'+
+      '<p>Most of them need you to talk to someone you don\u2019t know yet. That\u2019s deliberate. There are seven other squads here and by Thursday you should know a few of them.</p></div>'+
       chHelpBlock('ti-bolt','What is XP?','XP is points on your GCS player profile. Every challenge you complete adds more. The more you collect, the higher you climb on the leaderboard \u2014 and your XP counts towards your team\u2019s total too.')+
       chHelpBlock('ti-camera','1. Take the photo yourself','Open the Tour Challenge screen to see today\u2019s one. It might be a team selfie, meeting a player from another team, or something daft. <b>You</b> take the picture \u2014 you\u2019re the one who\u2019s actually there. You\u2019ve got until the closing time shown.')+
       chHelpBlock('ti-brand-instagram','2. Post it','Put it on Instagram or Facebook and use <b>'+esc(socialTagLine())+'</b>. Tap <b>Copy caption &amp; tags</b> and paste \u2014 nothing to type. The '+(eventHashtag()?'<b>#'+esc(eventHashtag())+'</b> tag is how we find your post, so don\u2019t drop it.':'tags are how we find your post.')+'')+
@@ -5118,7 +5123,8 @@
     document.getElementById('appSub').textContent=chName();
     document.getElementById('detailBody').innerHTML=
       '<div class="chintro"><b>A quick word on the '+esc(chName())+'.</b><p>A daily photo challenge your child completes on tour. Most players post it themselves and paste the link into the app to collect XP on their GCS profile. Some will need you to post it for them \u2014 that\u2019s the only bit that might land on you.</p></div>'+
-      chHelpBlock('ti-heart','Why we run it','Tours produce brilliant moments that nobody outside the ground ever sees. This gives families a reason to capture them, and gives the players something to collect along the way.')+
+      chHelpBlock('ti-heart','It\u2019s an icebreaker first','Eight squads arrive at Oakham on Monday morning not knowing each other. The challenges are built to fix that \u2014 find a player from another team, get a photo with the leading run scorer, collect the set. They give a shy 12-year-old a reason to walk over and start a conversation, which is much harder to do from a standing start.')+
+      chHelpBlock('ti-camera','And it captures the week','Tours produce brilliant moments nobody outside the ground ever sees. This gives everyone a reason to capture them, and gives the players something to collect along the way.')+
       chHelpBlock('ti-shield-check','No account needed','A player without their own Instagram or Facebook is not left out \u2014 a parent posts on their behalf and they collect exactly the same XP. Nobody has to set up an account to take part.')+
       chHelpBlock('ti-camera','Who does what','Most players do the whole thing themselves \u2014 take the photo, post it, paste the link into the app. <b>You only need to step in if your child hasn\u2019t got an account of their own.</b> In that case they send you the photo and caption, you post it, and you send them the link back.')+
       chHelpBlock('ti-photo','How to share','Post the photo or video to your own Instagram or Facebook and include <b>'+esc(socialTagLine())+'</b>. Your child can tap <b>Copy caption &amp; tags</b> in the app and send you the lot, so there\u2019s nothing to type.')+
