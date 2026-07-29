@@ -1730,7 +1730,13 @@
     S={settings:d.settings||sample().settings, teams:d.teams||[], teamMeta:d.teamMeta||{},
     days:Object.keys(d.days||{}).map(function(k){return {n:Number(k),date:d.days[k]};}).sort(function(a,b){return a.n-b.n;}),
     events:(d.events||[]).map(function(e){var c={}; for(var k in e){if(e.hasOwnProperty(k))c[k]=e[k];} c.id=uid++; c.loc=c.loc||''; c.sub=c.sub||''; c.kit=c.kit||''; return c;}),
-    announcements:d.announcements||[], teamLogos:d.teamLogos||{}, staff:d.staff||{}, players:d.players||{}, roster:d.roster||localRoster, moreContent:d.moreContent||[], meals:d.meals||[]}; }
+    announcements:d.announcements||[], teamLogos:d.teamLogos||{}, staff:d.staff||{}, players:d.players||{}, roster:d.roster||localRoster, moreContent:d.moreContent||[], meals:d.meals||[],
+    /* Everything the Publish payload sends has to be adopted back, or reopening this
+       console silently empties it and the next Publish wipes it from the live app.
+       Challenges, FAQ, restaurants, departures, squad numbers and groups were all
+       being lost this way. */
+    nums:d.nums||{}, faq:d.faq||[], groups:d.groups||{}, departures:d.departures||{},
+    restaurants:d.restaurants||[], challenges:d.challenges||[]}; }
   function getJSON(path){ var u='/.netlify/functions/tour'+(path||''); u+=(u.indexOf('?')>=0?'&':'?')+'_='+Date.now(); return fetch(u,{cache:'no-store'}); }
   // Tolerant read: never throws on an empty or odd body; throws a clear error only on a real HTTP/network failure.
   function fetchSlot(path){

@@ -286,6 +286,40 @@
   .rankrow .rkm{font-size:17px;min-width:24px;text-align:center}
   .rankrow .rkn{flex:1;font-size:14.5px;color:#fff;font-weight:600}
   .rankrow .rkv{font-size:13px;color:var(--muted);font-weight:600}
+  /* Players' Player ballot and points table. Near-black header in the brand's own
+     black, white rank labels, sunset orange for the points, teal for the squad. */
+  .vtable{width:100%;border-collapse:separate;border-spacing:0;margin:0 0 16px;
+    background:var(--surface);border:1px solid var(--surface-line);border-radius:14px;overflow:hidden}
+  .vtable th{background:#161615;color:#ffffff;font-size:10.5px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;text-align:left;padding:10px 12px;white-space:nowrap}
+  .vtable th.c2{text-align:center}
+  .vtable td{padding:12px;border-top:1px solid var(--surface-line);vertical-align:middle}
+  .vtable tr.filled{background:rgba(255,124,26,.10)}
+  .vtable tbody tr.filled{cursor:pointer}
+  .vtable.done tbody tr.filled,.vtable.pts tbody tr.filled{cursor:default}
+  .vtable tbody tr.filled:active{filter:brightness(1.15)}
+  .vtable td.c1{width:52px}
+  .vtable td.c1 b{font-size:15px;font-weight:800;font-style:italic;color:#ffffff}
+  .vtable td.c2{width:64px;text-align:center;white-space:nowrap}
+  .vtable td.c2 .vp{font-size:20px;font-weight:800;font-style:italic;color:#ff9d52}
+  .vtable tr.empty td.c2 .vp{color:var(--faint)}
+  .vtable td.c2 i{display:block;font-style:normal;font-size:9px;letter-spacing:.1em;color:var(--muted);margin-top:1px}
+  .vtable td.c3 b{display:block;font-size:15px;color:#ffffff;line-height:1.2;font-weight:600}
+  .vtable td.c3 span{display:block;font-size:11.5px;color:#7bdcc0;margin-top:2px}
+  .vtable td.c3.ph{font-size:13px;color:var(--faint)}
+  .vtable td.c4{width:30px;text-align:right;color:var(--faint);font-size:16px}
+  /* rank chip on a chosen player in the squad lists */
+  .voteopt .vradio.rk{background:#ff7c1a;color:#161615;font-weight:800;font-style:italic;font-size:14px;
+    display:flex;align-items:center;justify-content:center}
+  .voteopt .vtag{margin-left:auto;font-size:11px;font-weight:800;font-style:italic;letter-spacing:.03em;
+    color:#ffffff;background:rgba(255,124,26,.9);border-radius:6px;padding:2px 8px;flex:0 0 auto}
+  .vwinner{display:flex;gap:13px;align-items:center;border-radius:16px;padding:15px;margin:10px 0 14px;
+    background:linear-gradient(105deg,rgba(22,22,21,.28),rgba(22,22,21,.10) 55%),
+               linear-gradient(105deg,#ff7c1a 0%,#51cea7 54%,#7777c9 100%)}
+  .vwinner>i{font-size:32px;color:#fff;flex:0 0 auto}
+  .vwinner span{display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.9)}
+  .vwinner b{display:block;font-weight:700;font-style:italic;font-size:20px;color:#fff;line-height:1.15;margin-top:3px}
+  .vwinner em{display:block;font-style:normal;font-size:12px;color:rgba(255,255,255,.92);margin-top:3px}
   .nameinput{width:100%;background:var(--surface);border:1px solid var(--surface-line);border-radius:11px;
     padding:12px 14px;color:#fff;font-family:inherit;font-size:14.5px;margin-top:6px}
   .nameinput::placeholder{color:var(--faint)}
@@ -808,7 +842,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dn · vote-3-2-1</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dp · vote-table</div>
     </section>
 
     <!-- TODAY -->
@@ -1755,9 +1789,10 @@
     function info(icon,label,val){ return hasVal(val)?'<div class="contactrow"><div class="ic" style="background:var(--surface);color:#fff">'+iconHTML(icon)+'</div><div style="flex:1;min-width:0"><b>'+esc(label)+'</b><span style="display:block;word-break:break-word;overflow-wrap:anywhere">'+packLabel(val)+'</span></div></div>':''; }
     var rows='';
     rows+=info('ti-clock','When',dayLabel+' · '+e.time);
+    /* No Ground row on a fixture: the pitch map below shows the ground, the pitch and
+       where it sits, which a line of text and a maps link never did. */
     if(isMatch(e) && (e.meta&&(e.meta.ground||e.meta.pitch))){
-      var _gl=[e.meta.ground,e.meta.pitch].filter(Boolean).join(' \u00b7 ');
-      rows+=mapLink('Ground', e.loc||e.meta.ground, _gl);
+      /* nothing */
     } else {
       rows+=info('ti-map-pin','Location', /^https?:\/\//i.test(String(e.loc||''))?'':e.loc);
     }
@@ -2902,7 +2937,7 @@
   /* Players' Player runs on a ranked top three: 1st = 3 points, 2nd = 2, 3rd = 1,
      summed across every ballot. Stored as an ordered list of "Team|Player" keys, so
      position carries the points and nothing needs recalculating on read. */
-  var VOTE_PTS=[3,2,1];
+  var VOTE_PTS=[3,2,1], VOTE_RANKS=['1st','2nd','3rd'];
   function ballotPicks(){ return (_ballot && Array.isArray(_ballot.picks)) ? _ballot.picks : []; }
   function pickKey(team,player){ return team+'|'+player; }
   function pickParts(k){ var i=String(k||'').indexOf('|'); return i<0?{team:'',player:''}:{team:k.slice(0,i),player:k.slice(i+1)}; }
@@ -2935,16 +2970,20 @@
         'Tap three players from any squad. Your first pick is worth <b>3 points</b>, second <b>2</b>, third <b>1</b>. '+
         'Points from every ballot are added up to find the Players\u2019 Player.</div>';
 
-    h+='<div class="vslots">';
+    h+='<table class="vtable"><thead><tr>'+
+         '<th class="c1">Rank</th><th class="c2">Points</th><th class="c3">Your pick</th>'+
+         '<th class="c4"></th>'+
+       '</tr></thead><tbody>';
     for(var i=0;i<3;i++){
       var k=picks[i], p=k?pickParts(k):null;
-      h+='<div class="vslot'+(p?' filled':'')+'"'+(p?' onclick="clearPick('+i+')"':'')+'>'+
-           '<span class="vpts">'+VOTE_PTS[i]+'<i>pts</i></span>'+
-           (p?'<div class="vwho"><b>'+esc(p.player)+'</b><span>'+esc(p.team)+'</span></div><i class="ti ti-x vdrop"></i>'
-             :'<div class="vwho empty">'+(i===0?'1st pick':i===1?'2nd pick':'3rd pick')+'</div>')+
-         '</div>';
+      h+='<tr class="'+(p?'filled':'empty')+'"'+(p?' onclick="clearPick('+i+')"':'')+'>'+
+           '<td class="c1"><b>'+VOTE_RANKS[i]+'</b></td>'+
+           '<td class="c2"><span class="vp">'+VOTE_PTS[i]+'</span><i>pts</i></td>'+
+           (p?'<td class="c3"><b>'+esc(p.player)+'</b><span>'+esc(p.team)+'</span></td>'+'<td class="c4"><i class="ti ti-x"></i></td>'
+             :'<td class="c3 ph">Tap a player below</td>'+'<td class="c4"></td>')+
+         '</tr>';
     }
-    h+='</div>';
+    h+='</tbody></table>';
 
     VOTE_SQUADS.forEach(function(s,si){
       h+='<div class="votegrp"><div class="vgh">'+esc(s.team)+'</div>';
@@ -2995,16 +3034,20 @@
       '<div class="cictext"><b>Votes submitted</b><span>These are final and can\u2019t be changed</span></div></div>'+
       '<div class="votestatus" id="voteStatus"><i class="ti ti-loader-2"></i> Checking your vote reached the staff\u2026</div>';
     var dp=ballotPicks();
-    h+='<div class="vslots">';
+    h+='<table class="vtable done"><thead><tr>'+
+         '<th class="c1">Rank</th><th class="c2">Points</th><th class="c3">Your pick</th>'+
+         ''+
+       '</tr></thead><tbody>';
     for(var i=0;i<3;i++){
       var k=dp[i], p=k?pickParts(k):null;
-      h+='<div class="vslot'+(p?' filled':'')+'" style="cursor:default">'+
-           '<span class="vpts">'+VOTE_PTS[i]+'<i>pts</i></span>'+
-           (p?'<div class="vwho"><b>'+esc(p.player)+'</b><span>'+esc(p.team)+'</span></div>'
-             :'<div class="vwho empty">no pick</div>')+
-         '</div>';
+      h+='<tr class="'+(p?'filled':'empty')+'"'+'>'+
+           '<td class="c1"><b>'+VOTE_RANKS[i]+'</b></td>'+
+           '<td class="c2"><span class="vp">'+VOTE_PTS[i]+'</span><i>pts</i></td>'+
+           (p?'<td class="c3"><b>'+esc(p.player)+'</b><span>'+esc(p.team)+'</span></td>'
+             :'<td class="c3 ph">no pick</td>')+
+         '</tr>';
     }
-    h+='</div>';
+    h+='</tbody></table>';
     document.getElementById('detailBody').innerHTML=h;
     ensureVoteSent();
   }
@@ -3043,27 +3086,73 @@
   function renderVoteResults(all){
     if(looksLikeTourBlob(all)||!all||typeof all!=='object'||Array.isArray(all)) all={};
     var valid={}; (TEAMS_LIST||[]).forEach(function(t){valid[t]=1;});
-    var perTeam={}, overall={}, label={}, ballots=0;
+    var perTeam={}, overall={}, label={}, firsts={}, ballots=0;
+
     Object.keys(all).forEach(function(dev){
       var b=all[dev]; if(!b||typeof b!=='object'||Array.isArray(b)) return;
       var counted=false;
-      Object.keys(b).forEach(function(team){
-        var pl=b[team];
-        if(!valid[team]) return;                              // only real squads
-        if(typeof pl!=='string' || !pl.trim()) return;        // only player names (ignores objects/dates)
-        counted=true;
-        perTeam[team]=perTeam[team]||{}; perTeam[team][pl]=(perTeam[team][pl]||0)+1;
-        var key=team+'|'+pl; overall[key]=(overall[key]||0)+1; label[key]=pl+' ('+team+')';
-      });
+
+      if(Array.isArray(b.picks)){
+        /* Current format: an ordered top three worth 3, 2 and 1 points. */
+        b.picks.slice(0,3).forEach(function(k,i){
+          var p=pickParts(k);
+          if(!p.player || !valid[p.team]) return;
+          var pts=VOTE_PTS[i]||0; if(!pts) return;
+          counted=true;
+          perTeam[p.team]=perTeam[p.team]||{}; perTeam[p.team][p.player]=(perTeam[p.team][p.player]||0)+pts;
+          var key=p.team+'|'+p.player;
+          overall[key]=(overall[key]||0)+pts; label[key]=p.player+' ('+p.team+')';
+          if(i===0) firsts[key]=(firsts[key]||0)+1;
+        });
+      } else {
+        /* Ballots cast under the older one-per-squad system still count, at 3 points
+           each, so nothing submitted before the change is thrown away. */
+        Object.keys(b).forEach(function(team){
+          var pl=b[team];
+          if(!valid[team] || typeof pl!=='string' || !pl.trim()) return;
+          counted=true;
+          perTeam[team]=perTeam[team]||{}; perTeam[team][pl]=(perTeam[team][pl]||0)+3;
+          var key=team+'|'+pl;
+          overall[key]=(overall[key]||0)+3; label[key]=pl+' ('+team+')';
+          firsts[key]=(firsts[key]||0)+1;
+        });
+      }
       if(counted) ballots++;
     });
+
     var h='<div class="eyebrow" style="color:#ff9d52;margin-top:8px"><i class="ti ti-lock"></i> Staff only \u00b7 '+ballots+' ballot'+(ballots===1?'':'s')+' counted</div>'+
+      '<div style="font-size:12.5px;color:var(--muted);margin:0 2px 8px">1st = 3 points \u00b7 2nd = 2 \u00b7 3rd = 1</div>'+
       '<button class="cibtn" style="margin:4px 0 6px;max-width:200px" onclick="openVoteResults()"><i class="ti ti-refresh"></i> Refresh</button>';
     if(!ballots){ h+='<div class="readonly" style="justify-content:flex-start;margin-top:10px"><i class="ti ti-info-circle"></i> No votes yet.</div>'; document.getElementById('detailBody').innerHTML=h; return; }
-    h+='<div class="votegrp"><div class="vgh" style="color:#ffb074">🏆 Overall top 3</div>'+rankRows(top3(overall),label)+'</div>';
-    Object.keys(perTeam).forEach(function(team){ h+='<div class="votegrp"><div class="vgh">'+esc(team)+' — top 3</div>'+rankRows(top3(perTeam[team]),null)+'</div>'; });
+
+    /* Winner on points; a tie breaks on who took more first places. */
+    var keys=Object.keys(overall).sort(function(x,y){
+      return (overall[y]-overall[x]) || ((firsts[y]||0)-(firsts[x]||0)) || label[x].localeCompare(label[y]);
+    });
+    var w=keys[0];
+    var tied=keys.filter(function(k){ return overall[k]===overall[w] && (firsts[k]||0)===(firsts[w]||0); });
+    h+='<div class="vwinner"><i class="ti ti-trophy"></i><div>'+
+       '<span>Players\u2019 Player of the Tournament</span>'+
+       '<b>'+esc(tied.length>1?tied.map(function(k){return label[k];}).join('  &  '):label[w])+'</b>'+
+       '<em>'+overall[w]+' points \u00b7 '+(firsts[w]||0)+' first place'+((firsts[w]||0)===1?'':'s')+
+       (tied.length>1?' \u00b7 tied':'')+'</em></div></div>';
+
+    h+='<table class="vtable pts"><thead><tr><th class="c1">#</th><th class="c3">Player</th><th class="c2">Points</th></tr></thead><tbody>';
+    keys.slice(0,12).forEach(function(k,i){
+      h+='<tr class="'+(i===0?'filled':'')+'">'+
+           '<td class="c1"><b>'+(i+1)+'</b></td>'+
+           '<td class="c3"><b>'+esc(label[k])+'</b>'+((firsts[k]||0)?'<span>'+firsts[k]+' first place'+(firsts[k]===1?'':'s')+'</span>':'')+'</td>'+
+           '<td class="c2"><span class="vp">'+overall[k]+'</span><i>pts</i></td>'+
+         '</tr>';
+    });
+    h+='</tbody></table>';
+
+    Object.keys(perTeam).forEach(function(team){
+      h+='<div class="votegrp"><div class="vgh">'+esc(team)+' \u2014 top 3</div>'+rankRows(top3(perTeam[team]),null)+'</div>';
+    });
     document.getElementById('detailBody').innerHTML=h;
   }
+
   function rankRows(arr,label){
     if(!arr.length) return '<div class="readonly" style="justify-content:flex-start">No votes</div>';
     return arr.map(function(o,i){ var name=label?label[o.k]:o.k;
@@ -5427,26 +5516,37 @@
      The only number on it is the player's running XP total, because that is the thing
      they actually want to glance at. State detail lives on the screen it opens. */
   function challengeMoreCard(margin){
-    if(!CHALLENGES.length) return '';
-    if(isSupporter()) return '';
-    if(!isAdmin && role!=='player') return '';
+    /* Tournament staff always see it, even with nothing published, so an empty
+       Challenges tab reads as a message rather than the feature silently vanishing.
+       Coaches and supporters get it too: coaches nudge their squad through it, and
+       supporters are often the ones actually posting. Scorers and umpires don't. */
+    if(!isAdmin && !CHALLENGES.length) return '';
+    if(role==='official') return '';
     var m = (margin===undefined?16:margin);
+
     if(isAdmin){
       var n=subsList().filter(function(x){return x.status==='pending';}).length;
       var u=subsList().filter(function(x){return x.status==='approved'&&x.auto_approved&&x.verified===false;}).length;
+      var lbl = !CHALLENGES.length ? 'NONE' : (n?'TO DO':u?'CHECK':'CLEAR');
+      var val = !CHALLENGES.length ? 0 : (n||u||0);
       return '<div class="chbar" style="margin-top:'+m+'px" onclick="openChAdmin()">'+
         '<span class="cbicon"><i class="ti ti-bolt"></i></span>'+
         '<div class="cbname">'+esc(chName())+'</div>'+
-        '<span class="cbval"><b>'+(n||u||0)+'</b><span>'+(n?'TO DO':u?'CHECK':'CLEAR')+'</span></span>'+
+        '<span class="cbval"><b>'+val+'</b><span>'+lbl+'</span></span>'+
         '<i class="ti ti-chevron-right cbarr"></i></div>';
     }
-    var me=myPlayerId();
+
+    var me=(role==='player')?myPlayerId():'';
+    var right;
+    if(role!=='player')  right='<span class="cbhint">'+CHALLENGES.length+' challenge'+(CHALLENGES.length===1?'':'s')+'</span>';
+    else if(me)          right='<span class="cbval"><b>'+xpFor(me)+'</b><span>XP</span></span>';
+    else                 right='<span class="cbhint">Sign in with your name</span>';
     return '<div class="chbar" style="margin-top:'+m+'px" onclick="openChallenge()">'+
       '<span class="cbicon"><i class="ti ti-bolt"></i></span>'+
       '<div class="cbname">'+esc(chName())+'</div>'+
-      (me ? '<span class="cbval"><b>'+xpFor(me)+'</b><span>XP</span></span>' : '<span class="cbhint">Sign in with your name</span>')+
-      '<i class="ti ti-chevron-right cbarr"></i></div>';
+      right+'<i class="ti ti-chevron-right cbarr"></i></div>';
   }
+
   function chTiles(){
     /* My GCS XP is no longer a tile of its own \u2014 badges, history and leaderboards
        all live on the challenge screen the bar opens. Once only: chTiles() runs from renderMore(), so re-rendering unconditionally here
