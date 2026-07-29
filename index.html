@@ -247,14 +247,22 @@
   /* GCS Challenge card: the three logo colours in mark order — G orange, C teal,
      S purple — with a near-black wash over the top so white text stays readable
      across the teal, which is far too light to sit under white on its own. */
-  .votecard.ch{background:
-    linear-gradient(105deg,rgba(22,22,21,.34),rgba(22,22,21,.12) 55%,rgba(22,22,21,.26)),
-    linear-gradient(105deg,#ff7c1a 0%,#51cea7 54%,#7777c9 100%)}
-  .votecard.ch .vcicon{background:rgba(22,22,21,.34)}
-  /* Done for the day: settle onto wicket teal alone. */
-  .votecard.ch.done{background:
-    linear-gradient(105deg,rgba(22,22,21,.3),rgba(22,22,21,.14)),
-    linear-gradient(105deg,#51cea7,#3fae8b)}
+  /* GCS Challenge bar: the three logo colours in mark order \u2014 G orange, C teal,
+     S purple \u2014 under a near-black wash so white text stays readable over the teal. */
+  .chbar{display:flex;align-items:center;gap:12px;padding:12px 15px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(105deg,rgba(22,22,21,.36),rgba(22,22,21,.14) 55%,rgba(22,22,21,.28)),
+               linear-gradient(105deg,#ff7c1a 0%,#51cea7 54%,#7777c9 100%);
+    transition:transform .12s ease,filter .12s ease}
+  .chbar:active{transform:scale(.99);filter:brightness(1.06)}
+  .chbar .cbicon{width:34px;height:34px;border-radius:10px;background:rgba(22,22,21,.34);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto}
+  .chbar .cbname{flex:1;min-width:0;font-weight:700;font-style:italic;font-size:16px;color:#fff;
+    line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chbar .cbval{display:flex;align-items:baseline;gap:4px;flex:0 0 auto}
+  .chbar .cbval b{font-size:22px;font-weight:800;font-style:italic;color:#fff;line-height:1}
+  .chbar .cbval span{font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.85)}
+  .chbar .cbhint{font-size:11.5px;color:rgba(255,255,255,.85);flex:0 0 auto}
+  .chbar .cbarr{color:#fff;font-size:19px;flex:0 0 auto}
   .votecard .vcicon{width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,.18);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
   .votecard .vcbody{flex:1;min-width:0}
@@ -765,7 +773,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29cx · brand-colours</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29da · single-xp-bar</div>
     </section>
 
     <!-- TODAY -->
@@ -781,6 +789,7 @@
         <div style="margin-left:auto;display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--teal);white-space:nowrap">7-day<i class="ti ti-chevron-right" style="font-size:15px"></i></div>
       </div>
       <div class="progress"><i id="progbar" style="width:44%"></i></div>
+      <div id="todayChallenge"></div>
       <div id="todayList"></div>
     </section>
 
@@ -1332,6 +1341,12 @@
     return !!(g&&g.indexOf&&g.indexOf(currentSquad)>=0);
   }
   function renderToday(){
+    /* The challenge card sits on the itinerary as well as the Tour hub. This is the
+       screen everyone actually opens, so a daily challenge nobody sees is a daily
+       challenge nobody does. Set before the early returns so it survives the
+       countdown and out-of-tour views too. */
+    var tc=document.getElementById('todayChallenge');
+    if(tc) tc.innerHTML=challengeMoreCard(10);
     EVENTS.sort(function(a,b){ return (a.day-b.day) || (tmin(a.time)-tmin(b.time)); });
     EVENTS.forEach(function(e,i){e._i=i;});
     var staff=false;
@@ -5150,31 +5165,29 @@
 
   /* Tile visibility for the Tour Challenge. Players get the challenge and their XP;
      tournament staff get the approvals queue. Supporters and team coaches get neither. */
-  /* Full-width banner on the More page, matching the Players' Player card, rather than
-     a small tile lost in the grid. The subtitle changes with the state so the card is
-     doing some work rather than just sitting there. */
-  function challengeMoreCard(){
+  /* One bar. Tap it and you get every challenge — pre-tour, today's, all-tournament.
+     The only number on it is the player's running XP total, because that is the thing
+     they actually want to glance at. State detail lives on the screen it opens. */
+  function challengeMoreCard(margin){
     if(!CHALLENGES.length) return '';
     if(isSupporter()) return '';
     if(!isAdmin && role!=='player') return '';
+    var m = (margin===undefined?16:margin);
     if(isAdmin){
       var n=subsList().filter(function(x){return x.status==='pending';}).length;
       var u=subsList().filter(function(x){return x.status==='approved'&&x.auto_approved&&x.verified===false;}).length;
-      return '<div class="votecard ch" style="margin-top:16px" onclick="openChAdmin()"><span class="vcicon"><i class="ti ti-bolt"></i></span>'+
-        '<div class="vcbody"><b>'+esc(chName())+'</b><span>'+(n?(n+' waiting for approval'):(u?(u+' to spot check'):'Submissions &amp; XP'))+'</span></div><i class="ti ti-chevron-right vcarr"></i></div>';
+      return '<div class="chbar" style="margin-top:'+m+'px" onclick="openChAdmin()">'+
+        '<span class="cbicon"><i class="ti ti-bolt"></i></span>'+
+        '<div class="cbname">'+esc(chName())+'</div>'+
+        '<span class="cbval"><b>'+(n||u||0)+'</b><span>'+(n?'TO DO':u?'CHECK':'CLEAR')+'</span></span>'+
+        '<i class="ti ti-chevron-right cbarr"></i></div>';
     }
-    var c=todaysChallenge(), pre=preChallenges().filter(chOpen);
-    var mine=chCanPlay()?(c?mySubFor(c.id):null):null, sub;
-    if(!myPlayerId())               sub='Sign in with your name to collect XP';
-    else if(tourPhase()==='before') sub=(pre.length?(pre.length+' challenge'+(pre.length>1?'s':'')+' live before you go'):'Starts on day one');
-    else if(!c)                     sub='Nothing new today \u2014 the all-tournament ones are still open';
-    else if(mine&&mine.status==='approved') sub='Today\u2019s done \u00b7 '+xpFor(myPlayerId())+' XP so far';
-    else if(mine)                   sub='Sent \u2014 waiting for approval';
-    else if(chOpen(c))              sub=esc(c.title||'')+' \u00b7 '+chXP(c)+' XP'+(chInEarly(c)?' +'+chEarlyXP(c)+' early bird':'');
-    else                            sub=esc(chClosedReason(c)||'Closed for today');
-    return '<div class="votecard ch'+((mine&&mine.status==='approved')?' done':'')+'" style="margin-top:16px" onclick="openChallenge()">'+
-      '<span class="vcicon"><i class="ti ti-bolt"></i></span>'+
-      '<div class="vcbody"><b>'+esc(chName())+'</b><span>'+sub+'</span></div><i class="ti ti-chevron-right vcarr"></i></div>';
+    var me=myPlayerId();
+    return '<div class="chbar" style="margin-top:'+m+'px" onclick="openChallenge()">'+
+      '<span class="cbicon"><i class="ti ti-bolt"></i></span>'+
+      '<div class="cbname">'+esc(chName())+'</div>'+
+      (me ? '<span class="cbval"><b>'+xpFor(me)+'</b><span>XP</span></span>' : '<span class="cbhint">Sign in with your name</span>')+
+      '<i class="ti ti-chevron-right cbarr"></i></div>';
   }
   function chTiles(){
     var on = CHALLENGES.length>0;
@@ -5185,7 +5198,10 @@
     if(t2) t2.style.display=(on && role==='player')?'':'none';
     /* Once only: chTiles() runs from renderMore(), so re-rendering unconditionally here
        would loop forever. _subsFetched is set by fetchSubs, which stops the second pass. */
-    if((chCanPlay()||isAdmin) && !_subsFetched) fetchSubs(function(){ renderMore(); });
+    if((chCanPlay()||isAdmin) && !_subsFetched) fetchSubs(function(){
+      renderMore();
+      try{ renderToday(); }catch(e){}   // refresh the itinerary card too
+    });
   }
 
 
