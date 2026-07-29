@@ -793,7 +793,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29de · handover-button</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29df · more-sections</div>
     </section>
 
     <!-- TODAY -->
@@ -2380,8 +2380,9 @@
     var hostEl=document.getElementById('moreDynamic'); if(!hostEl)return;
     var groups=[], idx={};
     (MORECONTENT||[]).forEach(function(r){ var t=moreTileMerge(r.tile||'Info');
-      if(!(t in idx)){ idx[t]=groups.length; groups.push({tile:t,icon:r.icon,highlight:false,rows:[]}); }
-      var g=groups[idx[t]]; g.rows.push(r); if(r.highlight)g.highlight=true; if(!g.icon&&r.icon)g.icon=r.icon; });
+      if(!(t in idx)){ idx[t]=groups.length; groups.push({tile:t,icon:r.icon,highlight:false,rows:[],group:(r.group||'')}); }
+      var g=groups[idx[t]]; g.rows.push(r); if(r.highlight)g.highlight=true; if(!g.icon&&r.icon)g.icon=r.icon;
+      if(!g.group && r.group) g.group=r.group; });
     MOREGROUPS=groups;
     var infoIdx=[], packIdx=[];
     groups.forEach(function(g,i){ if(!isPackingTile(g.tile) && moreTileHidden(g.tile)) return; (isPackingTile(g.tile)?packIdx:infoIdx).push(i); });
@@ -2409,12 +2410,19 @@
     var showExc=(isStaff||isSupporter()) && excursionsList().length;
     var showFlights=hasFlights() && flightsForMe();
     var showHotel=hasHotel();
-    var info=[];
+    /* Tiles are bucketed by their Group column. Anything without one lands in Tour info;
+       every other value becomes a heading of its own, in the order the sheet lists them. */
+    var DEFAULT_SECTION='Tour info';
+    var buckets={}, bucketOrder=[DEFAULT_SECTION];
+    buckets[DEFAULT_SECTION]=[];
     infoIdx.forEach(function(i,n){ var g=groups[i]; var acc=TILE_ACCENTS[n%TILE_ACCENTS.length];
-      info.push('<div class="tile '+acc+'" onclick="openMore('+i+')" style="position:relative'+(g.highlight?';border-color:rgba(255,124,26,.6)':'')+'">'+
+      var sec=(g.group||'').trim()||DEFAULT_SECTION;
+      if(!(sec in buckets)){ buckets[sec]=[]; bucketOrder.push(sec); }
+      buckets[sec].push('<div class="tile '+acc+'" onclick="openMore('+i+')" style="position:relative'+(g.highlight?';border-color:rgba(255,124,26,.6)':'')+'">'+
          (g.highlight?'<span style="position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--orange)"></span>':'')+
          '<span class="tbadge"><i class="ti '+moreIcon(g.icon)+'"></i></span><div>'+esc(g.tile)+'</div></div>');
     });
+    var info=buckets[DEFAULT_SECTION];
     if(showHotel) info.push(tile('acc-teal','openHotelMap()','ti-building',(isDomestic()&&!isSupporter()?'Where we stay &middot; Map':'Hotel &middot; Map')));
     info.push(tile('acc-purple','openFAQ()','ti-messages','FAQ'));
     if(showFlights) info.push(tile('acc-orange','openFlights()','ti-plane','Flights'));
@@ -2422,7 +2430,11 @@
     if(_depMe) info.push(tile('acc-purple','openDepartures()','ti-plane-departure','Airport departures'));
     if(showExc) info.push(tile('acc-teal','openExcursions()','ti-map-2','Excursions &amp; car hire'));
     if(RESTAURANTS&&RESTAURANTS.length) info.push(tile('acc-teal','openRestaurants()','ti-chef-hat','Eating out'));
-    h+=tileSection('Tour info','sec-orange',info);
+    h+=tileSection(DEFAULT_SECTION,'sec-orange',info);
+    var SEC_ACCENTS=['sec-teal','sec-purple','sec-orange'];
+    bucketOrder.slice(1).forEach(function(sec,n){
+      h+=tileSection(sec, SEC_ACCENTS[n%SEC_ACCENTS.length], buckets[sec]);
+    });
     // Before-you-go essentials (Wise / eSIM / Behaviour contract)
     var pre=[];
     if(!isDomestic()){

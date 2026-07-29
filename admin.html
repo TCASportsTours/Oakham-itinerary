@@ -1202,8 +1202,10 @@
     });
 
     // more content
+    /* Group puts the tile under its own heading on the More page. Blank = Tour info. */
     var more=moreRows.map(function(o){ return {tile:_gv(o,'tile')||_gv(o,'section'), heading:_gv(o,'heading'),
       text:_gv(o,'text')||_gv(o,'content'), icon:_gv(o,'icon'),
+      group:_gv(o,'group')||_gv(o,'heading group')||'',
       highlight:((_gv(o,'highlight')||_gv(o,'required')).toLowerCase()==='yes')}; })
       .filter(function(x){return x.tile||x.text;});
 
