@@ -806,7 +806,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dk · pitch-map-no-north</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dl · pitch-map-inline</div>
     </section>
 
     <!-- TODAY -->
@@ -1753,11 +1753,6 @@
     function info(icon,label,val){ return hasVal(val)?'<div class="contactrow"><div class="ic" style="background:var(--surface);color:#fff">'+iconHTML(icon)+'</div><div style="flex:1;min-width:0"><b>'+esc(label)+'</b><span style="display:block;word-break:break-word;overflow-wrap:anywhere">'+packLabel(val)+'</span></div></div>':''; }
     var rows='';
     rows+=info('ti-clock','When',dayLabel+' · '+e.time);
-    if(isMatch(e) && e.meta && e.meta.pitch){
-      h+='<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box;margin:10px 0 2px;'+
-         'background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.42)" '+
-         'onclick="openPitchMap(\''+attr(e.meta.pitch)+'\')"><i class="ti ti-map"></i> Show '+esc(e.meta.pitch)+' on the map</button>';
-    }
     if(isMatch(e) && (e.meta&&(e.meta.ground||e.meta.pitch))){
       var _gl=[e.meta.ground,e.meta.pitch].filter(Boolean).join(' \u00b7 ');
       rows+=mapLink('Ground', e.loc||e.meta.ground, _gl);
@@ -1785,6 +1780,7 @@
       '<div class="eyebrow" style="color:'+accent+';margin-top:8px">'+esc(typeName)+'</div>'+
       '<div style="font-weight:700;font-style:italic;font-size:22px;color:#fff;line-height:1.15;margin:2px 2px 14px">'+esc(e.title)+'</div>'+
       rows+
+      matchPitchMap(e)+
       (isMatch(e)&&!isSupporter()?'<div id="lineupSlot"></div>':'')+
       (isStaff && rollCallable(e) && !(DEMO_TODAY && e.day > DEMO_TODAY) ?'<button class="cibig" onclick="openCheckin('+(e._i)+')"><i class="ti ti-clipboard-check"></i> Open check-in register</button>':'');
     showOnly('s-detail');
@@ -5484,6 +5480,21 @@
       '</svg>';
   }
 
+  /* The map, inline on a fixture, with that game's pitch picked out. Shown on the
+     event itself rather than behind a button \u2014 a player opening their next game
+     wants to know where to go without another tap. */
+  function matchPitchMap(e){
+    if(!isMatch(e) || !e.meta || !e.meta.pitch) return '';
+    var n=pitchNum(e.meta.pitch);
+    if(!n) return '';
+    return '<div class="eyebrow" style="margin-top:16px">Where you\u2019re playing</div>'+
+      '<div class="pmnow"><span class="n">'+esc(n)+'</span><div><b>Pitch '+esc(n)+'</b>'+
+        '<span>'+esc(e.meta.ground||'Doncaster Close')+' \u00b7 highlighted below</span></div></div>'+
+      '<div class="pmwrap">'+pitchMapSVG(n)+'</div>'+
+      '<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box;margin-top:10px;'+
+        'background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.42)" '+
+        'onclick="openPitchMap(\''+attr(e.meta.pitch)+'\')"><i class="ti ti-map"></i> Full pitch map</button>';
+  }
   function openPitchMap(pitch){
     showOnly('s-pitchmap');
     var n = pitchNum(pitch);
