@@ -244,6 +244,8 @@
   .votecard{display:flex;align-items:center;gap:13px;margin:4px 0 12px;padding:14px 15px;border-radius:16px;cursor:pointer;
     background:linear-gradient(105deg,rgba(255,124,26,.9),rgba(255,124,26,.7));transition:transform .12s ease,filter .12s ease}
   .votecard:active{transform:scale(.99);filter:brightness(1.05)}
+  .votecard.ch{background:linear-gradient(105deg,rgba(119,119,201,.92),rgba(81,206,167,.72))}
+  .votecard.ch.done{background:linear-gradient(105deg,rgba(81,206,167,.85),rgba(81,206,167,.6))}
   .votecard .vcicon{width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,.18);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
   .votecard .vcbody{flex:1;min-width:0}
@@ -754,7 +756,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑28cv · no-medical-form</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29cw · challenge-banner</div>
     </section>
 
     <!-- TODAY -->
@@ -822,9 +824,7 @@
         <div class="tile acc-orange" id="squadTile" style="display:none" onclick="openRoster()"><span class="tbadge"><i class="ti ti-clipboard-list"></i></span><div>Squad list</div></div>
         <div class="tile acc-purple" id="voteTile" style="display:none" onclick="openVoteResults()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>Players&rsquo; Player<span id="voteTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-teal" id="mealTile" style="display:none" onclick="openMealOrders()"><span class="tbadge"><i class="ti ti-tools-kitchen-2"></i></span><div>Meal pre-orders</div></div>
-        <div class="tile acc-orange" id="challengeTile" style="display:none" onclick="openChallenge()"><span class="tbadge"><i class="ti ti-bolt"></i></span><div><span id="challengeTileName">Tour Challenge</span><span id="challengeTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-purple" id="myXPTile" style="display:none" onclick="openMyXP()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>My GCS XP</div></div>
-        <div class="tile acc-teal" id="chAdminTile" style="display:none" onclick="openChAdmin()"><span class="tbadge"><i class="ti ti-checkbox"></i></span><div>Challenge approvals<span id="chAdminTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
         <div class="tile acc-orange" id="alertTile" style="display:none" onclick="openSendAlert()"><span class="tbadge"><i class="ti ti-send"></i></span><div>Send alert</div></div>
       </div>
       </div>
@@ -1476,7 +1476,7 @@
   function switchSquad(){
     isStaff=false; staffPending=false; isAdmin=false; _adminPending=false; currentPlayer=''; role='player'; pendingRole='player'; officialKind=''; officialName=''; _loginTracked=false; viewAll=false; clearPlayer(); clearSession();
     var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display='none';
-    ['voteTile','mealTile','alertTile','rulesTile','scoringTile','challengeTile','myXPTile','chAdminTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
+    ['voteTile','mealTile','alertTile','rulesTile','scoringTile','myXPTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
     document.querySelector('.phone').classList.add('locked');
     document.querySelector('.phone').classList.remove('officials');
     showOnly('s-signin');
@@ -2343,6 +2343,7 @@
     var h='';
     // 1) Players' Player entry — always reachable here (opens to vote, or shows open/closed state)
     var vc=voteMoreCard(); h+=vc;
+    h+=challengeMoreCard();
     // 2) Tour info: spreadsheet tiles + Hotel + FAQ (everyone) + Flights (everyone) + Excursions (staff & supporters)
     var showExc=(isStaff||isSupporter()) && excursionsList().length;
     var showFlights=hasFlights() && flightsForMe();
@@ -5140,38 +5141,44 @@
 
   /* Tile visibility for the Tour Challenge. Players get the challenge and their XP;
      tournament staff get the approvals queue. Supporters and team coaches get neither. */
+  /* Full-width banner on the More page, matching the Players' Player card, rather than
+     a small tile lost in the grid. The subtitle changes with the state so the card is
+     doing some work rather than just sitting there. */
+  function challengeMoreCard(){
+    if(!CHALLENGES.length) return '';
+    if(isSupporter()) return '';
+    if(!isAdmin && role!=='player') return '';
+    if(isAdmin){
+      var n=subsList().filter(function(x){return x.status==='pending';}).length;
+      var u=subsList().filter(function(x){return x.status==='approved'&&x.auto_approved&&x.verified===false;}).length;
+      return '<div class="votecard ch" style="margin-top:16px" onclick="openChAdmin()"><span class="vcicon"><i class="ti ti-bolt"></i></span>'+
+        '<div class="vcbody"><b>'+esc(chName())+'</b><span>'+(n?(n+' waiting for approval'):(u?(u+' to spot check'):'Submissions &amp; XP'))+'</span></div><i class="ti ti-chevron-right vcarr"></i></div>';
+    }
+    var c=todaysChallenge(), pre=preChallenges().filter(chOpen);
+    var mine=chCanPlay()?(c?mySubFor(c.id):null):null, sub;
+    if(!myPlayerId())               sub='Sign in with your name to collect XP';
+    else if(tourPhase()==='before') sub=(pre.length?(pre.length+' challenge'+(pre.length>1?'s':'')+' live before you go'):'Starts on day one');
+    else if(!c)                     sub='Nothing new today \u2014 the all-tournament ones are still open';
+    else if(mine&&mine.status==='approved') sub='Today\u2019s done \u00b7 '+xpFor(myPlayerId())+' XP so far';
+    else if(mine)                   sub='Sent \u2014 waiting for approval';
+    else if(chOpen(c))              sub=esc(c.title||'')+' \u00b7 '+chXP(c)+' XP'+(chInEarly(c)?' +'+chEarlyXP(c)+' early bird':'');
+    else                            sub=esc(chClosedReason(c)||'Closed for today');
+    return '<div class="votecard ch'+((mine&&mine.status==='approved')?' done':'')+'" style="margin-top:16px" onclick="openChallenge()">'+
+      '<span class="vcicon"><i class="ti ti-bolt"></i></span>'+
+      '<div class="vcbody"><b>'+esc(chName())+'</b><span>'+sub+'</span></div><i class="ti ti-chevron-right vcarr"></i></div>';
+  }
   function chTiles(){
     var on = CHALLENGES.length>0;
-    var t1=document.getElementById('challengeTile');
     var t2=document.getElementById('myXPTile');
-    var t3=document.getElementById('chAdminTile');
     /* Players see it whenever there are challenges. Tournament staff ALWAYS see the
        approvals tile, even with nothing published, so an empty Challenges tab shows up
        as a message on the screen rather than the feature vanishing without explanation. */
-    if(t1) t1.style.display=(on && role==='player')?'':'none';
     if(t2) t2.style.display=(on && role==='player')?'':'none';
-    if(t3) t3.style.display=isAdmin?'':'none';
-    if(chCanPlay()||isAdmin) fetchSubs(chTileSubs);
+    /* Once only: chTiles() runs from renderMore(), so re-rendering unconditionally here
+       would loop forever. _subsFetched is set by fetchSubs, which stops the second pass. */
+    if((chCanPlay()||isAdmin) && !_subsFetched) fetchSubs(function(){ renderMore(); });
   }
-  function chTileSubs(){
-    var nm=document.getElementById('challengeTileName'); if(nm) nm.textContent=chName();
-    var c=todaysChallenge();
-    var s1=document.getElementById('challengeTileSub');
-    if(s1){
-      if(!c) s1.textContent='';
-      else { var mine=chCanPlay()?mySubFor(c.id):null;
-        s1.textContent = mine ? (mine.status==='approved'?'Done today':'Sent \u2014 awaiting') : (chOpen(c)?(chXP(c)+' XP today'):'Closed'); }
-    }
-    var s2=document.getElementById('chAdminTileSub');
-    if(s2){
-      if(!CHALLENGES.length){ s2.textContent='No challenges published'; }
-      else {
-        var n=subsList().filter(function(x){return x.status==='pending';}).length;
-        var u=subsList().filter(function(x){return x.status==='approved'&&x.auto_approved&&x.verified===false;}).length;
-        s2.textContent = n ? (n+' waiting') : (u? (u+' to spot check') : 'All clear');
-      }
-    }
-  }
+
 
   function bootstrap(){
     getJSON('').then(function(r){if(!r.ok)throw new Error('no data');return r.json();})
