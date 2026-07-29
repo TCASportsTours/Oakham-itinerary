@@ -569,6 +569,18 @@
   .chdupe{display:flex;gap:10px;align-items:flex-start;margin-top:9px;background:rgba(255,157,82,.13);
     border:1px solid rgba(255,157,82,.42);border-radius:11px;padding:11px 12px}
   .chdupe i{font-size:19px;color:#ff9d52;flex:0 0 auto}
+  .chterms-link{display:flex;gap:11px;align-items:center;background:var(--surface);border:1px solid var(--surface-line);
+    border-radius:13px;padding:12px 13px;margin-top:12px;cursor:pointer}
+  .chterms-link>i:first-child{font-size:20px;color:#9a9ad6;flex:0 0 auto}
+  .chterms-link>i:last-child{font-size:18px;color:var(--faint);flex:0 0 auto}
+  .chterms-link div{flex:1;min-width:0}
+  .chterms-link b{display:block;font-size:14px;color:#fff}
+  .chterms-link span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .chterm{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
+  .chterm .ic{width:34px;height:34px;border-radius:10px;background:rgba(119,119,201,.16);color:#9a9ad6;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:18px}
+  .chterm b{display:block;font-size:14.5px;color:#fff}
+  .chterm p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:3px}
   .chsteps{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:15px;margin-top:12px}
   .chsteps .hd{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
   .chwhy{font-size:12.5px;color:#7bdcc0;line-height:1.55;margin-top:8px;background:rgba(81,206,167,.1);
@@ -773,7 +785,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29da · single-xp-bar</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29db · challenge-terms</div>
     </section>
 
     <!-- TODAY -->
@@ -886,6 +898,10 @@
     </section>
 
     <!-- GCS TOUR CHALLENGE -->
+    <section class="screen" id="s-chterms">
+      <button class="backbtn" onclick="go('more')"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="chTermsBody"></div>
+    </section>
     <section class="screen" id="s-challenge">
       <button class="backbtn" onclick="appBack()"><i class="ti ti-chevron-left"></i> Back</button>
       <div id="challengeBody"></div>
@@ -1691,7 +1707,7 @@
     var wl=document.getElementById('welcomeLead'); if(wl){ wl.textContent='Staff sign-in — choose your team.'; wl.style.color=''; wl.style.fontWeight=''; }
     renderTeamButtons();
   }
-  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1};
+  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1,'s-chterms':1};
   function showOnly(id){
     var cur=document.querySelector('.screen.active'); var curId=cur?cur.id:'';
     if(curId && curId!=='s-detail') _screenScroll[curId]=screens.scrollTop;   // remember scroll (not the reused detail screen)
@@ -4418,7 +4434,56 @@
   }
 
   /* ======================= PLAYER: main screen ============================ */
+  /* Rules screen. Doubles as a gate: the first time a player opens the challenge they
+     have to read and accept before they can enter anything. Stored per player on their
+     own device, so a shared phone doesn't accept on someone else's behalf. */
+  function chTermsKey(){ return 'gcs_chterms_'+(SETTINGS.tourName||'tour')+'_'+(myPlayerId()||'anon'); }
+  function chTermsAccepted(){ try{ return localStorage.getItem(chTermsKey())==='1'; }catch(e){ return true; } }
+  function acceptChTerms(){
+    if(!document.getElementById('chTermsTick').checked){
+      var w=document.getElementById('chTermsWarn'); if(w) w.style.display='block';
+      return;
+    }
+    try{ localStorage.setItem(chTermsKey(),'1'); }catch(e){}
+    openChallenge();
+  }
+  function chTermRow(icon,title,body){
+    return '<div class="chterm"><div class="ic"><i class="ti '+icon+'"></i></div>'+
+           '<div><b>'+title+'</b><p>'+body+'</p></div></div>';
+  }
+  function openChTerms(readOnly){
+    showOnly('s-chterms');
+    document.getElementById('appTitle').textContent='Rules & how to enter';
+    document.getElementById('appSub').textContent=chName();
+    var tags=socialTagLine().replace('@'+igHandle()+' ','');
+    document.getElementById('chTermsBody').innerHTML=
+      '<div class="chintro"><b>Before you start.</b><p>Have a read \u2014 it takes a minute and it saves your entry being turned down later. Taking part is optional and nobody is worse off for sitting it out.</p></div>'+
+
+      chTermRow('ti-camera','1. You take the photo','Each challenge tells you what to capture. You take it yourself \u2014 you\u2019re the one who\u2019s there.')+
+      chTermRow('ti-brand-instagram','2. Post it with the tags','It must be tagged <b>@'+esc(igHandle())+'</b> and include <b>'+esc(tags)+'</b>. Tap <i>Copy caption &amp; tags</i> and paste. Without the tags we can\u2019t find it and it may be turned down.')+
+      chTermRow('ti-user-check','3. Your own account, or a parent\u2019s','If you\u2019re 13 or over you can post it yourself. If you haven\u2019t got an account, a parent or guardian posts it for you \u2014 same XP either way.')+
+      chTermRow('ti-link','4. Send us the link','Paste the link into the app. If it was a Story, upload a screenshot instead, because Stories vanish within a day.')+
+
+      chTermRow('ti-copy-off','One post per challenge','A link that has already been entered by anyone will be refused. You can\u2019t reuse your own post from another day either. Every challenge needs its own photo.')+
+      chTermRow('ti-users','Photos with other players in them','If someone else\u2019s child is clearly in the shot, check they and their parents are happy before it goes up. Ask first, or crop them out. If you\u2019re not sure, don\u2019t post it.')+
+      chTermRow('ti-eye-off','What not to post','Nothing showing room numbers, room doors or where the squads are sleeping. No location tags at the accommodation. Nothing in swimwear or changing rooms.')+
+      chTermRow('ti-mood-smile','Keep it kind','Laugh with people, not at them. Anything unkind, unsafe or inappropriate will be rejected and may be reported to your team manager.')+
+      chTermRow('ti-license','If you let us share it','There\u2019s an optional tick giving GCS permission to repost. It\u2019s genuinely optional \u2014 leave it unticked and you still get the full XP. Ask us any time and we\u2019ll take a post down.')+
+      chTermRow('ti-gavel','Decisions','GCS staff check entries and award the XP. We can turn one down or take XP back if something isn\u2019t right, and our decision is final.')+
+
+      (readOnly
+        ? '<button class="cta chcta" onclick="openChallenge()"><i class="ti ti-arrow-left"></i> Back to the challenges</button>'
+        : '<label class="chcheck perm" style="margin-top:18px"><input type="checkbox" id="chTermsTick"><span>I\u2019ve read the rules and I\u2019ll stick to them.</span></label>'+
+          '<div id="chTermsWarn" class="cherr" style="display:none">Please tick the box to carry on.</div>'+
+          '<button class="cta chcta" onclick="acceptChTerms()"><i class="ti ti-check"></i> Agree &amp; see the challenges</button>')+
+      '<div style="height:8px"></div>'+
+      '<button class="chmore" onclick="openChHelpPlayer()"><i class="ti ti-help-circle"></i> More detail</button>'+
+      '<button class="chmore" onclick="openChHelpParent()"><i class="ti ti-users"></i> Show a parent</button>';
+  }
+
   function openChallenge(){
+    /* First visit for this player: rules first, challenges after. */
+    if(role==='player' && myPlayerId() && !chTermsAccepted()){ openChTerms(false); return; }
     showOnly('s-challenge');
     document.getElementById('appTitle').textContent=chName();
     document.getElementById('appSub').textContent='Earn XP for your profile';
@@ -4449,23 +4514,9 @@
     }
 
     /* --- how to compete: always at the top, so nobody has to go looking --- */
-    h+='<div class="chsteps">'+
-         '<div class="hd"><i class="ti ti-flag"></i> How to compete</div>'+
-         '<div class="chwhy">Half of these need you to talk to someone from another team. That\u2019s the point \u2014 you\u2019ll know half the tournament by Thursday.</div>'+
-         '<ol>'+
-           '<li><b>Do today\u2019s challenge.</b> It changes every day and closes at the time shown below.</li>'+
-           '<li><b>You take the photo or video.</b> It\u2019s your tour \u2014 you\u2019re the one who\u2019s there.</li>'+
-           '<li><b>Post it</b>, tagging <b>@'+esc(igHandle())+'</b> and adding <b>'+esc(socialTagLine().replace('@'+igHandle()+' ',''))+'</b>. Tap <i>Copy caption &amp; tags</i> and it\u2019s ready to paste. No account of your own? Send it to a parent and they\u2019ll post it for you.</li>'+
-           '<li><b>Come back and tap Submit challenge</b>, then paste the link. Story instead? Upload a screenshot.</li>'+
-           '<li><b>Collect your XP.</b> Most links are checked and approved on the spot.</li>'+
-         '</ol>'+
-         '<div class="chrule"><i class="ti ti-users"></i><div><b>Photos with other players in them</b>'+
-           '<span>If anyone else\u2019s child is clearly in the shot, their parent needs to be happy for it to be posted. Ask first \u2014 or crop them out. If you\u2019re not sure, don\u2019t post it.</span></div></div>'+
-         '<div class="chrule alt"><i class="ti ti-copy-off"></i><div><b>One post per challenge</b>'+
-           '<span>You can\u2019t send in a link somebody else has already used, or reuse your own from another day. Every challenge needs its own photo.</span></div></div>'+
-         '<button class="chmore" onclick="openChHelpPlayer()"><i class="ti ti-help-circle"></i> More detail</button>'+
-         '<button class="chmore" onclick="openChHelpParent()"><i class="ti ti-users"></i> Show a parent</button>'+
-       '</div>';
+    h+='<div class="chterms-link" onclick="openChTerms(true)"><i class="ti ti-list-check"></i>'+
+         '<div><b>Rules &amp; how to enter</b><span>What counts, what doesn\u2019t, and what to do about photos with other players in them.</span></div>'+
+         '<i class="ti ti-chevron-right"></i></div>';
 
     /* --- my XP strip --- */
     if(chCanPlay()){

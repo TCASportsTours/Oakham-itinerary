@@ -1644,7 +1644,7 @@
     })).then(function(res){ toast(res.every(Boolean)?'All submitted test data cleared \u2713':'Some slots still have data — the backend function may need redeploying'); });
   }
   function resetThisDevice(){
-    var pref=['gcs_order_','gcs_ballot_','gcs_ballotdone_','gcs_ballotconf_','gcs_player_','gcs_pack_','gcs_chprefs_'];
+    var pref=['gcs_order_','gcs_ballot_','gcs_ballotdone_','gcs_ballotconf_','gcs_player_','gcs_pack_','gcs_chprefs_','gcs_chterms_'];
     try{ Object.keys(localStorage).forEach(function(k){ if(pref.some(function(p){return k.indexOf(p)===0;})) localStorage.removeItem(k); }); }catch(e){}
     try{localStorage.removeItem('gcs_acked');}catch(e){}
     toast('This device reset — reopen the app to start fresh');
