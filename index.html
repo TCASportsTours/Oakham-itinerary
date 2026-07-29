@@ -631,6 +631,19 @@
     background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.42);
     border-radius:11px;padding:10px 15px;font-size:13.5px;font-weight:700}
   .morelink i{font-size:17px}
+  .pmwrap{margin-top:12px;border-radius:14px;overflow:hidden;border:1px solid var(--surface-line)}
+  .pmnow{display:flex;gap:12px;align-items:center;margin-top:12px;background:rgba(255,124,26,.13);
+    border:1px solid rgba(255,124,26,.42);border-radius:13px;padding:12px 13px}
+  .pmnow .n{width:42px;height:42px;border-radius:11px;background:rgba(255,124,26,.25);color:#ff9d52;
+    display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;font-style:italic;flex:0 0 auto}
+  .pmnow b{display:block;font-size:15px;color:#ff9d52}
+  .pmnow span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+  .pmkey{margin-top:12px}
+  .pmkey>div{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);padding:4px 2px;line-height:1.45}
+  .pmkey .sw{width:14px;height:14px;border-radius:4px;flex:0 0 auto}
+  .pmkey .sw.pav{background:#7777c9}
+  .pmkey .sw.net{background:rgba(81,206,167,.5);border:1px solid #51cea7}
+
   .chdone{margin-top:14px}
   .chnote{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
   .chchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;flex:0 0 auto}
@@ -793,7 +806,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dg · pitch-on-card</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dk · pitch-map-no-north</div>
     </section>
 
     <!-- TODAY -->
@@ -890,6 +903,10 @@
     </section>
 
     <!-- GCS TOUR CHALLENGE -->
+    <section class="screen" id="s-pitchmap">
+      <button class="backbtn" onclick="appBack()"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="pitchMapBody"></div>
+    </section>
     <section class="screen" id="s-chterms">
       <button class="backbtn" onclick="go('more')"><i class="ti ti-chevron-left"></i> Back</button>
       <div id="chTermsBody"></div>
@@ -1699,7 +1716,7 @@
     var wl=document.getElementById('welcomeLead'); if(wl){ wl.textContent='Staff sign-in — choose your team.'; wl.style.color=''; wl.style.fontWeight=''; }
     renderTeamButtons();
   }
-  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1,'s-chterms':1};
+  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1,'s-chterms':1,'s-pitchmap':1};
   function showOnly(id){
     var cur=document.querySelector('.screen.active'); var curId=cur?cur.id:'';
     if(curId && curId!=='s-detail') _screenScroll[curId]=screens.scrollTop;   // remember scroll (not the reused detail screen)
@@ -1736,6 +1753,11 @@
     function info(icon,label,val){ return hasVal(val)?'<div class="contactrow"><div class="ic" style="background:var(--surface);color:#fff">'+iconHTML(icon)+'</div><div style="flex:1;min-width:0"><b>'+esc(label)+'</b><span style="display:block;word-break:break-word;overflow-wrap:anywhere">'+packLabel(val)+'</span></div></div>':''; }
     var rows='';
     rows+=info('ti-clock','When',dayLabel+' · '+e.time);
+    if(isMatch(e) && e.meta && e.meta.pitch){
+      h+='<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box;margin:10px 0 2px;'+
+         'background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.42)" '+
+         'onclick="openPitchMap(\''+attr(e.meta.pitch)+'\')"><i class="ti ti-map"></i> Show '+esc(e.meta.pitch)+' on the map</button>';
+    }
     if(isMatch(e) && (e.meta&&(e.meta.ground||e.meta.pitch))){
       var _gl=[e.meta.ground,e.meta.pitch].filter(Boolean).join(' \u00b7 ');
       rows+=mapLink('Ground', e.loc||e.meta.ground, _gl);
@@ -2432,6 +2454,7 @@
     });
     var info=buckets[DEFAULT_SECTION];
     if(showHotel) info.push(tile('acc-teal','openHotelMap()','ti-building',(isDomestic()&&!isSupporter()?'Where we stay &middot; Map':'Hotel &middot; Map')));
+    info.push(tile('acc-teal','openPitchMap()','ti-map','Pitch map'));
     info.push(tile('acc-purple','openFAQ()','ti-messages','FAQ'));
     if(showFlights) info.push(tile('acc-orange','openFlights()','ti-plane','Flights'));
     var _depMe = isAdmin ? (Object.keys(DEPARTURES||{}).length>0) : (isStaff && DEPARTURES && DEPARTURES[currentSquad] && DEPARTURES[currentSquad].length>0);
@@ -5376,6 +5399,111 @@
     });
   }
 
+
+  /* ==========================================================================
+     PITCH MAP — Doncaster Close playing fields, Oakham School
+     --------------------------------------------------------------------------
+     Drawn from the ground layout rather than traced from satellite imagery, so
+     it stays legible at phone size. North is up, matching how you'd walk in
+     from Kilburn Road. Opening it from a fixture highlights that pitch.
+     ========================================================================== */
+  function pitchNum(p){ var m=String(p||'').match(/(\d+)/); return m?m[1]:''; }
+
+  function pitchMapSVG(highlight){
+    var hi = pitchNum(highlight);
+    /* Each pitch: box, wicket strip, label anchor */
+    var P = {
+      '4': {x: 52, y: 34,  w:148, h: 96, sx: 108, sy: 44,  sw: 34, sh: 76},
+      '3': {x: 46, y: 168, w:150, h:104, sx: 104, sy: 180, sw: 34, sh: 80},
+      '2': {x: 214,y: 176, w:132, h:100, sx: 264, sy: 188, sw: 32, sh: 76},
+      '1': {x: 84, y: 396, w:186, h:110, sx: 152, sy: 410, sw: 50, sh: 82}
+    };
+    var order = ['4','3','2','1'], out = '';
+    order.forEach(function(n){
+      var p = P[n], on = (hi === n);
+      out +=
+        '<g>' +
+          '<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="10" ' +
+            'fill="'+(on?'rgba(255,124,26,.24)':'rgba(81,206,167,.10)')+'" ' +
+            'stroke="'+(on?'#ff7c1a':'rgba(81,206,167,.55)')+'" stroke-width="'+(on?3:1.5)+'"/>' +
+          '<rect x="'+p.sx+'" y="'+p.sy+'" width="'+p.sw+'" height="'+p.sh+'" rx="3" ' +
+            'fill="'+(on?'rgba(255,124,26,.55)':'rgba(255,255,255,.16)')+'" ' +
+            'stroke="'+(on?'#ff7c1a':'rgba(255,255,255,.28)')+'" stroke-width="1"/>' +
+          '<text x="'+(p.x+22)+'" y="'+(p.y+p.h/2+13)+'" font-size="38" font-weight="700" font-style="italic" ' +
+            'fill="'+(on?'#ff7c1a':'#ffffff')+'" opacity="'+(on?1:.9)+'">'+n+'</text>' +
+          (on ? '<text x="'+(p.x+p.w-8)+'" y="'+(p.y+18)+'" text-anchor="end" font-size="11" font-weight="700" fill="#ff7c1a">YOUR PITCH</text>' : '') +
+        '</g>';
+    });
+
+    return '<svg viewBox="0 0 372 566" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">' +
+      '<defs>' +
+        /* the GCS monogram texture from the brand sheet, at a whisper */
+        '<pattern id="pmgcs" width="66" height="52" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">' +
+          '<text x="0" y="20" font-size="15" font-weight="700" font-style="italic" fill="#51cea7" opacity=".07">GCS</text>' +
+          '<text x="33" y="46" font-size="15" font-weight="700" font-style="italic" fill="#7777c9" opacity=".07">GCS</text>' +
+        '</pattern>' +
+        '<pattern id="pmtree" width="15" height="15" patternUnits="userSpaceOnUse">' +
+          '<circle cx="7.5" cy="7.5" r="6" fill="#51cea7" opacity=".16"/></pattern>' +
+      '</defs>' +
+
+      /* near-black base with a wicket-teal wash for the field, GCS monogram over the top */
+      '<rect x="0" y="0" width="372" height="566" rx="14" fill="#161615"/>' +
+      '<rect x="0" y="0" width="372" height="566" rx="14" fill="rgba(81,206,167,.07)"/>' +
+      '<rect x="0" y="0" width="372" height="566" rx="14" fill="url(#pmgcs)"/>' +
+      '<rect x="0.75" y="0.75" width="370.5" height="564.5" rx="13" fill="none" stroke="rgba(81,206,167,.28)" stroke-width="1.5"/>' +
+
+      /* Kilburn Road down the west side */
+      '<rect x="0" y="0" width="26" height="566" fill="#0e0e0d"/>' +
+      '<line x1="13" y1="10" x2="13" y2="556" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-dasharray="12 12"/>' +
+      '<text x="13" y="300" fill="rgba(255,255,255,.8)" font-size="12" font-weight="700" ' +
+        'text-anchor="middle" transform="rotate(-90 13 300)">KILBURN ROAD</text>' +
+
+      /* tree lines */
+      '<rect x="330" y="60" width="42" height="330" fill="url(#pmtree)"/>' +
+      '<rect x="30" y="524" width="240" height="42" fill="url(#pmtree)"/>' +
+
+      /* practice nets in ocean purple */
+      '<rect x="252" y="24" width="96" height="60" rx="6" fill="rgba(119,119,201,.16)" stroke="rgba(119,119,201,.6)" stroke-width="1.5"/>' +
+      '<g stroke="rgba(119,119,201,.5)" stroke-width="1.5">' +
+        '<line x1="272" y1="28" x2="272" y2="80"/><line x1="290" y1="28" x2="290" y2="80"/>' +
+        '<line x1="308" y1="28" x2="308" y2="80"/><line x1="326" y1="28" x2="326" y2="80"/></g>' +
+      '<text x="300" y="100" text-anchor="middle" fill="#9a9ad6" font-size="11" font-weight="700">PRACTICE NETS</text>' +
+
+      out +
+
+      /* pavilion, set on the same diagonal as the building on the aerial view */
+      '<g transform="rotate(-24 84 326)">' +
+        '<rect x="38" y="302" width="92" height="48" rx="6" fill="#7777c9"/>' +
+        '<path d="M38 302 L84 284 L130 302 Z" fill="#9a9ad6"/>' +
+        '<line x1="84" y1="284" x2="84" y2="302" stroke="rgba(22,22,21,.35)" stroke-width="1.5"/>' +
+        '<rect x="52" y="316" width="64" height="3" rx="1.5" fill="rgba(22,22,21,.3)"/>' +
+      '</g>' +
+      '<text x="150" y="322" fill="#ffffff" font-size="12" font-weight="700">PAVILION</text>' +
+      '<text x="150" y="337" fill="rgba(255,255,255,.7)" font-size="9.5">Check-in &amp; first aid</text>' +
+
+      '</svg>';
+  }
+
+  function openPitchMap(pitch){
+    showOnly('s-pitchmap');
+    var n = pitchNum(pitch);
+    document.getElementById('appTitle').textContent='Pitch map';
+    document.getElementById('appSub').textContent = n ? ('Pitch '+n+' \u00b7 Doncaster Close') : 'Doncaster Close, Oakham School';
+    document.getElementById('pitchMapBody').innerHTML =
+      (n ? '<div class="pmnow"><span class="n">'+esc(n)+'</span><div><b>You\u2019re on Pitch '+esc(n)+'</b>'+
+           '<span>Highlighted below. All four pitches are on the same field.</span></div></div>' : '')+
+      '<div class="pmwrap">'+pitchMapSVG(n)+'</div>'+
+      '<div class="pmkey">'+
+        '<div><span class="sw pav"></span> Pavilion \u2014 check-in, first aid, team meetings</div>'+
+        '<div><span class="sw net"></span> Practice nets</div>'+
+      '</div>'+
+      '<div class="chintro"><b>Finding your pitch</b><p>The pavilion sits at the Kilburn Road end. Pitch 1 is the far one to the south, 3 and 4 run up the Kilburn Road side, and 2 sits over towards the trees. Every fixture on your schedule tells you which pitch you\u2019re on.</p></div>'+
+      '<button class="cta chcta" onclick="openGroundMap()"><i class="ti ti-map-pin"></i> Open in maps</button>';
+  }
+  function openGroundMap(){
+    var q=encodeURIComponent('Doncaster Close Playing Fields, Oakham School, Oakham LE15 6QL');
+    window.open('https://www.google.com/maps/search/?api=1&query='+q,'_blank','noopener');
+  }
 
   function bootstrap(){
     getJSON('').then(function(r){if(!r.ok)throw new Error('no data');return r.json();})
