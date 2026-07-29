@@ -623,6 +623,10 @@
   .chcopy{margin-top:8px;width:100%;background:rgba(119,119,201,.2);color:#9a9ad6;border:1px solid rgba(119,119,201,.4);
     border-radius:10px;padding:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
   .chcta{width:100%;justify-content:center;box-sizing:border-box;margin-top:14px}
+  .chfollow{display:inline-flex;align-items:center;gap:7px;margin-top:11px;text-decoration:none;
+    background:rgba(255,124,26,.18);color:#ff9d52;border:1px solid rgba(255,124,26,.45);
+    border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700}
+  .chfollow i{font-size:17px}
   .chdone{margin-top:14px}
   .chnote{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
   .chchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;flex:0 0 auto}
@@ -651,6 +655,13 @@
   .chinput{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--surface-line);color:#fff;
     border-radius:11px;padding:12px 13px;font:inherit;font-size:15px}
   .chinput:focus{outline:none;border-color:rgba(255,124,26,.6)}
+  /* Desktop browsers render the native dropdown list with system colours, which put
+     white text on a white background on Windows. Setting both on the options fixes it. */
+  select.chinput{color:#fff;background-color:#1c1c1a;-webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9a96' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:38px}
+  select.chinput option{background-color:#1c1c1a;color:#ffffff}
+  select.chinput option:checked,select.chinput option:hover{background-color:#ff7c1a;color:#ffffff}
   .chhint{font-size:11px;color:var(--faint);margin:6px 2px 0;line-height:1.5}
   .chupload{width:100%;background:rgba(81,206,167,.14);color:#7bdcc0;border:1px dashed rgba(81,206,167,.5);border-radius:11px;
     padding:16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -778,7 +789,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29db · challenge-terms</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dc · more-restructure</div>
     </section>
 
     <!-- TODAY -->
@@ -834,23 +845,7 @@
         <div><b>Get help now</b><span>One tap &rarr; local emergency, tour manager &amp; coaches</span></div>
       </div>
 
-      <div class="moresec sec-teal">
-      <div class="msectitle">Help &amp; people</div>
-      <div class="grid">
-        <div class="tile acc-red" onclick="openSOS()"><span class="tbadge"><i class="ti ti-phone-call"></i></span><div>Emergency contacts</div></div>
-        <div class="tile acc-teal" onclick="openStaff()"><span class="tbadge"><i class="ti ti-user-star"></i></span><div>Staff &amp; coaches</div></div>
-        <div class="tile acc-purple" onclick="openHandover()"><span class="tbadge"><i class="ti ti-heart-handshake"></i></span><div>Handover of Care</div></div>
-        <div class="tile acc-orange" onclick="openHowTo()"><span class="tbadge"><i class="ti ti-help-circle"></i></span><div>How to use</div></div>
-        <div class="tile acc-purple" id="scoringTile" style="display:none" onclick="openScoring()"><span class="tbadge"><i class="ti ti-list-numbers"></i></span><div>Scoring app guide</div></div>
-        <div class="tile acc-teal" onclick="openFeedback()"><span class="tbadge"><i class="ti ti-message-2-heart"></i></span><div>Send feedback</div></div>
-        <div class="tile acc-orange pulse" onclick="openSocials()"><span class="tbadge"><i class="ti ti-brand-instagram"></i></span><div>Follow the tour</div></div>
-        <div class="tile acc-orange" id="squadTile" style="display:none" onclick="openRoster()"><span class="tbadge"><i class="ti ti-clipboard-list"></i></span><div>Squad list</div></div>
-        <div class="tile acc-purple" id="voteTile" style="display:none" onclick="openVoteResults()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>Players&rsquo; Player<span id="voteTileSub" style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px"></span></div></div>
-        <div class="tile acc-teal" id="mealTile" style="display:none" onclick="openMealOrders()"><span class="tbadge"><i class="ti ti-tools-kitchen-2"></i></span><div>Meal pre-orders</div></div>
-        <div class="tile acc-purple" id="myXPTile" style="display:none" onclick="openMyXP()"><span class="tbadge"><i class="ti ti-trophy"></i></span><div>My GCS XP</div></div>
-        <div class="tile acc-orange" id="alertTile" style="display:none" onclick="openSendAlert()"><span class="tbadge"><i class="ti ti-send"></i></span><div>Send alert</div></div>
-      </div>
-      </div>
+      <div id="moreHelp"></div>
 
       <div id="moreDynamic"></div>
       <div style="height:8px"></div>
@@ -1483,17 +1478,11 @@
     document.getElementById('moreSquad').textContent= isAdmin ? 'GCS Admin' : (sq + (isStaff? (currentPlayer?' · '+currentPlayer+' (Staff)':' · Staff') : (role==='supporter'?' · Supporter':(currentPlayer?' · '+currentPlayer:''))));
     var _sw=document.getElementById('switchTeamBtn'), _lo=document.getElementById('logoutBtn'); if(_sw) _sw.style.display='none'; if(_lo) _lo.style.display='';   // Log out available to everyone: players and coaches need it to hand a phone over or fix a wrong team pick
     var crest=document.getElementById('hubCrest'); if(crest){ var lg=(TEAMLOGOS||{})[sq]||SETTINGS.badge; if(lg) crest.src=lg; }
-    var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display=isStaff?'':'none';
     /* Scoring app guide: tournament staff / GCS admin only. Players, supporters and team
        coaches never score a match, so the tile is noise on their More screen. */
-    var scTile=document.getElementById('scoringTile'); if(scTile) scTile.style.display=isAdmin?'':'none';
     chTiles();
-    ['voteTile','alertTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display=isStaff?'':'none'; });
-    var mt=document.getElementById('mealTile'); if(mt) mt.style.display=(isStaff && MEALS && MEALS.length)?'':'none';
-    var rt=document.getElementById('rulesTile'); if(rt) rt.style.display=hasVal(SETTINGS.rulesUrl)?'':'none';
     var ani=document.getElementById('alertNavIcon'); if(ani) ani.className='ti ti-bell';
     var anb=document.getElementById('alertNavBtn'); if(anb) anb.setAttribute('aria-label', isStaff?'Send an alert':'Alerts');
-    var ht=document.getElementById('hotelTile'); if(ht){ ht.style.display=hasHotel()?'':'none'; }
     var sw=document.getElementById('switchTeamBtn'); if(sw) sw.style.display='none';   // replaced by the live team-filter dropdown for staff
     var tf=document.getElementById('teamFilter');
     if(tf){ if(isAdmin){ var _o='<option value=\"__all__\">All teams</option>'; (TEAMS_LIST||[]).forEach(function(t){ _o+='<option value=\"'+String(t).replace(/\"/g,'&quot;')+'\">'+t+'</option>'; }); tf.innerHTML=_o; tf.value=viewAll?'__all__':currentSquad; tf.style.display=''; } else { tf.style.display='none'; } }
@@ -1508,8 +1497,6 @@
   }
   function switchSquad(){
     isStaff=false; staffPending=false; isAdmin=false; _adminPending=false; currentPlayer=''; role='player'; pendingRole='player'; officialKind=''; officialName=''; _loginTracked=false; viewAll=false; clearPlayer(); clearSession();
-    var sqTile=document.getElementById('squadTile'); if(sqTile) sqTile.style.display='none';
-    ['voteTile','mealTile','alertTile','rulesTile','scoringTile','myXPTile'].forEach(function(id){ var t=document.getElementById(id); if(t) t.style.display='none'; });
     document.querySelector('.phone').classList.add('locked');
     document.querySelector('.phone').classList.remove('officials');
     showOnly('s-signin');
@@ -2363,8 +2350,29 @@
     document.getElementById('detailBody').innerHTML=h;
   }
   function _depReRender(team){ var sc=document.querySelector('.screens'); var y=sc?sc.scrollTop:0; renderDepTeam(team); if(sc) sc.scrollTop=y; }
+  /* Sections are capped at six tiles. Anything longer is split into "(cont.)"
+     blocks so no heading ever carries a wall of tiles, and a section with nothing
+     under it produces no markup at all rather than an empty heading. */
+  var TILES_PER_SECTION = 6;
+  function tileSection(title, accent, tiles){
+    tiles = (tiles||[]).filter(Boolean);
+    if(!tiles.length) return '';
+    var out='';
+    for(var i=0;i<tiles.length;i+=TILES_PER_SECTION){
+      var chunk=tiles.slice(i,i+TILES_PER_SECTION);
+      out+='<div class="moresec '+accent+'"><div class="msectitle">'+
+           esc(title)+(i?' <span style="font-weight:400;color:var(--muted);font-style:normal">(cont.)</span>':'')+
+           '</div><div class="grid">'+chunk.join('')+'</div></div>';
+    }
+    return out;
+  }
+  function tile(cls,onclick,icon,label,sub,extra){
+    return '<div class="tile '+cls+'" onclick="'+onclick+'"'+(extra||'')+'>'+
+      '<span class="tbadge"><i class="ti '+icon+'"></i></span><div>'+label+
+      (sub?'<span style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px">'+sub+'</span>':'')+
+      '</div></div>';
+  }
   function renderMore(){
-    var vts=document.getElementById('voteTileSub'); if(vts) vts.textContent = (isStaff && votingNotOpenYet()) ? ('Opens in '+voteCountdown()) : '';
     var hostEl=document.getElementById('moreDynamic'); if(!hostEl)return;
     var groups=[], idx={};
     (MORECONTENT||[]).forEach(function(r){ var t=moreTileMerge(r.tile||'Info');
@@ -2377,33 +2385,49 @@
     // 1) Players' Player entry — always reachable here (opens to vote, or shows open/closed state)
     var vc=voteMoreCard(); h+=vc;
     h+=challengeMoreCard();
+
+    /* --- Help & people --- */
+    var help=[];
+    help.push(tile('acc-red','openSOS()','ti-phone-call','Emergency contacts'));
+    help.push(tile('acc-teal','openStaff()','ti-user-star','Staff &amp; coaches'));
+    help.push(tile('acc-orange','openHowTo()','ti-help-circle','How to use'));
+    if(isStaff) help.push(tile('acc-orange','openRoster()','ti-clipboard-list','Squad list'));
+    if(isAdmin) help.push(tile('acc-purple','openScoring()','ti-list-numbers','Scoring app guide'));
+    if(isStaff) help.push(tile('acc-purple','openVoteResults()','ti-trophy','Players&rsquo; Player',_voteTileSub()));
+    if(isStaff && MEALS && MEALS.length) help.push(tile('acc-teal','openMealOrders()','ti-tools-kitchen-2','Meal pre-orders'));
+    if(isStaff) help.push(tile('acc-orange','openSendAlert()','ti-send','Send alert'));
+    help.push(tile('acc-teal','openFeedback()','ti-message-2-heart','Send feedback'));
+    help.push(tile('acc-orange pulse','openSocials()','ti-brand-instagram','Follow the tour'));
+    var _hh=document.getElementById('moreHelp');
+    if(_hh) _hh.innerHTML=tileSection('Help & people','sec-teal',help);
     // 2) Tour info: spreadsheet tiles + Hotel + FAQ (everyone) + Flights (everyone) + Excursions (staff & supporters)
     var showExc=(isStaff||isSupporter()) && excursionsList().length;
     var showFlights=hasFlights() && flightsForMe();
     var showHotel=hasHotel();
-    h+='<div class="moresec sec-orange"><div class="msectitle">Tour info</div><div class="grid">';
+    var info=[];
     infoIdx.forEach(function(i,n){ var g=groups[i]; var acc=TILE_ACCENTS[n%TILE_ACCENTS.length];
-      h+='<div class="tile '+acc+'" onclick="openMore('+i+')" style="position:relative'+(g.highlight?';border-color:rgba(255,124,26,.6)':'')+'">'+
+      info.push('<div class="tile '+acc+'" onclick="openMore('+i+')" style="position:relative'+(g.highlight?';border-color:rgba(255,124,26,.6)':'')+'">'+
          (g.highlight?'<span style="position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--orange)"></span>':'')+
-         '<span class="tbadge"><i class="ti '+moreIcon(g.icon)+'"></i></span><div>'+esc(g.tile)+'</div></div>';
+         '<span class="tbadge"><i class="ti '+moreIcon(g.icon)+'"></i></span><div>'+esc(g.tile)+'</div></div>');
     });
-    if(showHotel) h+='<div class="tile acc-teal" onclick="openHotelMap()"><span class="tbadge"><i class="ti ti-building"></i></span><div>'+(isDomestic()&&!isSupporter()?'Where we stay &middot; Map':'Hotel &middot; Map')+'</div></div>';
-    h+='<div class="tile acc-purple" onclick="openFAQ()"><span class="tbadge"><i class="ti ti-messages"></i></span><div>FAQ</div></div>';
-    if(showFlights) h+='<div class="tile acc-orange" onclick="openFlights()"><span class="tbadge"><i class="ti ti-plane"></i></span><div>Flights</div></div>';
+    if(showHotel) info.push(tile('acc-teal','openHotelMap()','ti-building',(isDomestic()&&!isSupporter()?'Where we stay &middot; Map':'Hotel &middot; Map')));
+    info.push(tile('acc-purple','openHandover()','ti-heart-handshake','Handover of Care'));
+    info.push(tile('acc-purple','openFAQ()','ti-messages','FAQ'));
+    if(showFlights) info.push(tile('acc-orange','openFlights()','ti-plane','Flights'));
     var _depMe = isAdmin ? (Object.keys(DEPARTURES||{}).length>0) : (isStaff && DEPARTURES && DEPARTURES[currentSquad] && DEPARTURES[currentSquad].length>0);
-    if(_depMe) h+='<div class="tile acc-purple" onclick="openDepartures()"><span class="tbadge"><i class="ti ti-plane-departure"></i></span><div>Airport departures</div></div>';
-    if(showExc) h+='<div class="tile acc-teal" onclick="openExcursions()"><span class="tbadge"><i class="ti ti-map-2"></i></span><div>Excursions &amp; car hire</div></div>';
-    if(RESTAURANTS&&RESTAURANTS.length) h+='<div class="tile acc-teal" onclick="openRestaurants()"><span class="tbadge"><i class="ti ti-chef-hat"></i></span><div>Eating out</div></div>';
-    h+='</div></div>';
+    if(_depMe) info.push(tile('acc-purple','openDepartures()','ti-plane-departure','Airport departures'));
+    if(showExc) info.push(tile('acc-teal','openExcursions()','ti-map-2','Excursions &amp; car hire'));
+    if(RESTAURANTS&&RESTAURANTS.length) info.push(tile('acc-teal','openRestaurants()','ti-chef-hat','Eating out'));
+    h+=tileSection('Tour info','sec-orange',info);
     // Before-you-go essentials (Wise / eSIM / Behaviour contract)
-    h+='<div class="moresec sec-purple"><div class="msectitle">Before you go</div><div class="grid">';
+    var pre=[];
     if(!isDomestic()){
-      h+='<div class="tile acc-teal" onclick="openTravelMoney()"><span class="tbadge"><i class="ti ti-credit-card"></i></span><div>Travel money</div></div>';
-      h+='<div class="tile acc-orange" onclick="openEsim()"><span class="tbadge"><i class="ti ti-device-mobile"></i></span><div>Mobile data</div></div>';
+      pre.push(tile('acc-teal','openTravelMoney()','ti-credit-card','Travel money'));
+      pre.push(tile('acc-orange','openEsim()','ti-device-mobile','Mobile data'));
     }
-    if(hasPaperwork()) h+='<div class="tile acc-teal" onclick="openPaperwork()"><span class="tbadge"><i class="ti ti-files"></i></span><div>Paperwork</div></div>';
-    if(showShop()) h+='<div class="tile acc-purple" onclick="openShop()"><span class="tbadge"><i class="ti ti-shopping-bag"></i></span><div>Shop &middot; kit &amp; merch</div></div>';
-    h+='</div></div>';
+    if(hasPaperwork()) pre.push(tile('acc-teal','openPaperwork()','ti-files','Paperwork'));
+    if(showShop()) pre.push(tile('acc-purple','openShop()','ti-shopping-bag','Shop &middot; kit &amp; merch'));
+    h+=tileSection('Before you go','sec-purple',pre);
     // 3) + 4) Pre-order menus and the Packing list. Before the tour starts the packing
     // list is the priority (menus below it); once the tour is under way, menus come first.
     var mealsHTML=mealsSectionHTML();
@@ -2497,6 +2521,21 @@
       .map(function(p){ return '<div style="font-size:14px;line-height:1.6;margin:0 2px 11px;'+(hot||'color:var(--muted)')+'">'+linkify(p)+'</div>'; }).join('');
   }
   function isPackingTile(name){ return /pack|checklist|kit list|things to (bring|pack)/i.test(name||''); }
+  /* True when a More-content tile talks about live scoring or streaming. */
+  function mentionsScoring(g){
+    var hay=((g&&g.tile)||'')+' '+(((g&&g.rows)||[]).map(function(r){ return (r.heading||'')+' '+(r.text||''); }).join(' '));
+    return /live scor|live-scor|livestream|live stream|streamed|streaming|scorecard/i.test(hay);
+  }
+  function gcsAppBox(){
+    return '<div class="travelbox" style="margin-top:10px"><div class="th"><i class="ti ti-device-mobile"></i> Global Cricket Series app</div>'+
+      '<div style="font-size:13.5px;line-height:1.6;color:var(--muted);padding:2px 2px 12px">'+
+        'Every game is live scored and streamed here \u2014 scores ball by ball, full scorecards, player stats and wagon wheels. Free on both stores.</div>'+
+      '<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box" onclick="openGCS()"><i class="ti ti-download"></i> Get the GCS app</button>'+
+      '<div class="stores" style="margin-top:10px">'+
+        '<a href="https://apps.apple.com/us/app/global-cricket-series/id6759386148" target="_blank" rel="noopener"><i class="ti ti-brand-apple"></i> App Store</a>'+
+        '<a href="https://play.google.com/store/apps/details?id=com.cricheroes.gcs&hl=en_GB" target="_blank" rel="noopener"><i class="ti ti-brand-google-play"></i> Google Play</a>'+
+      '</div></div>';
+  }
   function isTravelTile(name){ return /(before you travel|passport|visa|travel doc|documentation|getting there)/i.test(name||''); }
   function isWeatherTile(name){ return /forecast/i.test(name||'') || String(name||'').trim().toLowerCase()==='weather'; }
 
@@ -2531,6 +2570,9 @@
     if(isWeatherTile(g.tile)){ openWeather(); return; }   // route the hub "Weather" box to the live forecast
     var h='';
     if(isTravelTile(g.tile) && !isDomestic()) h+=travelGuidance(SETTINGS.country);
+    /* Anything about live scoring or streaming gets the app itself attached, rather
+       than telling people it's streamed and leaving them to find it. */
+    if(mentionsScoring(g)) h+=gcsAppBox();
     g.rows.forEach(function(r){
       if(r.heading) h+='<div class="eyebrow" style="margin-top:14px">'+esc(r.heading)+'</div>';
       if(r.text){ var hot=r.highlight?'background:rgba(255,124,26,.12);border:1px solid rgba(255,124,26,.45);border-radius:12px;padding:11px 13px;color:#ffce9e;':'color:var(--muted);';
@@ -2766,6 +2808,11 @@
     var sub = done ? 'Your votes are submitted \u2713' : (picked? picked+' of '+VOTE_SQUADS.length+' squads chosen' : 'Vote for the standout player in each squad');
     return '<div class="votecard'+(done?' done':'')+'" onclick="openVote()"><span class="vcicon"><i class="ti ti-trophy"></i></span>'+
       '<div class="vcbody"><b>Players\u2019 Player</b><span>'+sub+'</span></div><i class="ti ti-chevron-right vcarr"></i></div>';
+  }
+  /* Subtitle for the Players' Player tile, previously written into a fixed span. */
+  function _voteTileSub(){
+    try{ return (isStaff && votingNotOpenYet()) ? ('Opens in '+voteCountdown()) : ''; }
+    catch(e){ return ''; }
   }
   function voteMoreCard(){   // always-available entry on the More page (for access + testing)
     if(isStaff || isSupporter()) return '';
@@ -4277,6 +4324,19 @@
     for(var i=0;i<CHALLENGES.length;i++) if(CHALLENGES[i].id===id) return CHALLENGES[i];
     return null;
   }
+  /* Challenge copy sometimes carries a raw Instagram URL. A 40-character link is
+     unreadable on a phone, so it is stripped from the text and offered as a button. */
+  var URL_RE=/\(?\bhttps?:\/\/[^\s)]+\)?/g;
+  function chDesc(c){ return String((c&&c.description)||'').replace(URL_RE,'').replace(/\s{2,}/g,' ').replace(/\s+([.,!?])/g,'$1').trim(); }
+  function chLinkIn(c){ var m=String((c&&c.description)||'').match(/https?:\/\/[^\s)]+/); return m?m[0].replace(/[).,]+$/,''):''; }
+  function chFollowBtn(c){
+    var url=chLinkIn(c);
+    if(!url) return '';
+    var insta=/instagram\.com/i.test(url);
+    return '<a class="chfollow" href="'+attr(url)+'" target="_blank" rel="noopener">'+
+      '<i class="ti '+(insta?'ti-brand-instagram':'ti-external-link')+'"></i> '+
+      (insta?('Follow @'+esc(igHandle())):'Open the link')+'</a>';
+  }
   function chXP(c){ var n=parseInt(c&&c.xp,10); return isNaN(n)?25:n; }
   function chOpensAt(c){ return (c&&c.opens)?c.opens:'09:00'; }
   function chEarlyXP(c){ var n=parseInt(c&&c.earlyXp,10); return isNaN(n)?10:n; }
@@ -4550,7 +4610,7 @@
                '</div>'+
                '<div class="xpbadge"><span class="n">'+chXP(x)+'</span><span class="l">XP</span></div>'+
              '</div>'+
-             (x.description?'<div class="chdesc">'+esc(x.description)+'</div>':'')+
+             (chDesc(x)?'<div class="chdesc">'+esc(chDesc(x))+'</div>':'')+chFollowBtn(x)+
              '<div class="chrow"><span class="chpill"><i class="ti ti-clock-hour-4"></i> '+(open?'Closes end of day 1':esc(chClosedReason(x)||'Closed'))+'</span></div>'+
              (!sub&&open&&!firstFinisher(x.id)?'<div class="chfirst"><i class="ti ti-flag-2"></i><div><b>Nobody has done this one yet</b><span>First one in takes the Trailblazer badge.</span></div></div>':'')+
              (x.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText'+esc(x.id)+'">'+esc(x.caption)+'</div>'+
@@ -4585,7 +4645,7 @@
              '<div class="xpbadge big"><span class="n">'+chXP(c)+'</span><span class="l">XP</span>'+
                (chEarlyXP(c)?'<span class="plus">+'+chEarlyXP(c)+' early</span>':'')+'</div>'+
            '</div>'+
-           (c.description?'<div class="chdesc">'+esc(c.description)+'</div>':'')+
+           (chDesc(c)?'<div class="chdesc">'+esc(chDesc(c))+'</div>':'')+chFollowBtn(c)+
            '<div class="chrow">'+
              (chInEarly(c)?'<span class="chpill early"><i class="ti ti-clock-bolt"></i> Early bird live \u00b7 '+esc(chEarlyLeft(c))+' left</span>':'')+
              (c.closes?'<span class="chpill"><i class="ti ti-clock-hour-4"></i> Closes '+esc(c.closes)+'</span>':'')+
@@ -4620,7 +4680,7 @@
                '</div>'+
                '<div class="xpbadge"><span class="n">'+chXP(x)+'</span><span class="l">XP</span></div>'+
              '</div>'+
-             (x.description?'<div class="chdesc">'+esc(x.description)+'</div>':'')+
+             (chDesc(x)?'<div class="chdesc">'+esc(chDesc(x))+'</div>':'')+chFollowBtn(x)+
              '<div class="chrow"><span class="chpill"><i class="ti ti-calendar"></i> Closes end of day '+lastTourDay()+'</span></div>'+
              (sub
                ? '<div class="chdone">'+chStatusChip(sub)+(sub.status==='rejected'&&sub.note?'<div class="chnote">'+esc(sub.note)+'</div>':'')+
@@ -4654,6 +4714,36 @@
              (sub&&sub.status==='approved'?'<i class="ti ti-circle-check" style="color:#51cea7;font-size:20px"></i>':'')+
            '</div>';
       });
+    }
+
+    /* --- badges, history and leaderboards: all in one place now, so there is no
+           separate "My GCS XP" screen to go looking for --- */
+    if(chCanPlay()){
+      var badges=badgeState(me), got=badges.filter(function(b){return !b.locked;}).length;
+      h+='<div class="eyebrow" style="margin-top:18px">Badges <span style="color:var(--faint);font-weight:400">'+got+' of '+badges.length+'</span></div>';
+      h+='<div class="badgewrap">';
+      badges.forEach(function(b){
+        var prog = b.goal<=0 ? 'Not available yet'
+                 : b.locked  ? (b.have>0 ? (b.have+' / '+b.goal+(b.unit?' '+b.unit:'')) : 'Locked')
+                 : 'Earned';
+        h+='<div class="badge'+(b.locked?' locked':'')+'"><i class="ti '+b.i+'"></i><b>'+esc(b.t)+'</b>'+
+           '<span>'+esc(b.d)+'</span><em class="'+(b.locked?'':'won')+'">'+(b.locked?'':'<i class="ti ti-check"></i> ')+esc(prog)+'</em></div>';
+      });
+      h+='</div>';
+
+      var mine=mySubs();
+      if(mine.length){
+        h+='<div class="eyebrow" style="margin-top:16px">Your XP history</div>';
+        mine.forEach(function(x){
+          var cc=challengeById(x.challenge_id);
+          h+='<div class="xprow"><div class="ic '+(x.status==='approved'?'ok':x.status==='rejected'?'no':'wait')+'">'+
+               '<i class="ti '+(x.status==='approved'?'ti-bolt':x.status==='rejected'?'ti-circle-x':'ti-hourglass-low')+'"></i></div>'+
+             '<div style="flex:1;min-width:0"><b>'+esc((cc&&cc.title)||x.challenge_id)+'</b>'+
+               '<span>'+platLabel(x.platform)+' &middot; '+chWhen(x.submitted_at)+(x.featured?' &middot; featured by GCS':'')+'</span>'+
+               (x.status==='rejected'&&x.note?'<span class="rej">'+esc(x.note)+'</span>':'')+'</div>'+
+             '<div class="amt '+(x.status==='approved'?'ok':'')+'">'+(x.status==='approved'?'+'+(parseInt(x.xp_awarded,10)||0):(x.status==='rejected'?'\u2014':'\u2026'))+'</div></div>';
+        });
+      }
     }
 
     /* --- leaderboards --- */
@@ -4935,7 +5025,8 @@
   }
 
   /* ======================= PLAYER: My GCS XP ============================== */
-  function openMyXP(){
+  function openMyXP(){ openChallenge(); }        // merged into the challenge screen
+  function openMyXP_legacy(){
     if(!chCanPlay()){ toast('Sign in as a player to see your XP'); return; }
     showOnly('s-myxp');
     document.getElementById('appTitle').textContent='My GCS XP';
@@ -5234,13 +5325,8 @@
       '<i class="ti ti-chevron-right cbarr"></i></div>';
   }
   function chTiles(){
-    var on = CHALLENGES.length>0;
-    var t2=document.getElementById('myXPTile');
-    /* Players see it whenever there are challenges. Tournament staff ALWAYS see the
-       approvals tile, even with nothing published, so an empty Challenges tab shows up
-       as a message on the screen rather than the feature vanishing without explanation. */
-    if(t2) t2.style.display=(on && role==='player')?'':'none';
-    /* Once only: chTiles() runs from renderMore(), so re-rendering unconditionally here
+    /* My GCS XP is no longer a tile of its own \u2014 badges, history and leaderboards
+       all live on the challenge screen the bar opens. Once only: chTiles() runs from renderMore(), so re-rendering unconditionally here
        would loop forever. _subsFetched is set by fetchSubs, which stops the second pass. */
     if((chCanPlay()||isAdmin) && !_subsFetched) fetchSubs(function(){
       renderMore();
