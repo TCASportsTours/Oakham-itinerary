@@ -636,6 +636,8 @@
     border:1px solid rgba(255,124,26,.42);border-radius:13px;padding:12px 13px}
   .pmnow .n{width:42px;height:42px;border-radius:11px;background:rgba(255,124,26,.25);color:#ff9d52;
     display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;font-style:italic;flex:0 0 auto}
+  .pmnow.tight{padding:9px 11px;margin-top:8px}
+  .pmnow.tight .n{width:34px;height:34px;font-size:18px;border-radius:9px}
   .pmnow b{display:block;font-size:15px;color:#ff9d52}
   .pmnow span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
   .pmkey{margin-top:12px}
@@ -806,7 +808,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dl · pitch-map-inline</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dn · vote-3-2-1</div>
     </section>
 
     <!-- TODAY -->
@@ -2895,10 +2897,30 @@
         (closed?'Voting has closed — results are with the staff.':(soon?('Players\u2019 Player voting opens in '+voteCountdown()+'. Check back then!'):'Voting opens on the last day of games. Check back then!'))+'</div>';
       return;
     }
-    document.getElementById('appSub').textContent='Vote — one per squad'; renderVote();
+    document.getElementById('appSub').textContent='Vote — your top three'; renderVote();
   }
+  /* Players' Player runs on a ranked top three: 1st = 3 points, 2nd = 2, 3rd = 1,
+     summed across every ballot. Stored as an ordered list of "Team|Player" keys, so
+     position carries the points and nothing needs recalculating on read. */
+  var VOTE_PTS=[3,2,1];
+  function ballotPicks(){ return (_ballot && Array.isArray(_ballot.picks)) ? _ballot.picks : []; }
+  function pickKey(team,player){ return team+'|'+player; }
+  function pickParts(k){ var i=String(k||'').indexOf('|'); return i<0?{team:'',player:''}:{team:k.slice(0,i),player:k.slice(i+1)}; }
+  function pickRank(k){ return ballotPicks().indexOf(k); }          // -1 = not chosen
   function ballotKey(){ return 'gcs_ballot_'+(SETTINGS.tourName||'tour')+pSuffix(); }
-  function loadBallot(){ try{_ballot=JSON.parse(localStorage.getItem(ballotKey())||'{}')||{};}catch(e){_ballot={};} }
+  function loadBallot(){
+    try{ _ballot=JSON.parse(localStorage.getItem(ballotKey())||'{}')||{}; }catch(e){ _ballot={}; }
+    /* Anything saved before the switch to a ranked top three is a different shape.
+       Convert it rather than showing an empty ballot: each old pick becomes a rank. */
+    if(!Array.isArray(_ballot.picks)){
+      var conv=[];
+      Object.keys(_ballot).forEach(function(t){
+        var p=_ballot[t];
+        if(typeof p==='string' && p.trim() && conv.length<3) conv.push(pickKey(t,p));
+      });
+      _ballot={picks:conv};
+    }
+  }
   function saveBallot(){ try{localStorage.setItem(ballotKey(),JSON.stringify(_ballot));}catch(e){} }
   function voteDoneKey(){ return 'gcs_ballotdone_'+(SETTINGS.tourName||'tour')+pSuffix(); }
   function voteConfKey(){ return 'gcs_ballotconf_'+(SETTINGS.tourName||'tour')+pSuffix(); }
@@ -2907,28 +2929,61 @@
   function markVoteSubmitted(){ try{localStorage.setItem(voteDoneKey(),'1');}catch(e){} }
   function markVoteConfirmed(){ try{localStorage.setItem(voteConfKey(),'1');}catch(e){} }
   function renderVote(){
-    var picked=VOTE_SQUADS.filter(function(s){return _ballot[s.team];}).length;
-    var h='<div class="eyebrow" style="margin-top:8px">Pick the standout player in each squad</div>'+
-      '<div class="cicount"><b>'+picked+'</b> / '+VOTE_SQUADS.length+' squads chosen</div>';
+    var picks=ballotPicks();
+    var h='<div class="eyebrow" style="margin-top:8px">Your top three of the tournament</div>'+
+      '<div style="font-size:13px;color:var(--muted);line-height:1.6;margin:0 2px 10px">'+
+        'Tap three players from any squad. Your first pick is worth <b>3 points</b>, second <b>2</b>, third <b>1</b>. '+
+        'Points from every ballot are added up to find the Players\u2019 Player.</div>';
+
+    h+='<div class="vslots">';
+    for(var i=0;i<3;i++){
+      var k=picks[i], p=k?pickParts(k):null;
+      h+='<div class="vslot'+(p?' filled':'')+'"'+(p?' onclick="clearPick('+i+')"':'')+'>'+
+           '<span class="vpts">'+VOTE_PTS[i]+'<i>pts</i></span>'+
+           (p?'<div class="vwho"><b>'+esc(p.player)+'</b><span>'+esc(p.team)+'</span></div><i class="ti ti-x vdrop"></i>'
+             :'<div class="vwho empty">'+(i===0?'1st pick':i===1?'2nd pick':'3rd pick')+'</div>')+
+         '</div>';
+    }
+    h+='</div>';
+
     VOTE_SQUADS.forEach(function(s,si){
       h+='<div class="votegrp"><div class="vgh">'+esc(s.team)+'</div>';
       s.players.forEach(function(p,pi){
-        var on=_ballot[s.team]===p;
-        h+='<div class="voteopt'+(on?' on':'')+'" onclick="pickVote('+si+','+pi+')"><span class="vradio"><i class="ti ti-check"></i></span><span class="vname">'+esc(p)+'</span></div>';
+        var r=pickRank(pickKey(s.team,p)), on=r>=0;
+        h+='<div class="voteopt'+(on?' on':'')+'" onclick="pickVote('+si+','+pi+')">'+
+             '<span class="vradio'+(on?' rk':'')+'">'+(on?String(VOTE_PTS[r]):'<i class="ti ti-check"></i>')+'</span>'+
+             '<span class="vname">'+esc(p)+'</span>'+
+             (on?'<span class="vtag">'+(r===0?'1st':r===1?'2nd':'3rd')+'</span>':'')+
+           '</div>';
       });
       h+='</div>';
     });
-    h+='<button class="cibig cibig-go" onclick="submitVote()"><i class="ti ti-send"></i> Submit my votes</button>'+
-       '<div class="readonly" style="justify-content:flex-start"><i class="ti ti-alert-triangle"></i> You can only submit once — your votes are final and can\u2019t be changed afterwards.</div>';
+    h+='<button class="cibig cibig-go" onclick="submitVote()"><i class="ti ti-send"></i> Submit my top three</button>'+
+       '<div class="readonly" style="justify-content:flex-start"><i class="ti ti-alert-triangle"></i> You can only submit once \u2014 your votes are final and can\u2019t be changed afterwards.</div>';
     document.getElementById('detailBody').innerHTML=h;
   }
-  function pickVote(si,pi){ if(voteSubmitted())return; var s=VOTE_SQUADS[si]; if(!s)return; _ballot[s.team]=s.players[pi]; saveBallot(); renderVote(); }
+
+  function pickVote(si,pi){
+    if(voteSubmitted())return;
+    var s=VOTE_SQUADS[si]; if(!s)return;
+    var k=pickKey(s.team, s.players[pi]);
+    var picks=ballotPicks().slice(), at=picks.indexOf(k);
+    if(at>=0) picks.splice(at,1);                 // tap again to drop it, the rest move up
+    else if(picks.length<3) picks.push(k);
+    else { toast('You\u2019ve already picked three \u2014 tap one to swap it out'); return; }
+    _ballot={picks:picks}; saveBallot(); renderVote();
+  }
+  function clearPick(i){
+    if(voteSubmitted())return;
+    var picks=ballotPicks().slice(); picks.splice(i,1);
+    _ballot={picks:picks}; saveBallot(); renderVote();
+  }
   function submitVote(){
-    var picked=VOTE_SQUADS.filter(function(s){return _ballot[s.team];}).length;
+    var picked=ballotPicks().length;
     if(!picked){ toast('Pick at least one player first'); return; }
-    var msg = picked<VOTE_SQUADS.length
-      ? 'You\u2019ve chosen for '+picked+' of '+VOTE_SQUADS.length+' squads. Submit now? Your votes are final \u2014 you can\u2019t change them afterwards.'
-      : 'Submit your votes? They\u2019re final \u2014 you can\u2019t change them afterwards.';
+    var msg = picked<3
+      ? ('You\u2019ve only picked '+picked+' of 3. Submit anyway? Your votes are final \u2014 you can\u2019t change them afterwards.')
+      : 'Submit your top three? They\u2019re final \u2014 you can\u2019t change them afterwards.';
     if(!confirm(msg)) return;
     saveBallot(); markVoteSubmitted();
     renderVoteDone();              // lock the screen immediately
@@ -2939,10 +2994,17 @@
     var h='<div class="ciconfirm"><div class="cichk"><i class="ti ti-circle-check-filled"></i></div>'+
       '<div class="cictext"><b>Votes submitted</b><span>These are final and can\u2019t be changed</span></div></div>'+
       '<div class="votestatus" id="voteStatus"><i class="ti ti-loader-2"></i> Checking your vote reached the staff\u2026</div>';
-    VOTE_SQUADS.forEach(function(s){
-      h+='<div class="votegrp"><div class="vgh">'+esc(s.team)+'</div>'+
-         '<div class="voteopt on" style="cursor:default"><span class="vradio"><i class="ti ti-check"></i></span><span class="vname">'+esc(_ballot[s.team]||'\u2014 no pick \u2014')+'</span></div></div>';
-    });
+    var dp=ballotPicks();
+    h+='<div class="vslots">';
+    for(var i=0;i<3;i++){
+      var k=dp[i], p=k?pickParts(k):null;
+      h+='<div class="vslot'+(p?' filled':'')+'" style="cursor:default">'+
+           '<span class="vpts">'+VOTE_PTS[i]+'<i>pts</i></span>'+
+           (p?'<div class="vwho"><b>'+esc(p.player)+'</b><span>'+esc(p.team)+'</span></div>'
+             :'<div class="vwho empty">no pick</div>')+
+         '</div>';
+    }
+    h+='</div>';
     document.getElementById('detailBody').innerHTML=h;
     ensureVoteSent();
   }
@@ -5407,33 +5469,33 @@
 
   function pitchMapSVG(highlight){
     var hi = pitchNum(highlight);
-    /* Each pitch: box, wicket strip, label anchor */
+    /* Compressed vertically against the true geography so the whole ground fits on one
+       screen without scrolling. Relative positions are kept; only the scale is squashed. */
     var P = {
-      '4': {x: 52, y: 34,  w:148, h: 96, sx: 108, sy: 44,  sw: 34, sh: 76},
-      '3': {x: 46, y: 168, w:150, h:104, sx: 104, sy: 180, sw: 34, sh: 80},
-      '2': {x: 214,y: 176, w:132, h:100, sx: 264, sy: 188, sw: 32, sh: 76},
-      '1': {x: 84, y: 396, w:186, h:110, sx: 152, sy: 410, sw: 50, sh: 82}
+      '4': {x: 50, y: 18,  w:150, h: 66, sx: 108, sy: 25,  sw: 34, sh: 52},
+      '3': {x: 44, y: 100, w:152, h: 70, sx: 104, sy: 108, sw: 34, sh: 54},
+      '2': {x: 214,y: 104, w:134, h: 68, sx: 264, sy: 112, sw: 32, sh: 52},
+      '1': {x: 82, y: 244, w:188, h: 74, sx: 152, sy: 252, sw: 50, sh: 58}
     };
     var order = ['4','3','2','1'], out = '';
     order.forEach(function(n){
       var p = P[n], on = (hi === n);
       out +=
         '<g>' +
-          '<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="10" ' +
+          '<rect x="'+p.x+'" y="'+p.y+'" width="'+p.w+'" height="'+p.h+'" rx="9" ' +
             'fill="'+(on?'rgba(255,124,26,.24)':'rgba(81,206,167,.10)')+'" ' +
             'stroke="'+(on?'#ff7c1a':'rgba(81,206,167,.55)')+'" stroke-width="'+(on?3:1.5)+'"/>' +
           '<rect x="'+p.sx+'" y="'+p.sy+'" width="'+p.sw+'" height="'+p.sh+'" rx="3" ' +
             'fill="'+(on?'rgba(255,124,26,.55)':'rgba(255,255,255,.16)')+'" ' +
             'stroke="'+(on?'#ff7c1a':'rgba(255,255,255,.28)')+'" stroke-width="1"/>' +
-          '<text x="'+(p.x+22)+'" y="'+(p.y+p.h/2+13)+'" font-size="38" font-weight="700" font-style="italic" ' +
+          '<text x="'+(p.x+18)+'" y="'+(p.y+p.h/2+11)+'" font-size="30" font-weight="700" font-style="italic" ' +
             'fill="'+(on?'#ff7c1a':'#ffffff')+'" opacity="'+(on?1:.9)+'">'+n+'</text>' +
-          (on ? '<text x="'+(p.x+p.w-8)+'" y="'+(p.y+18)+'" text-anchor="end" font-size="11" font-weight="700" fill="#ff7c1a">YOUR PITCH</text>' : '') +
+          (on ? '<text x="'+(p.x+p.w-7)+'" y="'+(p.y+16)+'" text-anchor="end" font-size="10" font-weight="700" fill="#ff7c1a">YOUR PITCH</text>' : '') +
         '</g>';
     });
 
-    return '<svg viewBox="0 0 372 566" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">' +
+    return '<svg viewBox="0 0 372 336" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">' +
       '<defs>' +
-        /* the GCS monogram texture from the brand sheet, at a whisper */
         '<pattern id="pmgcs" width="66" height="52" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">' +
           '<text x="0" y="20" font-size="15" font-weight="700" font-style="italic" fill="#51cea7" opacity=".07">GCS</text>' +
           '<text x="33" y="46" font-size="15" font-weight="700" font-style="italic" fill="#7777c9" opacity=".07">GCS</text>' +
@@ -5442,41 +5504,36 @@
           '<circle cx="7.5" cy="7.5" r="6" fill="#51cea7" opacity=".16"/></pattern>' +
       '</defs>' +
 
-      /* near-black base with a wicket-teal wash for the field, GCS monogram over the top */
-      '<rect x="0" y="0" width="372" height="566" rx="14" fill="#161615"/>' +
-      '<rect x="0" y="0" width="372" height="566" rx="14" fill="rgba(81,206,167,.07)"/>' +
-      '<rect x="0" y="0" width="372" height="566" rx="14" fill="url(#pmgcs)"/>' +
-      '<rect x="0.75" y="0.75" width="370.5" height="564.5" rx="13" fill="none" stroke="rgba(81,206,167,.28)" stroke-width="1.5"/>' +
+      '<rect x="0" y="0" width="372" height="336" rx="14" fill="#161615"/>' +
+      '<rect x="0" y="0" width="372" height="336" rx="14" fill="rgba(81,206,167,.07)"/>' +
+      '<rect x="0" y="0" width="372" height="336" rx="14" fill="url(#pmgcs)"/>' +
+      '<rect x="0.75" y="0.75" width="370.5" height="334.5" rx="13" fill="none" stroke="rgba(81,206,167,.28)" stroke-width="1.5"/>' +
 
-      /* Kilburn Road down the west side */
-      '<rect x="0" y="0" width="26" height="566" fill="#0e0e0d"/>' +
-      '<line x1="13" y1="10" x2="13" y2="556" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-dasharray="12 12"/>' +
-      '<text x="13" y="300" fill="rgba(255,255,255,.8)" font-size="12" font-weight="700" ' +
-        'text-anchor="middle" transform="rotate(-90 13 300)">KILBURN ROAD</text>' +
+      '<rect x="0" y="0" width="24" height="336" fill="#0e0e0d"/>' +
+      '<line x1="12" y1="8" x2="12" y2="328" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-dasharray="10 10"/>' +
+      '<text x="12" y="176" fill="rgba(255,255,255,.8)" font-size="11" font-weight="700" ' +
+        'text-anchor="middle" transform="rotate(-90 12 176)">KILBURN ROAD</text>' +
 
-      /* tree lines */
-      '<rect x="330" y="60" width="42" height="330" fill="url(#pmtree)"/>' +
-      '<rect x="30" y="524" width="240" height="42" fill="url(#pmtree)"/>' +
+      '<rect x="332" y="34" width="40" height="196" fill="url(#pmtree)"/>' +
+      '<rect x="28" y="312" width="230" height="24" fill="url(#pmtree)"/>' +
 
-      /* practice nets in ocean purple */
-      '<rect x="252" y="24" width="96" height="60" rx="6" fill="rgba(119,119,201,.16)" stroke="rgba(119,119,201,.6)" stroke-width="1.5"/>' +
+      /* practice nets */
+      '<rect x="254" y="14" width="94" height="46" rx="6" fill="rgba(119,119,201,.16)" stroke="rgba(119,119,201,.6)" stroke-width="1.5"/>' +
       '<g stroke="rgba(119,119,201,.5)" stroke-width="1.5">' +
-        '<line x1="272" y1="28" x2="272" y2="80"/><line x1="290" y1="28" x2="290" y2="80"/>' +
-        '<line x1="308" y1="28" x2="308" y2="80"/><line x1="326" y1="28" x2="326" y2="80"/></g>' +
-      '<text x="300" y="100" text-anchor="middle" fill="#9a9ad6" font-size="11" font-weight="700">PRACTICE NETS</text>' +
+        '<line x1="274" y1="18" x2="274" y2="56"/><line x1="292" y1="18" x2="292" y2="56"/>' +
+        '<line x1="310" y1="18" x2="310" y2="56"/><line x1="328" y1="18" x2="328" y2="56"/></g>' +
+      '<text x="301" y="74" text-anchor="middle" fill="#9a9ad6" font-size="10" font-weight="700">PRACTICE NETS</text>' +
 
       out +
 
-      /* pavilion, set on the same diagonal as the building on the aerial view */
-      '<g transform="rotate(-24 84 326)">' +
-        '<rect x="38" y="302" width="92" height="48" rx="6" fill="#7777c9"/>' +
-        '<path d="M38 302 L84 284 L130 302 Z" fill="#9a9ad6"/>' +
-        '<line x1="84" y1="284" x2="84" y2="302" stroke="rgba(22,22,21,.35)" stroke-width="1.5"/>' +
-        '<rect x="52" y="316" width="64" height="3" rx="1.5" fill="rgba(22,22,21,.3)"/>' +
+      /* pavilion, on the same diagonal as the building on the aerial view */
+      '<g transform="rotate(-24 80 205)">' +
+        '<rect x="38" y="190" width="84" height="34" rx="5" fill="#7777c9"/>' +
+        '<path d="M38 190 L80 176 L122 190 Z" fill="#9a9ad6"/>' +
+        '<line x1="80" y1="176" x2="80" y2="190" stroke="rgba(22,22,21,.35)" stroke-width="1.5"/>' +
       '</g>' +
-      '<text x="150" y="322" fill="#ffffff" font-size="12" font-weight="700">PAVILION</text>' +
-      '<text x="150" y="337" fill="rgba(255,255,255,.7)" font-size="9.5">Check-in &amp; first aid</text>' +
-
+      '<text x="144" y="200" fill="#ffffff" font-size="11" font-weight="700">PAVILION</text>' +
+      '<text x="144" y="213" fill="rgba(255,255,255,.7)" font-size="9">Check-in &amp; first aid</text>' +
       '</svg>';
   }
 
@@ -5488,12 +5545,9 @@
     var n=pitchNum(e.meta.pitch);
     if(!n) return '';
     return '<div class="eyebrow" style="margin-top:16px">Where you\u2019re playing</div>'+
-      '<div class="pmnow"><span class="n">'+esc(n)+'</span><div><b>Pitch '+esc(n)+'</b>'+
-        '<span>'+esc(e.meta.ground||'Doncaster Close')+' \u00b7 highlighted below</span></div></div>'+
-      '<div class="pmwrap">'+pitchMapSVG(n)+'</div>'+
-      '<button class="cta" style="width:100%;justify-content:center;box-sizing:border-box;margin-top:10px;'+
-        'background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.42)" '+
-        'onclick="openPitchMap(\''+attr(e.meta.pitch)+'\')"><i class="ti ti-map"></i> Full pitch map</button>';
+      '<div class="pmnow tight"><span class="n">'+esc(n)+'</span><div><b>Pitch '+esc(n)+'</b>'+
+        '<span>'+esc(e.meta.ground||'Doncaster Close')+'</span></div></div>'+
+      '<div class="pmwrap">'+pitchMapSVG(n)+'</div>';
   }
   function openPitchMap(pitch){
     showOnly('s-pitchmap');
