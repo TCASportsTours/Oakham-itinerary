@@ -627,6 +627,10 @@
     background:rgba(255,124,26,.18);color:#ff9d52;border:1px solid rgba(255,124,26,.45);
     border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700}
   .chfollow i{font-size:17px}
+  .morelink{display:inline-flex;align-items:center;gap:8px;margin:2px 2px 14px;text-decoration:none;
+    background:rgba(81,206,167,.16);color:#7bdcc0;border:1px solid rgba(81,206,167,.42);
+    border-radius:11px;padding:10px 15px;font-size:13.5px;font-weight:700}
+  .morelink i{font-size:17px}
   .chdone{margin-top:14px}
   .chnote{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
   .chchip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;flex:0 0 auto}
@@ -789,7 +793,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dc · more-restructure</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29de · handover-button</div>
     </section>
 
     <!-- TODAY -->
@@ -2390,6 +2394,7 @@
     var help=[];
     help.push(tile('acc-red','openSOS()','ti-phone-call','Emergency contacts'));
     help.push(tile('acc-teal','openStaff()','ti-user-star','Staff &amp; coaches'));
+    help.push(tile('acc-purple','openHandover()','ti-heart-handshake','Handover of Care'));
     help.push(tile('acc-orange','openHowTo()','ti-help-circle','How to use'));
     if(isStaff) help.push(tile('acc-orange','openRoster()','ti-clipboard-list','Squad list'));
     if(isAdmin) help.push(tile('acc-purple','openScoring()','ti-list-numbers','Scoring app guide'));
@@ -2411,7 +2416,6 @@
          '<span class="tbadge"><i class="ti '+moreIcon(g.icon)+'"></i></span><div>'+esc(g.tile)+'</div></div>');
     });
     if(showHotel) info.push(tile('acc-teal','openHotelMap()','ti-building',(isDomestic()&&!isSupporter()?'Where we stay &middot; Map':'Hotel &middot; Map')));
-    info.push(tile('acc-purple','openHandover()','ti-heart-handshake','Handover of Care'));
     info.push(tile('acc-purple','openFAQ()','ti-messages','FAQ'));
     if(showFlights) info.push(tile('acc-orange','openFlights()','ti-plane','Flights'));
     var _depMe = isAdmin ? (Object.keys(DEPARTURES||{}).length>0) : (isStaff && DEPARTURES && DEPARTURES[currentSquad] && DEPARTURES[currentSquad].length>0);
@@ -2520,6 +2524,19 @@
     return String(text||'').split(/\n+/).map(function(s){return s.trim();}).filter(Boolean)
       .map(function(p){ return '<div style="font-size:14px;line-height:1.6;margin:0 2px 11px;'+(hot||'color:var(--muted)')+'">'+linkify(p)+'</div>'; }).join('');
   }
+  /* Labels the button from the row heading, so it reads "Open the handover form"
+     rather than a naked address. */
+  function moreLinkBtn(url,heading){
+    var t=String(heading||'').toLowerCase(), label;
+    if(/handover/.test(t))              label='Open the Handover of Care form';
+    else if(/instagram|follow|social/.test(t)) label='Follow us on Instagram';
+    else if(/rule|condition/.test(t))   label='Read the playing conditions';
+    else if(/book|hotel/.test(t))       label='Book online';
+    else if(/form/.test(t))             label='Open the form';
+    else                                label='Open the link';
+    return '<a class="morelink" href="'+attr(url)+'" target="_blank" rel="noopener">'+
+      '<i class="ti ti-external-link"></i> '+esc(label)+'</a>';
+  }
   function isPackingTile(name){ return /pack|checklist|kit list|things to (bring|pack)/i.test(name||''); }
   /* True when a More-content tile talks about live scoring or streaming. */
   function mentionsScoring(g){
@@ -2576,8 +2593,13 @@
     g.rows.forEach(function(r){
       if(r.heading) h+='<div class="eyebrow" style="margin-top:14px">'+esc(r.heading)+'</div>';
       if(r.text){ var hot=r.highlight?'background:rgba(255,124,26,.12);border:1px solid rgba(255,124,26,.45);border-radius:12px;padding:11px 13px;color:#ffce9e;':'color:var(--muted);';
-        if(r.highlight) h+='<div style="font-size:14px;line-height:1.6;margin:3px 2px 8px;'+hot+'">'+linkify(r.text)+'</div>';
-        else h+=paras(r.text); }
+        /* A raw URL is unreadable on a phone, so it comes out of the sentence and
+           becomes a labelled button underneath. */
+        var body=String(r.text||''), lnk=(body.match(/https?:\/\/[^\s)]+/)||[''])[0].replace(/[).,]+$/,'');
+        if(lnk) body=body.replace(/\(?\bhttps?:\/\/[^\s)]+\)?/g,'').replace(/\s{2,}/g,' ').replace(/\s+([.,!?])/g,'$1').trim();
+        if(r.highlight) h+='<div style="font-size:14px;line-height:1.6;margin:3px 2px 8px;'+hot+'">'+linkify(body)+'</div>';
+        else h+=paras(body);
+        if(lnk) h+=moreLinkBtn(lnk, r.heading); }
     });
     document.getElementById('detailBody').innerHTML=h||'<div class="readonly" style="justify-content:flex-start;margin-top:14px"><i class="ti ti-info-circle"></i> Nothing here yet.</div>';
     showOnly('s-detail');
