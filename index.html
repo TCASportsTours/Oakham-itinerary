@@ -244,8 +244,17 @@
   .votecard{display:flex;align-items:center;gap:13px;margin:4px 0 12px;padding:14px 15px;border-radius:16px;cursor:pointer;
     background:linear-gradient(105deg,rgba(255,124,26,.9),rgba(255,124,26,.7));transition:transform .12s ease,filter .12s ease}
   .votecard:active{transform:scale(.99);filter:brightness(1.05)}
-  .votecard.ch{background:linear-gradient(105deg,rgba(119,119,201,.92),rgba(81,206,167,.72))}
-  .votecard.ch.done{background:linear-gradient(105deg,rgba(81,206,167,.85),rgba(81,206,167,.6))}
+  /* GCS Challenge card: the three logo colours in mark order — G orange, C teal,
+     S purple — with a near-black wash over the top so white text stays readable
+     across the teal, which is far too light to sit under white on its own. */
+  .votecard.ch{background:
+    linear-gradient(105deg,rgba(22,22,21,.34),rgba(22,22,21,.12) 55%,rgba(22,22,21,.26)),
+    linear-gradient(105deg,#ff7c1a 0%,#51cea7 54%,#7777c9 100%)}
+  .votecard.ch .vcicon{background:rgba(22,22,21,.34)}
+  /* Done for the day: settle onto wicket teal alone. */
+  .votecard.ch.done{background:
+    linear-gradient(105deg,rgba(22,22,21,.3),rgba(22,22,21,.14)),
+    linear-gradient(105deg,#51cea7,#3fae8b)}
   .votecard .vcicon{width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,.18);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
   .votecard .vcbody{flex:1;min-width:0}
@@ -756,7 +765,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29cw · challenge-banner</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29cx · brand-colours</div>
     </section>
 
     <!-- TODAY -->
