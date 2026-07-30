@@ -263,6 +263,14 @@
   .chbar .cbval span{font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.85)}
   .chbar .cbhint{font-size:11.5px;color:rgba(255,255,255,.85);flex:0 0 auto}
   .chbar .cbarr{color:#fff;font-size:19px;flex:0 0 auto}
+  /* Players' Player bar: sunset orange alone, so it reads as a different thing from
+     the three-colour Challenge bar directly beneath it. */
+  .chbar.vote{background:linear-gradient(105deg,rgba(22,22,21,.24),rgba(22,22,21,.06) 60%),
+                         linear-gradient(105deg,#ff7c1a,#e0650c)}
+  .chbar.vote.done{background:linear-gradient(105deg,rgba(22,22,21,.26),rgba(22,22,21,.10)),
+                              linear-gradient(105deg,#51cea7,#3fae8b)}
+  .chbar.vote.shut{filter:saturate(.5) brightness(.8)}
+  .chbar .cbhint i{font-size:14px;vertical-align:-1px}
   .votecard .vcicon{width:42px;height:42px;border-radius:12px;background:rgba(0,0,0,.18);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
   .votecard .vcbody{flex:1;min-width:0}
@@ -308,6 +316,19 @@
   .vtable td.c3 span{display:block;font-size:11.5px;color:#7bdcc0;margin-top:2px}
   .vtable td.c3.ph{font-size:13px;color:var(--faint)}
   .vtable td.c4{width:30px;text-align:right;color:var(--faint);font-size:16px}
+  /* Match facts: a two-column grid of label/value pairs instead of nine stacked rows,
+     so the pitch map underneath is on screen without scrolling. */
+  .factbox{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--surface-line);
+    border:1px solid var(--surface-line);border-radius:14px;overflow:hidden;margin:8px 0 0}
+  .factbox .fct{background:var(--surface);padding:9px 12px;min-width:0}
+  .factbox .fct:only-child,.factbox .fct:nth-child(odd):last-child{grid-column:1/-1}
+  .factbox .fct span{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .factbox .fct b{display:block;font-size:15px;color:#fff;font-weight:600;margin-top:2px;line-height:1.25;
+    word-break:break-word;overflow-wrap:anywhere}
+  .factnote{display:flex;gap:9px;align-items:flex-start;margin-top:8px;background:var(--surface);
+    border:1px solid var(--surface-line);border-radius:12px;padding:10px 12px}
+  .factnote i{font-size:16px;color:var(--muted);flex:0 0 auto}
+  .factnote span{font-size:13.5px;color:var(--muted);line-height:1.55}
   /* rank chip on a chosen player in the squad lists */
   .voteopt .vradio.rk{background:#ff7c1a;color:#161615;font-weight:800;font-style:italic;font-size:14px;
     display:flex;align-items:center;justify-content:center}
@@ -842,7 +863,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dp · vote-table</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dr · compact-match-detail</div>
     </section>
 
     <!-- TODAY -->
@@ -1415,7 +1436,7 @@
        challenge nobody does. Set before the early returns so it survives the
        countdown and out-of-tour views too. */
     var tc=document.getElementById('todayChallenge');
-    if(tc) tc.innerHTML=challengeMoreCard(10);
+    if(tc) tc.innerHTML=voteBarHTML(10)+challengeMoreCard(10);
     EVENTS.sort(function(a,b){ return (a.day-b.day) || (tmin(a.time)-tmin(b.time)); });
     EVENTS.forEach(function(e,i){e._i=i;});
     var staff=false;
@@ -1463,7 +1484,6 @@
       later=list.filter(function(e){return e.day===today&&e.slot==='later';});
     }
     var h='';
-    h+=voteCardHTML();
     if(past.length){
       h+='<button class="pastbtn" onclick="togglePast(this)"><i class="ti ti-check tick"></i><span>'+past.length+' earlier event'+(past.length>1?'s':'')+' done today</span><i class="ti ti-chevron-down chev"></i></button>';
       h+='<div class="pastlist">'+past.map(function(e){return rowHTML(e,staff);}).join('')+'</div>';
@@ -1787,29 +1807,31 @@
     var dt=dispType(e); var typeName=dispLabel(e);
     var accent=dt==='teal'?'#7bdcc0':(dt==='purple'?'#9a9ad6':'#ff9d52');
     function info(icon,label,val){ return hasVal(val)?'<div class="contactrow"><div class="ic" style="background:var(--surface);color:#fff">'+iconHTML(icon)+'</div><div style="flex:1;min-width:0"><b>'+esc(label)+'</b><span style="display:block;word-break:break-word;overflow-wrap:anywhere">'+packLabel(val)+'</span></div></div>':''; }
+    /* One compact block rather than a stack of full-width rows. Nine of those pushed
+       the pitch map two screens down; this fits the lot above the fold. */
+    function fact(label,val){ return hasVal(val)?'<div class="fct"><span>'+esc(label)+'</span><b>'+packLabel(val)+'</b></div>':''; }
     var rows='';
-    rows+=info('ti-clock','When',dayLabel+' · '+e.time);
-    /* No Ground row on a fixture: the pitch map below shows the ground, the pitch and
-       where it sits, which a line of text and a maps link never did. */
-    if(isMatch(e) && (e.meta&&(e.meta.ground||e.meta.pitch))){
-      /* nothing */
+    if(e.meta){
+      var m=e.meta;
+      var facts='';
+      facts+=fact('When', dayLabel+' · '+e.time);
+      facts+=fact('Format', e.sub);
+      facts+=fact('Kit', e.kit);
+      facts+=fact('Arrive', m.arrival);
+      facts+=fact('Start', m.start);
+      facts+=fact('Lunch', m.lunch);
+      facts+=fact('Finish', m.finish);
+      facts+=fact('Ball', m.ball);
+      if(e.sq&&e.sq!=='all') facts+=fact('Team', e.sq);
+      if(isStaff||isAdmin){ facts+=fact('Umpires', m.umpires); facts+=fact('Scorers', m.scorers||m.scorer); }
+      rows+='<div class="factbox">'+facts+'</div>';
+      if(hasVal(m.notes)) rows+='<div class="factnote"><i class="ti ti-note"></i><span>'+packLabel(m.notes)+'</span></div>';
     } else {
+      rows+=info('ti-clock','When',dayLabel+' · '+e.time);
       rows+=info('ti-map-pin','Location', /^https?:\/\//i.test(String(e.loc||''))?'':e.loc);
-    }
-    rows+=info('ti-shirt','Kit',e.kit);
-    if(e.sq&&e.sq!=='all') rows+=info('ti-users','Team',e.sq);
-    rows+=info('ti-info-circle','Details',e.sub);
-    if(e.meta){var m=e.meta;
-      rows+='<div class="eyebrow" style="margin-top:12px;color:'+accent+'">Match details</div>';
-      rows+=info('ti-clock','Arrive',m.arrival);
-      rows+=info('ti-clock','Start',m.start);
-      rows+=info('ti-tools-kitchen-2','Lunch',m.lunch);
-      rows+=info('ti-flag','Finish',m.finish);
-      rows+=info('ti-bus','Back to hotel',m.returnHotel);
-      rows+=info('ti-circle','Ball',m.ball);
-      if(isStaff||isAdmin){ rows+=info('umpire','Umpires',m.umpires); rows+=info('ti-pencil','Scorers',m.scorers||m.scorer); }   // umpire/scorer numbers hidden from players & supporters
-      rows+=info('ti-note','Notes',m.notes);
-    } else {
+      rows+=info('ti-shirt','Kit',e.kit);
+      if(e.sq&&e.sq!=='all') rows+=info('ti-users','Team',e.sq);
+      rows+=info('ti-info-circle','Details',e.sub);
       rows+=info('ti-note','Notes',e.notes);
     }
     if(!e.loc&&!e.kit&&!e.sub&&!e.notes&&!e.meta) rows+='<div class="readonly" style="justify-content:flex-start;margin-top:14px"><i class="ti ti-info-circle"></i> No extra details for this event.</div>';
@@ -2891,6 +2913,33 @@
   function votingClosedByTime(){ var c=votingCloseAt(); return !!(c && Date.now()>=c.getTime()); }
   function votingOpenNow(){ if(votingClosedByTime()) return false; if(votingForceOpen()) return true; var o=effectiveVoteOpenAt(); return !!(o && Date.now()>=o.getTime()); }
   function buildVoteSquads(){ VOTE_SQUADS=[]; (TEAMS_LIST||[]).forEach(function(t){ var pl=((PLAYERS||{})[t]||[]).filter(function(n){return n&&n.trim() && !(t===currentSquad && currentPlayer && n===currentPlayer);}); if(pl.length) VOTE_SQUADS.push({team:t,players:pl}); }); }
+  /* Players' Player as a bar on the itinerary, built to match the challenge bar so the
+     top of the screen reads as a set. Set from renderToday, which runs in every view of
+     that screen, so it shows during the countdown as well as mid-tournament. */
+  function voteBarHTML(margin){
+    if(isStaff || isSupporter() || role==='official') return '';
+    buildVoteSquads(); if(!VOTE_SQUADS.length) return '';
+    var m=(margin===undefined?16:margin), right, cls='chbar vote';
+
+    if(votingNotOpenYet()){
+      right='<span class="cbhint">'+esc(voteCountdown())+'</span>';
+    } else if(!votingOpenNow()){
+      if(!votingClosedByTime()) return '';
+      right='<span class="cbhint">Closed</span>';
+      cls+=' shut';
+    } else {
+      loadBallot();
+      if(voteSubmitted()){ right='<span class="cbhint"><i class="ti ti-circle-check"></i> Submitted</span>'; cls+=' done'; }
+      else {
+        var n=ballotPicks().length;
+        right='<span class="cbval"><b>'+n+'</b><span>OF 3</span></span>';
+      }
+    }
+    return '<div class="'+cls+'" style="margin-top:'+m+'px" onclick="openVote()">'+
+      '<span class="cbicon"><i class="ti ti-trophy"></i></span>'+
+      '<div class="cbname">Players\u2019 Player</div>'+
+      right+'<i class="ti ti-chevron-right cbarr"></i></div>';
+  }
   function voteCardHTML(){   // prominent card on the schedule page
     if(isStaff || isSupporter()) return '';
     if(votingNotOpenYet()){
