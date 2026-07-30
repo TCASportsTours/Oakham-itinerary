@@ -892,7 +892,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30dv · view-as</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30dx · no-numbers-anywhere</div>
     </section>
 
     <!-- TODAY -->
@@ -3453,8 +3453,16 @@
     var mgrCard = sup ? tmContactHTML(false) : '';
     if(!mgrCard && !items.length) return '';
     var rowsHTML = items.map(function(x){
-      var sub = sup ? esc(x.role) : ((x.phone?esc(x.phone)+' \u00b7 ':'')+esc(x.role));
-      return '<div class="contactrow"'+(sup?'':' onclick="'+x.fn+'()" style="cursor:pointer"')+'><div class="ic" style="background:rgba(81,206,167,.16);color:var(--teal)"><i class="ti '+x.icon+'"></i></div><div style="flex:1;min-width:0"><b>'+esc(x.name)+'</b>'+(sub?'<span>'+sub+'</span>':'')+'</div>'+(sup?'':'<i class="ti ti-chevron-right" style="color:var(--faint);font-size:18px"></i>')+'</div>';
+      /* Role only \u2014 the number never appears on screen. The WhatsApp button carries it,
+         or an envelope where the contact is an email address. */
+      var isEmail=/@/.test(String(x.phone||''));
+      var btn='';
+      if(!sup && x.phone){
+        btn = isEmail
+          ? '<button class="stbtn mail" title="Email '+attr(x.name)+'" onclick="event.stopPropagation();'+x.fn+'()"><i class="ti ti-mail"></i></button>'
+          : '<button class="stbtn wa" title="WhatsApp '+attr(x.name)+'" onclick="event.stopPropagation();waNumber(\''+attr(x.phone)+'\')"><i class="ti ti-brand-whatsapp"></i></button>';
+      }
+      return '<div class="contactrow"'+(sup?'':' onclick="'+x.fn+'()" style="cursor:pointer"')+'><div class="ic" style="background:rgba(81,206,167,.16);color:var(--teal)"><i class="ti '+x.icon+'"></i></div><div style="flex:1;min-width:0"><b>'+esc(x.name)+'</b><span>'+esc(x.role)+'</span></div>'+btn+(sup?'':'<i class="ti ti-chevron-right" style="color:var(--faint);font-size:18px"></i>')+'</div>';
     }).join('');
     return '<div class="eyebrow" style="margin-top:18px">Event staff</div>'+mgrCard+rowsHTML;
   }
@@ -3483,7 +3491,10 @@
   }
   function contactStaffIdx(i){ var p=STAFF_VIEW[i]; if(!p)return; contactStaff(p.name,p.phone); }
   function contactStaff(name,phone){ _contactPhone=phone||''; var isEmail=/@/.test(_contactPhone);
-    document.getElementById('contactName').textContent=name||''; document.getElementById('contactNum').textContent=phone||'';
+    document.getElementById('contactName').textContent=name||'';
+    /* The sheet shows what you can do, not the number itself. Call and WhatsApp both
+       work from _contactPhone without it ever being on screen. */
+    document.getElementById('contactNum').textContent = isEmail ? 'Email' : 'Call or WhatsApp';
     var w=document.getElementById('ctWhats'), c=document.getElementById('ctCall'), e=document.getElementById('ctEmail');
     if(w) w.style.display=isEmail?'none':''; if(c) c.style.display=isEmail?'none':''; if(e) e.style.display=isEmail?'':'none';
     document.getElementById('contactModal').style.display='flex'; }
