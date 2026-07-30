@@ -318,9 +318,13 @@
   .vtable td.c4{width:30px;text-align:right;color:var(--faint);font-size:16px}
   /* Match facts: a two-column grid of label/value pairs instead of nine stacked rows,
      so the pitch map underneath is on screen without scrolling. */
-  .factbox{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--surface-line);
-    border:1px solid var(--surface-line);border-radius:14px;overflow:hidden;margin:8px 0 0}
-  .factbox .fct{background:var(--surface);padding:9px 12px;min-width:0}
+  /* Fixture facts in the brand's own colours rather than plain grey: a teal-to-purple
+     wash over near-black, with a sunset-orange hairline on the left edge. */
+  .factbox{display:grid;grid-template-columns:1fr 1fr;gap:1px;
+    background:rgba(255,255,255,.07);border:1px solid rgba(81,206,167,.34);
+    border-left:3px solid #ff7c1a;border-radius:14px;overflow:hidden;margin:8px 0 0}
+  .factbox .fct{padding:9px 12px;min-width:0;
+    background:linear-gradient(135deg,rgba(81,206,167,.09),rgba(119,119,201,.09))}
   .factbox .fct:only-child,.factbox .fct:nth-child(odd):last-child{grid-column:1/-1}
   .factbox .fct span{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   .factbox .fct b{display:block;font-size:15px;color:#fff;font-weight:600;margin-top:2px;line-height:1.25;
@@ -329,6 +333,12 @@
     border:1px solid var(--surface-line);border-radius:12px;padding:10px 12px}
   .factnote i{font-size:16px;color:var(--muted);flex:0 0 auto}
   .factnote span{font-size:13.5px;color:var(--muted);line-height:1.55}
+  .factbox .fct span{color:#7bdcc0}
+  .stbtn{width:36px;height:36px;border-radius:10px;border:1px solid;flex:0 0 auto;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:19px;background:transparent}
+  .stbtn.wa{color:#51cea7;border-color:rgba(81,206,167,.45);background:rgba(81,206,167,.14)}
+  .stbtn.mail{color:#9a9ad6;border-color:rgba(119,119,201,.45);background:rgba(119,119,201,.14)}
+  .stbtn:active{filter:brightness(1.25)}
   /* rank chip on a chosen player in the squad lists */
   .voteopt .vradio.rk{background:#ff7c1a;color:#161615;font-weight:800;font-style:italic;font-size:14px;
     display:flex;align-items:center;justify-content:center}
@@ -863,7 +873,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dt · logout-restricted</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30du · staff-wa-and-brand-box</div>
     </section>
 
     <!-- TODAY -->
@@ -2327,12 +2337,29 @@
     if(!list.length) return '<div class="readonly" style="justify-content:flex-start;margin-top:10px"><i class="ti ti-info-circle"></i> No staff contacts added yet.</div>';
     var sup=isSupporter();
     return list.map(function(p,i){
-      var sub = sup ? (showTeam&&p.team?esc(p.team):'') : (esc(p.phone||'')+(showTeam&&p.team?' · '+esc(p.team):''));
+      /* Numbers are never printed on screen — a phone left on a table shouldn't show
+         every coach's mobile. The WhatsApp button carries the number without displaying it.
+         Email contacts get an envelope instead, since wa.me can't take an address. */
+      var isEmail=/@/.test(String(p.phone||''));
+      var sub = (showTeam&&p.team) ? esc(p.team) : '';
+      var btn = '';
+      if(!sup && p.phone){
+        btn = isEmail
+          ? '<button class="stbtn mail" title="Email '+attr(p.name)+'" onclick="event.stopPropagation();contactStaffIdx('+i+')"><i class="ti ti-mail"></i></button>'
+          : '<button class="stbtn wa" title="WhatsApp '+attr(p.name)+'" onclick="event.stopPropagation();waStaffIdx('+i+')"><i class="ti ti-brand-whatsapp"></i></button>';
+      }
       return '<div class="contactrow"'+(sup?'':' onclick="contactStaffIdx('+i+')" style="cursor:pointer"')+'>'+
         '<div class="ic" style="background:rgba(81,206,167,.16);color:var(--teal)"><i class="ti ti-user"></i></div>'+
         '<div style="flex:1;min-width:0"><b>'+esc(p.name||'')+'</b>'+(sub?'<span>'+sub+'</span>':'')+'</div>'+
+        btn+
         (sup?'':'<i class="ti ti-chevron-right" style="color:var(--faint);font-size:18px"></i>')+'</div>';
     }).join('');
+  }
+  /* Straight to WhatsApp, skipping the contact sheet that would print the number. */
+  function waStaffIdx(i){
+    var p=STAFF_VIEW[i]; if(!p||!p.phone) return;
+    var d=waDigits(p.phone); if(!d){ toast('No mobile number on file'); return; }
+    window.open('https://wa.me/'+d,'_blank','noopener');
   }
   function localEmergency(){ return EMERGENCY_NUMS[(SETTINGS&&SETTINGS.country)||''] || {dial:'112',label:'112 (or the local emergency number)'}; }
   function sosCall(num){ var t=String(num||'').replace(/[^0-9+]/g,''); if(t) window.location.href='tel:'+t; }
