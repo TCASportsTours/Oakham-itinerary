@@ -863,7 +863,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29ds · detail-and-flag-fix</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑29dt · logout-restricted</div>
     </section>
 
     <!-- TODAY -->
@@ -1561,7 +1561,13 @@
     trackLogin();
     document.querySelector('.phone').classList.remove('locked');
     document.getElementById('moreSquad').textContent= isAdmin ? 'GCS Admin' : (sq + (isStaff? (currentPlayer?' · '+currentPlayer+' (Staff)':' · Staff') : (role==='supporter'?' · Supporter':(currentPlayer?' · '+currentPlayer:''))));
-    var _sw=document.getElementById('switchTeamBtn'), _lo=document.getElementById('logoutBtn'); if(_sw) _sw.style.display='none'; if(_lo) _lo.style.display='';   // Log out available to everyone: players and coaches need it to hand a phone over or fix a wrong team pick
+    var _sw=document.getElementById('switchTeamBtn'), _lo=document.getElementById('logoutBtn');
+    if(_sw) _sw.style.display='none';
+    /* Log out is for GCS admin only on this screen. Players, coaches and supporters stay
+       signed in for the tournament \u2014 a 12-year-old logging themselves out mid-week and
+       not remembering their team creates more problems than it solves. Scorers and umpires
+       have their own Sign out on the officials screen, since they hand devices round. */
+    if(_lo) _lo.style.display=isAdmin?'':'none';
     var crest=document.getElementById('hubCrest'); if(crest){ var lg=(TEAMLOGOS||{})[sq]||SETTINGS.badge; if(lg) crest.src=lg; }
     /* Scoring app guide: tournament staff / GCS admin only. Players, supporters and team
        coaches never score a match, so the tile is noise on their More screen. */
