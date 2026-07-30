@@ -660,9 +660,16 @@
   .chterms-link div{flex:1;min-width:0}
   .chterms-link b{display:block;font-size:14px;color:#fff}
   .chterms-link span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
-  .chterm{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
+  .chterm{display:flex;gap:13px;align-items:flex-start;margin-top:18px}
   .chterm .ic{width:34px;height:34px;border-radius:10px;background:rgba(119,119,201,.16);color:#9a9ad6;
     display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:18px}
+  .prizebox{display:flex;gap:12px;align-items:flex-start;margin:16px 0 4px;padding:14px;border-radius:14px;
+    background:linear-gradient(105deg,rgba(255,124,26,.16),rgba(119,119,201,.14));
+    border:1px solid rgba(255,124,26,.42)}
+  .prizebox>i{font-size:26px;color:#ff9d52;flex:0 0 auto;line-height:1.1}
+  .prizebox b{color:#fff;font-weight:700}
+  .prizebox>div>b{display:block;font-size:15.5px;font-style:italic;margin-bottom:3px}
+  .prizebox span{display:block;font-size:13px;color:var(--muted);line-height:1.6}
   .chsteps3{display:flex;align-items:center;gap:6px;margin:10px 2px 4px}
   .chsteps3 span{width:26px;height:4px;border-radius:2px;background:var(--surface-line)}
   .chsteps3 span.on{background:var(--orange)}
@@ -672,8 +679,11 @@
   .chterm.behave .ic{background:rgba(81,206,167,.16);color:#7bdcc0}
   .chcheck.behave{background:rgba(81,206,167,.10);border:1px solid rgba(81,206,167,.34);
     border-radius:11px;padding:11px 12px;margin-top:10px}
-  .chterm b{display:block;font-size:14.5px;color:#fff}
-  .chterm p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:3px}
+  .chterm>div:last-child>b{display:block;font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px}
+  .chterm p b,.chintro p b,.chsafe b{display:inline;font-weight:700;color:#fff}
+  .chterm p{font-size:13.5px;color:var(--muted);line-height:1.65;margin:0;
+    text-wrap:pretty;overflow-wrap:break-word}
+  .chterm p br+br{content:'';display:block;height:5px}
     border-left:2px solid rgba(81,206,167,.5);border-radius:0 8px 8px 0;padding:8px 10px}
   .chrule{display:flex;gap:10px;align-items:flex-start;margin-top:11px;background:rgba(81,206,167,.11);
     border:1px solid rgba(81,206,167,.34);border-radius:11px;padding:11px 12px}
@@ -866,7 +876,7 @@
 
   .chintro{background:rgba(255,124,26,.1);border:1px solid rgba(255,124,26,.28);border-radius:13px;padding:14px;margin-top:12px}
   .chintro b{display:block;font-weight:700;font-style:italic;font-size:18px;color:#fff}
-  .chintro p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:6px}
+  .chintro p{font-size:13.5px;color:var(--muted);line-height:1.65;margin-top:7px;text-wrap:pretty}
   .chhelp{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
   .chhelp .ic{width:38px;height:38px;border-radius:11px;background:rgba(119,119,201,.16);color:#9a9ad6;
     display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:19px}
@@ -902,7 +912,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ee · three-step-gate</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eg · prizes</div>
     </section>
 
     <!-- TODAY -->
@@ -4920,9 +4930,9 @@
   function chTermsPage1(readOnly){
     return chStepDots(1)+
       '<div class="chintro"><b>Welcome to Oakham.</b><p>Two minutes and you\u2019re in. This is your tournament in your pocket \u2014 here\u2019s what it does.</p></div>'+
-      chTermRow('ti-calendar-event','Your whole week','Every fixture and start time, <b>which pitch you\u2019re on</b> with a map of the ground, meal times, and where you need to be. If anything moves, it moves here first.')+
-      chTermRow('ti-message-2','Your coach messages you here','Team messages and one-to-one. It won\u2019t buzz like WhatsApp \u2014 the message is waiting when you open the app, so <b>open it a few times a day</b>. First thing, after lunch, after tea.')+
-      chTermRow('ti-bolt','The '+esc(chName()),'A new challenge every day, XP for each one, and a leaderboard for players and teams. It\u2019s optional \u2014 but it\u2019s how you\u2019ll end up knowing people from the other seven squads.')+
+      chTermRow('ti-calendar-event','Your whole week','Every fixture, start time and meal, plus <b>which pitch you\u2019re on</b> and a map of the ground.<br><br>If anything moves, it moves here first.')+
+      chTermRow('ti-message-2','Your coach messages you here','Team messages and one-to-one.<br><br>It won\u2019t buzz like WhatsApp. The message is waiting for you when you open the app \u2014 so <b>open it a few times a day.</b> First thing, after lunch, after tea.')+
+      chTermRow('ti-bolt','The '+esc(chName()),'A new challenge every day, XP for each one, and leaderboards for players and teams.<br><br><b>It\u2019s a competition, and there are prizes</b> \u2014 for the highest individual score and the top team at the end of the week.<br><br>Optional \u2014 but it\u2019s also how you\u2019ll end up knowing people from the other seven squads.')+
       chTermRow('ti-urgent','If you need help','Tap the orange button at the top of any screen. Tournament staff and your coach, one tap.')+
       chTermRow('ti-device-mobile-down','Keep it handy','Add it to your home screen and it opens like a normal app. There\u2019s a link for that on the Tour hub.')+
       (readOnly
@@ -5206,7 +5216,13 @@
 
   function boardHTML(){
     var pb=playerBoard().slice(0,10), tb=teamBoard(), me=myPlayerId();
-    var h='<div class="eyebrow" style="margin-top:18px">Team leaderboard</div>';
+    /* It's a competition, not just a scoreboard \u2014 say so where they're already
+       looking at where they've come. */
+    var h='<div class="prizebox"><i class="ti ti-trophy"></i><div>'+
+      '<b>There are prizes.</b>'+
+      '<span>The <b>highest individual</b> and the <b>top team</b> at the end of the week both win. '+
+      'Every challenge you finish counts towards both.</span></div></div>';
+    h+='<div class="eyebrow" style="margin-top:18px">Team leaderboard</div>';
     if(!tb.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-info-circle"></i> No XP yet \u2014 be the first.</div>';
     tb.forEach(function(r,i){
       h+='<div class="lbrow'+(r.team===currentSquad?' mine':'')+'"><div class="pos">'+(i+1)+'</div>'+
