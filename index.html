@@ -663,6 +663,13 @@
   .chterm{display:flex;gap:13px;align-items:flex-start;margin-top:18px}
   .chterm .ic{width:34px;height:34px;border-radius:10px;background:rgba(119,119,201,.16);color:#9a9ad6;
     display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:18px}
+  .a2hsnudge{display:flex;gap:11px;align-items:center;margin-top:10px;padding:11px 13px;border-radius:13px;
+    background:rgba(119,119,201,.14);border:1px solid rgba(119,119,201,.40);cursor:pointer}
+  .a2hsnudge>i:first-child{font-size:21px;color:#9a9ad6;flex:0 0 auto}
+  .a2hsnudge div{flex:1;min-width:0}
+  .a2hsnudge b{display:block;font-size:14px;color:#fff}
+  .a2hsnudge span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px;line-height:1.45}
+  .a2hsnudge .x{font-size:17px;color:var(--faint);flex:0 0 auto;padding:4px}
   .prizebox{display:flex;gap:12px;align-items:flex-start;margin:16px 0 4px;padding:14px;border-radius:14px;
     background:linear-gradient(105deg,rgba(255,124,26,.16),rgba(119,119,201,.14));
     border:1px solid rgba(255,124,26,.42)}
@@ -912,7 +919,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eg · prizes</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eh · add-to-home</div>
     </section>
 
     <!-- TODAY -->
@@ -1485,7 +1492,7 @@
        challenge nobody does. Set before the early returns so it survives the
        countdown and out-of-tour views too. */
     var tc=document.getElementById('todayChallenge');
-    if(tc) tc.innerHTML=voteBarHTML(10)+challengeMoreCard(10);
+    if(tc) tc.innerHTML=a2hsNudge()+voteBarHTML(10)+challengeMoreCard(10);
     EVENTS.sort(function(a,b){ return (a.day-b.day) || (tmin(a.time)-tmin(b.time)); });
     EVENTS.forEach(function(e,i){e._i=i;});
     var staff=false;
@@ -2587,6 +2594,7 @@
     help.push(tile('acc-teal','openFeedback()','ti-message-2-heart','Send feedback'));
     if(isAdmin || _previewOn()) help.push(tile('acc-purple','openPreview()','ti-eye','View as\u2026'));
     help.push(tile('acc-orange pulse','openSocials()','ti-brand-instagram','Follow the tour'));
+    if(!isStandalone() && a2hsPlatform()!=='other') help.push(tile('acc-purple','openA2HS()','ti-device-mobile-down','Add to home screen'));
     var _hh=document.getElementById('moreHelp');
     if(_hh) _hh.innerHTML=tileSection('Help & people','sec-teal',help);
     // 2) Tour info: spreadsheet tiles + Hotel + FAQ (everyone) + Flights (everyone) + Excursions (staff & supporters)
@@ -3672,6 +3680,23 @@
   }
   function dismissA2HS(){ var el=document.getElementById('a2hs'); if(el) el.classList.remove('show'); try{ localStorage.setItem('gcs_a2hs','done'); }catch(e){} }
   function openA2HS(){ showA2HS(true); }
+  /* You cannot force a home-screen install \u2014 iOS gives no API for it at all \u2014 so this
+     is a standing reminder rather than a gate. It disappears for good once they're
+     running standalone, or when they dismiss it. */
+  function a2hsDismissKey(){ return 'gcs_a2hs_x_'+(SETTINGS.tourName||'tour'); }
+  function dismissA2HS(ev){
+    if(ev&&ev.stopPropagation) ev.stopPropagation();
+    try{ localStorage.setItem(a2hsDismissKey(),'1'); }catch(e){}
+    renderToday();
+  }
+  function a2hsNudge(){
+    if(isStandalone() || a2hsPlatform()==='other') return '';
+    try{ if(localStorage.getItem(a2hsDismissKey())==='1') return ''; }catch(e){}
+    return '<div class="a2hsnudge" onclick="openA2HS()">'+
+      '<i class="ti ti-device-mobile-down"></i>'+
+      '<div><b>Add this to your home screen</b><span>Opens full screen, and no hunting through WhatsApp for the link.</span></div>'+
+      '<i class="ti ti-x x" onclick="dismissA2HS(event)"></i></div>';
+  }
   var toastT;
   function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},1800);}
 
@@ -4934,7 +4959,7 @@
       chTermRow('ti-message-2','Your coach messages you here','Team messages and one-to-one.<br><br>It won\u2019t buzz like WhatsApp. The message is waiting for you when you open the app \u2014 so <b>open it a few times a day.</b> First thing, after lunch, after tea.')+
       chTermRow('ti-bolt','The '+esc(chName()),'A new challenge every day, XP for each one, and leaderboards for players and teams.<br><br><b>It\u2019s a competition, and there are prizes</b> \u2014 for the highest individual score and the top team at the end of the week.<br><br>Optional \u2014 but it\u2019s also how you\u2019ll end up knowing people from the other seven squads.')+
       chTermRow('ti-urgent','If you need help','Tap the orange button at the top of any screen. Tournament staff and your coach, one tap.')+
-      chTermRow('ti-device-mobile-down','Keep it handy','Add it to your home screen and it opens like a normal app. There\u2019s a link for that on the Tour hub.')+
+      chTermRow('ti-device-mobile-down','Keep it handy','Add it to your home screen and it opens like a normal app \u2014 and you won\u2019t have to go hunting through WhatsApp for the link every time.<br><br>There\u2019s a reminder at the top of your schedule until you do.')+
       (readOnly
         ? '<button class="cta chcta" onclick="chTermsGo(2)">Next \u2014 challenge rules <i class="ti ti-arrow-right"></i></button>'
         : '<button class="cta chcta" onclick="chTermsGo(2)">Next <i class="ti ti-arrow-right"></i></button>');
