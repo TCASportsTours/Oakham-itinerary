@@ -892,7 +892,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30dx · no-numbers-anywhere</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30dy · coach-name-field</div>
     </section>
 
     <!-- TODAY -->
@@ -4269,7 +4269,7 @@
     roster.forEach(function(n,ni){
       h+='<button class="squadopt" onclick="pickByIndex('+ni+')"><span class="dot" style="background:var(--surface);color:#fff"><i class="ti '+(asStaff?'ti-user-star':'ti-user')+'"></i></span><span style="flex:1"><b>'+esc(n)+'</b></span><i class="ti ti-chevron-right arr"></i></button>';
     });
-    if(asStaff) h+='<button class="squadopt" onclick="pickByIndex(-1)"><span class="dot" style="background:var(--surface);color:#fff"><i class="ti ti-dots"></i></span><span style="flex:1"><b>I\u2019m not listed</b><span>Continue without picking a name</span></span><i class="ti ti-chevron-right arr"></i></button>';
+    if(asStaff) h+='<button class="squadopt" onclick="staffTypeName()"><span class="dot" style="background:var(--surface);color:#fff"><i class="ti ti-pencil"></i></span><span style="flex:1"><b>I\u2019m not listed</b><span>Type your name instead</span></span><i class="ti ti-chevron-right arr"></i></button>';
     h+='<button class="squadopt" onclick="backToTeams()" style="margin-top:8px;opacity:.8"><span class="dot" style="background:var(--surface);color:#fff"><i class="ti ti-chevron-left"></i></span><span style="flex:1"><b>Not '+esc(team)+'?</b><span>Tap to go back to teams</span></span></button>';
     host.innerHTML=h;
   }
@@ -4278,6 +4278,20 @@
     currentPlayer=name;
     if(c.staff){ staffPending=false; } else { savePlayer(c.team,name); }
     signIn(c.team, c.staff);
+  }
+  /* Second coaches, stand-ins and anyone added late: type a name rather than signing in
+     blank. The name is what appears on roll calls and batting orders, so an unnamed staff
+     session is worth avoiding. */
+  function staffTypeName(){
+    var host=document.getElementById('teamBtns'); if(!host) return;
+    var c=_pickCtx||{};
+    var wl=document.getElementById('welcomeLead');
+    if(wl){ wl.textContent='Enter your name to continue.'; wl.style.color='var(--orange)'; wl.style.fontWeight='700'; }
+    host.innerHTML=
+      '<div style="margin:2px 2px 10px"><input id="pickName" class="nameinput" placeholder="Your name" autocomplete="name"></div>'+
+      '<button class="cibig cibig-go" onclick="pickTyped()"><i class="ti ti-check"></i> Continue</button>'+
+      '<button class="squadopt" style="margin-top:12px;opacity:.8" onclick="showNamePick(_pickCtx.team,true)"><span class="dot" style="background:var(--surface);color:#fff"><i class="ti ti-chevron-left"></i></span><span style="flex:1"><b>Back</b><span>Pick from the list instead</span></span></button>';
+    var el=document.getElementById('pickName'); if(el) el.focus();
   }
   function pickTyped(){
     var el=document.getElementById('pickName'), nm=el?(el.value||'').trim():'';
