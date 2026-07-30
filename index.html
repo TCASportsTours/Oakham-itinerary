@@ -662,6 +662,9 @@
   .chterm{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
   .chterm .ic{width:34px;height:34px;border-radius:10px;background:rgba(119,119,201,.16);color:#9a9ad6;
     display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:18px}
+  .chterm.behave .ic{background:rgba(81,206,167,.16);color:#7bdcc0}
+  .chcheck.behave{background:rgba(81,206,167,.10);border:1px solid rgba(81,206,167,.34);
+    border-radius:11px;padding:11px 12px;margin-top:10px}
   .chterm b{display:block;font-size:14.5px;color:#fff}
   .chterm p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:3px}
     border-left:2px solid rgba(81,206,167,.5);border-radius:0 8px 8px 0;padding:8px 10px}
@@ -892,7 +895,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eb · ask-for-challenge</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ed · behaviour-agreement</div>
     </section>
 
     <!-- TODAY -->
@@ -994,7 +997,7 @@
       <div id="pitchMapBody"></div>
     </section>
     <section class="screen" id="s-chterms">
-      <button class="backbtn" onclick="go('more')"><i class="ti ti-chevron-left"></i> Back</button>
+      <button class="backbtn" id="chTermsBack" onclick="go('more')"><i class="ti ti-chevron-left"></i> Back</button>
       <div id="chTermsBody"></div>
     </section>
     <section class="screen" id="s-challenge">
@@ -1606,7 +1609,15 @@
     var sw=document.getElementById('switchTeamBtn'); if(sw) sw.style.display='none';   // replaced by the live team-filter dropdown for staff
     var tf=document.getElementById('teamFilter');
     if(tf){ if(isAdmin){ var _o='<option value=\"__all__\">All teams</option>'; (TEAMS_LIST||[]).forEach(function(t){ _o+='<option value=\"'+String(t).replace(/\"/g,'&quot;')+'\">'+t+'</option>'; }); tf.innerHTML=_o; tf.value=viewAll?'__all__':currentSquad; tf.style.display=''; } else { tf.style.display='none'; } }
-    ciInit();renderToday();renderMore();go('today');loadWeather();startAlerts();startLiveClock();fetchLineups(renderToday);
+    ciInit();renderToday();renderMore();loadWeather();startAlerts();startLiveClock();fetchLineups(renderToday);
+    /* A player has to read and accept the rules before they get into the app at all.
+       Once only, stored against that player on that device. Staff, supporters and
+       officials go straight in \u2014 the rules are about entering the challenge. */
+    if(role==='player' && myPlayerId() && CHALLENGES.length && !chTermsAccepted()){
+      _termsThen='app'; openChTerms(false);
+    } else {
+      go('today');
+    }
     saveSession();
   }
   function applyTeamFilter(val){
@@ -4844,13 +4855,24 @@
      own device, so a shared phone doesn't accept on someone else's behalf. */
   function chTermsKey(){ return 'gcs_chterms_'+(SETTINGS.tourName||'tour')+'_'+(myPlayerId()||'anon'); }
   function chTermsAccepted(){ try{ return localStorage.getItem(chTermsKey())==='1'; }catch(e){ return true; } }
+  var _termsThen='challenge';
   function acceptChTerms(){
-    if(!document.getElementById('chTermsTick').checked){
-      var w=document.getElementById('chTermsWarn'); if(w) w.style.display='block';
+    var a=document.getElementById('chTermsTick'), b=document.getElementById('chBehaveTick');
+    var w=document.getElementById('chTermsWarn');
+    if(!a||!a.checked||!b||!b.checked){
+      if(w){ w.textContent = (a&&a.checked&&(!b||!b.checked))
+        ? 'Please agree to the behaviour points as well.'
+        : ((b&&b.checked&&(!a||!a.checked)) ? 'Please tick the challenge rules too.' : 'Please tick both boxes to carry on.');
+        w.style.display='block'; }
       return;
     }
     try{ localStorage.setItem(chTermsKey(),'1'); }catch(e){}
+    if(_termsThen==='app'){ _termsThen='challenge'; go('today'); toast('Welcome to Oakham'); return; }
     openChallenge();
+  }
+  function chBehaveRow(icon,title,body){
+    return '<div class="chterm behave"><div class="ic"><i class="ti '+icon+'"></i></div>'+
+           '<div><b>'+title+'</b><p>'+body+'</p></div></div>';
   }
   function chTermRow(icon,title,body){
     return '<div class="chterm"><div class="ic"><i class="ti '+icon+'"></i></div>'+
@@ -4858,11 +4880,18 @@
   }
   function openChTerms(readOnly){
     showOnly('s-chterms');
+    /* No way round the gate: the Back button only exists when they're re-reading. */
+    var bb=document.getElementById('chTermsBack');
+    if(bb) bb.style.display = readOnly ? '' : 'none';
     document.getElementById('appTitle').textContent='Rules & how to enter';
     document.getElementById('appSub').textContent=chName();
     var tags=socialTagLine().replace('@'+igHandle()+' ','');
     document.getElementById('chTermsBody').innerHTML=
-      '<div class="chintro"><b>Before you start.</b><p>Have a read \u2014 it takes a minute and it saves your entry being turned down later. Taking part is optional and nobody is worse off for sitting it out.</p></div>'+
+      (readOnly
+        ? '<div class="chintro"><b>The rules.</b><p>What counts, what doesn\u2019t, and what we ask of everyone taking part.</p></div>'
+        : (_termsThen==='app'
+            ? '<div class="chintro"><b>One thing before you go in.</b><p>These are the rules for the '+esc(chName())+'. Have a read \u2014 it takes a minute, and everyone at Oakham has agreed to the same ones. Taking part in the challenge is optional; reading this isn\u2019t.</p></div>'
+            : '<div class="chintro"><b>Before you start.</b><p>Have a read \u2014 it takes a minute and it saves your entry being turned down later. Taking part is optional and nobody is worse off for sitting it out.</p></div>'))+
 
       chTermRow('ti-camera','1. You take the photo','Each challenge tells you what to capture. You take it yourself \u2014 you\u2019re the one who\u2019s there.')+
       chTermRow('ti-brand-instagram','2. Post it with the tags','It must be tagged <b>@'+esc(igHandle())+'</b> and include <b>'+esc(tags)+'</b>. Tap <i>Copy caption &amp; tags</i> and paste. Without the tags we can\u2019t find it and it may be turned down.')+
@@ -4875,20 +4904,31 @@
       chTermRow('ti-mood-smile','Keep it kind','Laugh with people, not at them. Anything unkind, unsafe or inappropriate will be rejected and may be reported to your team manager.')+
       chTermRow('ti-license','If you let us share it','There\u2019s an optional tick giving GCS permission to repost. It\u2019s genuinely optional \u2014 leave it unticked and you still get the full XP. Ask us any time and we\u2019ll take a post down.')+
       chTermRow('ti-gavel','Decisions','GCS staff check entries and award the XP. We can turn one down or take XP back if something isn\u2019t right, and our decision is final.')+
+      '<div class="chintro" style="margin-top:22px"><b>And while you\u2019re here.</b><p>Six things we ask of every player at Oakham. Nothing surprising \u2014 but we\u2019d rather say it than assume it.</p></div>'+
+      chBehaveRow('ti-shield-check','Play it right','Give everything for your team, and shake hands like you mean it. Accept the umpire\u2019s decision first time, every time.')+
+      chBehaveRow('ti-mood-smile','Look after each other','Nobody left out, nobody picked on. If someone\u2019s having a rough time of it, be the one who notices.')+
+      chBehaveRow('ti-ear','Listen to staff','Coaches, umpires, TCA staff, Oakham School staff. First time of asking.')+
+      chBehaveRow('ti-map-pin','Stay where you should be','Don\u2019t wander off on your own. Staff need to know where you are \u2014 help them out.')+
+      chBehaveRow('ti-home','Respect the place','Oakham School is lending us their ground and their boarding houses. Leave both as you found them.')+
+      chBehaveRow('ti-moon','Rooms by 21:00, quiet by 22:00','Four days is a long tournament on no sleep \u2014 for you and for everyone down the corridor.')+
+
 
       (readOnly
         ? '<button class="cta chcta" onclick="openChallenge()"><i class="ti ti-arrow-left"></i> Back to the challenges</button>'
-        : '<label class="chcheck perm" style="margin-top:18px"><input type="checkbox" id="chTermsTick"><span>I\u2019ve read the rules and I\u2019ll stick to them.</span></label>'+
-          '<div id="chTermsWarn" class="cherr" style="display:none">Please tick the box to carry on.</div>'+
-          '<button class="cta chcta" onclick="acceptChTerms()"><i class="ti ti-check"></i> Agree &amp; see the challenges</button>')+
+        : '<label class="chcheck perm" style="margin-top:18px"><input type="checkbox" id="chTermsTick"><span>I\u2019ve read the challenge rules and I\u2019ll stick to them.</span></label>'+
+          '<label class="chcheck behave"><input type="checkbox" id="chBehaveTick"><span>I agree to the six things above, for the whole tournament.</span></label>'+
+          '<div id="chTermsWarn" class="cherr" style="display:none">Please tick both boxes to carry on.</div>'+
+          '<button class="cta chcta" onclick="acceptChTerms()"><i class="ti ti-check"></i> '+
+            (_termsThen==='app'?'Agree &amp; go in':'Agree &amp; see the challenges')+'</button>')+
       '<div style="height:8px"></div>'+
       '<button class="chmore" onclick="openChHelpPlayer()"><i class="ti ti-help-circle"></i> More detail</button>'+
       '<button class="chmore" onclick="openChHelpParent()"><i class="ti ti-users"></i> Show a parent</button>';
   }
 
   function openChallenge(){
-    /* First visit for this player: rules first, challenges after. */
-    if(role==='player' && myPlayerId() && !chTermsAccepted()){ openChTerms(false); return; }
+    /* Anyone who somehow reaches this without having accepted \u2014 an older session,
+       a cleared browser \u2014 still gets the rules first. */
+    if(role==='player' && myPlayerId() && !chTermsAccepted()){ _termsThen='challenge'; openChTerms(false); return; }
     showOnly('s-challenge');
     document.getElementById('appTitle').textContent=chName();
     document.getElementById('appSub').textContent='Earn XP for your profile';

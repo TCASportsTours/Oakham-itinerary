@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GCS Oakham 2026 — get the app</title>
+<meta name="description" content="Everything for the four days at Oakham: fixtures, pitches, live alerts and the GCS Oakham Challenge.">
+
+<!-- WhatsApp / iMessage / Facebook preview card -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="GCS Oakham 2026 — get the app">
+<meta property="og:description" content="Fixtures, pitch maps, live alerts and the GCS Oakham Challenge. Everything for the four days, on your phone.">
+<meta property="og:image" content="https://oakham.globalcricketseries.com/oakham_share_card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://oakham.globalcricketseries.com/start.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#161615">
+<link rel="icon" href="gcs_mark_512.png">
+<link rel="apple-touch-icon" href="gcs_mark_512.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --orange:#ff7c1a; --teal:#51cea7; --purple:#7777c9;
+    --ink:#161615; --panel:#1f1f1d; --line:rgba(255,255,255,.10);
+    --muted:#a3a39d; --faint:#6f6f6a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--ink); color:#fff;
+    font-family:'Josefin Sans',system-ui,-apple-system,sans-serif;
+    font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* the brand's monogram texture, on its own diagonal */
+  /* The brand texture is the wordmark repeated, not a monogram — set on its own
+     diagonal and kept to a whisper so it reads as paper, not pattern. */
+  body::before{
+    content:''; position:fixed; inset:-30%; z-index:0; pointer-events:none;
+    transform:rotate(-12deg);
+    background-repeat:repeat;
+    background-size:720px 62px;
+    background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='720' height='62'>\
+<text x='0' y='30' font-family='Josefin Sans,sans-serif' font-weight='700' font-size='26' \
+fill='%23ffffff' fill-opacity='0.045' letter-spacing='1'>GLOBAL CRICKET SERIES  GLOBAL CRICKET SERIES</text>\
+<text x='120' y='58' font-family='Josefin Sans,sans-serif' font-weight='700' font-size='26' \
+fill='%23ffffff' fill-opacity='0.045' letter-spacing='1'>GLOBAL CRICKET SERIES  GLOBAL CRICKET SERIES</text>\
+</svg>");
+  }
+  .wrap{position:relative; z-index:1; max-width:560px; margin:0 auto; padding:0 20px 64px}
+
+  /* ---------- hero ---------- */
+  header{padding:36px 0 4px}
+  .mark{display:block}
+  .lockup{width:100%;max-width:340px;height:auto;display:block}
+
+  h1{
+    font-size:clamp(46px,15vw,74px); line-height:.94; margin:24px 0 0;
+    font-weight:700; font-style:italic; letter-spacing:-.015em;
+  }
+  h1 em{font-style:italic;color:var(--orange)}
+  .dates{font-size:17px;color:var(--muted);margin:14px 0 0;font-weight:400}
+
+  /* ---------- the countdown: numbers on scoreboard slats ---------- */
+  .board{display:flex;gap:8px;margin:26px 0 0}
+  .slat{
+    flex:1; background:var(--panel); border:1px solid var(--line);
+    border-top:3px solid var(--orange); border-radius:10px;
+    padding:12px 6px 10px; text-align:center;
+  }
+  .slat b{display:block;font-size:32px;font-weight:700;font-style:italic;line-height:1;color:#fff;
+    font-variant-numeric:tabular-nums}
+  .slat span{display:block;font-size:10px;letter-spacing:.16em;color:var(--faint);margin-top:6px;font-weight:600}
+  .board.live .slat{border-top-color:var(--teal)}
+  .boardnote{font-size:13px;color:var(--faint);margin:10px 2px 0}
+
+  /* ---------- primary action ---------- */
+  .go{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    margin:24px 0 0; padding:19px 20px; border-radius:15px;
+    background:linear-gradient(105deg,var(--orange),#e0650c);
+    color:var(--ink); font-size:20px; font-weight:700; font-style:italic;
+    text-decoration:none; border:0; width:100%; cursor:pointer;
+    font-family:inherit; transition:transform .12s ease,filter .12s ease;
+  }
+  .go:active{transform:scale(.985);filter:brightness(1.08)}
+  .go svg{width:22px;height:22px;flex:0 0 auto}
+  .gosub{text-align:center;font-size:13px;color:var(--faint);margin:10px 0 0}
+
+  /* ---------- who are you ---------- */
+  .who{display:flex;gap:7px;margin:38px 0 0;background:var(--panel);
+    border:1px solid var(--line);border-radius:13px;padding:5px}
+  .who button{
+    flex:1;padding:11px 4px;border:0;border-radius:9px;background:transparent;
+    color:var(--muted);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    transition:background .15s ease,color .15s ease;
+  }
+  .who button[aria-selected="true"]{background:var(--orange);color:var(--ink);font-weight:700}
+  .who button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+  /* ---------- content ---------- */
+  section{display:none;animation:in .3s ease both}
+  section.on{display:block}
+  @keyframes in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+  h2{font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:var(--orange);
+    margin:36px 0 12px;font-weight:700}
+  h3{font-size:20px;margin:26px 0 8px;font-weight:700;font-style:italic}
+  p{margin:0 0 14px;color:var(--muted);font-weight:400}
+  p strong,li strong{color:#fff;font-weight:600}
+  ul{margin:0 0 14px;padding-left:20px;color:var(--muted);font-weight:400}
+  li{margin-bottom:7px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px}
+  .card.orange{border-color:rgba(255,124,26,.42);background:rgba(255,124,26,.09)}
+  .card.teal{border-color:rgba(81,206,167,.40);background:rgba(81,206,167,.09)}
+  .card.purple{border-color:rgba(119,119,201,.42);background:rgba(119,119,201,.09)}
+  .card p:last-child{margin-bottom:0}
+  .card b{color:#fff}
+
+  .say{
+    font-size:19px;font-weight:700;font-style:italic;color:#fff;
+    border-left:3px solid var(--orange);padding:4px 0 4px 15px;margin:14px 0;
+  }
+
+  .steps{counter-reset:s;list-style:none;padding:0;margin:0 0 14px}
+  .steps li{counter-increment:s;position:relative;padding-left:38px;margin-bottom:13px;color:var(--muted)}
+  .steps li::before{
+    content:counter(s);position:absolute;left:0;top:1px;width:26px;height:26px;border-radius:8px;
+    background:rgba(255,124,26,.18);color:var(--orange);font-weight:700;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .xp{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 16px}
+  .xp span{background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:7px 13px;font-size:13.5px;color:var(--muted)}
+  .xp span b{color:var(--orange);font-weight:700}
+
+  .home{display:flex;gap:12px;align-items:flex-start;margin:0 0 10px}
+  .home i{font-style:normal;font-size:20px;flex:0 0 auto;line-height:1.4}
+  .home div{font-size:15px;color:var(--muted)}
+  .home b{color:#fff}
+
+  footer{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--faint)}
+  footer b{color:var(--muted);font-weight:600}
+  a{color:var(--teal)}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="mark">
+      <img class="lockup" src="gcs_england_landscape.svg" alt="Global Cricket Series England" width="1663" height="570">
+    </div>
+
+    <h1>Oakham<br><em>2026</em></h1>
+    <p class="dates">3&ndash;6 August &middot; Oakham School</p>
+
+    <div class="board" id="board" aria-live="polite">
+      <div class="slat"><b id="d">–</b><span>DAYS</span></div>
+      <div class="slat"><b id="h">–</b><span>HRS</span></div>
+      <div class="slat"><b id="m">–</b><span>MIN</span></div>
+    </div>
+    <p class="boardnote" id="boardnote">until the first ball</p>
+
+    <a class="go" href="/" id="open">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="2" width="14" height="20" rx="3"/><path d="M12 18h.01"/>
+      </svg>
+      Open the app
+    </a>
+    <p class="gosub">No app store, no password, no account.</p>
+  </header>
+
+  <div class="who" role="tablist" aria-label="Who are you?">
+    <button role="tab" aria-selected="true"  aria-controls="p-parent" id="t-parent"  onclick="pick('parent')">I&rsquo;m a parent</button>
+    <button role="tab" aria-selected="false" aria-controls="p-player" id="t-player"  onclick="pick('player')">I&rsquo;m a player</button>
+    <button role="tab" aria-selected="false" aria-controls="p-staff"  id="t-staff"   onclick="pick('staff')">Team staff</button>
+  </div>
+
+  <!-- ============================================ PARENT -->
+  <section id="p-parent" class="on" role="tabpanel" aria-labelledby="t-parent">
+    <h2>Start here</h2>
+    <p>Tap <b>Open the app</b> above, choose <b>Supporter</b>, then pick your child&rsquo;s team. That&rsquo;s it &mdash; you stay signed in all week.</p>
+
+    <div class="card orange">
+      <p><b>Then add it to your home screen.</b> It opens like a normal app and you&rsquo;ll actually use it.</p>
+    </div>
+    <div id="a2hs-parent"></div>
+
+    <h2>What&rsquo;s on it</h2>
+    <ul>
+      <li><strong>Every fixture</strong> and start time, updated live</li>
+      <li><strong>Which pitch</strong> your child is on, with a map of the ground</li>
+      <li><strong>Alerts</strong> the moment anything moves</li>
+      <li><strong>Weather</strong> for Oakham</li>
+      <li><strong>Emergency contacts</strong> &mdash; tournament staff and the team coach, one tap</li>
+      <li>Parking, what&rsquo;s on site, and the Wisteria Hotel supporters&rsquo; discount</li>
+    </ul>
+    <p>A family without it will be the last to know when something moves. Over four days, things move.</p>
+
+    <h2>How the coach reaches your child</h2>
+    <div class="card teal">
+      <p><b>Through the app, not WhatsApp.</b> No phone numbers change hands in either direction, there&rsquo;s no group chat with children in it, and every message comes from a named staff account.</p>
+      <p>It doesn&rsquo;t buzz the phone like WhatsApp does &mdash; messages appear when the app is opened. Please nudge your child to <b>open it a few times a day</b>, especially first thing and after tea.</p>
+    </div>
+
+    <h2>The GCS Oakham Challenge</h2>
+    <p>A daily photo challenge with points and leaderboards. The photos aren&rsquo;t really the aim.</p>
+    <p><strong>Eight squads arrive on Monday not knowing each other.</strong> Meet someone from a team you&rsquo;ve never played. Get a photo with a player from every other team. Find the leading run scorer. None of it can be done sitting with your own squad.</p>
+    <p>It gives a shy twelve-year-old a specific, easy reason to walk over and say hello. The conversations are the point.</p>
+
+    <h3>Does my child need social media?</h3>
+    <p><strong>No.</strong> If they&rsquo;re 13+ with an account they post it themselves. If not, they send you the photo and caption and you post it. Same points either way. And the whole thing is optional.</p>
+
+    <h3>If you&rsquo;d rather they weren&rsquo;t photographed</h3>
+    <div class="card purple">
+      <p><b>Tell us and we&rsquo;ll take care of it.</b> Your child goes on a list only GCS staff see. Every entry is checked against it and nothing featuring them is shared.</p>
+      <p>No wristband, no badge, no list on a noticeboard, and no other family is told.</p>
+      <p><b>They can still play.</b> The kit bag shot, the GCS flag, the trophy, a scorecard, a bucket golf shot &mdash; over 100 points without ever being in front of a camera.</p>
+      <p>Worth telling them directly too: <i>&ldquo;if anyone asks for a photo for the challenge, just say no thanks.&rdquo;</i></p>
+    </div>
+
+    <h3>What we ask of the players</h3>
+    <p>Not of you &mdash; tracking down other families isn&rsquo;t realistic. The rule sits with the children: before anyone else is in a photo, ask them, <strong>and say it&rsquo;s for the Challenge</strong>.</p>
+    <p class="say">&ldquo;Can I get a photo with you for the GCS Challenge?&rdquo;</p>
+    <p>Because everybody gets asked the same way, a child who says no is doing what any player might do that day. Nobody stands out.</p>
+  </section>
+
+  <!-- ============================================ PLAYER -->
+  <section id="p-player" role="tabpanel" aria-labelledby="t-player">
+    <h2>Start here</h2>
+    <p>Tap <b>Open the app</b> above, choose <b>Player</b>, pick your team, then tap your name.</p>
+
+    <div class="card orange">
+      <p><b>Everyone else will have it.</b> Don&rsquo;t be the one asking what time you&rsquo;re playing.</p>
+    </div>
+    <div id="a2hs-player"></div>
+
+    <h2>What&rsquo;s on it</h2>
+    <p>Your fixtures and start times. <strong>Which pitch you&rsquo;re on</strong>, with a map. What&rsquo;s for tea. Where you need to be, all week.</p>
+
+    <h2>Your coach messages you on it</h2>
+    <div class="card teal">
+      <p>&ldquo;Warm-ups moved to 13:45.&rdquo; &ldquo;Whites tomorrow.&rdquo; &ldquo;Come and see me before you go in.&rdquo;</p>
+      <p><b>It won&rsquo;t buzz like WhatsApp.</b> The message is waiting when you open the app &mdash; so open it a few times a day. First thing, after lunch, after tea.</p>
+    </div>
+
+    <h2>The GCS Oakham Challenge</h2>
+    <p>A new challenge every day. You earn <strong>XP</strong>, and there&rsquo;s a leaderboard for players and one for teams.</p>
+    <div class="xp">
+      <span><b>485</b> XP all week</span>
+      <span><b>11</b> challenges</span>
+      <span><b>8</b> badges</span>
+    </div>
+    <ul>
+      <li><strong>Find the Flag!</strong> &mdash; hunt down a GCS flag</li>
+      <li><strong>Make a New Cricket Friend</strong> &mdash; someone from a team you&rsquo;ve never played</li>
+      <li><strong>Collect The Set</strong> &mdash; a photo with a player from every other team. 100 XP, takes all week</li>
+      <li><strong>Meet the Orange Cap</strong> &mdash; track down the leading run scorer</li>
+      <li><strong>Bucket Golf Hero</strong> &mdash; your best shot. Out of the rough, off a tree, the more ridiculous the better</li>
+      <li><strong>Champions&rsquo; Photo</strong> &mdash; find the trophy on finals day</li>
+    </ul>
+
+    <h3>How to do one</h3>
+    <ol class="steps">
+      <li><strong>Take the photo yourself.</strong> It&rsquo;s your tournament.</li>
+      <li><strong>Post it</strong> tagging <b>@globalcricketseries</b> with <b>#GCSOakham2026</b>. Tap <i>Copy caption &amp; tags</i> and paste. No account? Send it to a parent and they&rsquo;ll post it &mdash; same XP.</li>
+      <li><strong>Paste the link into the app.</strong> Most are approved straight away.</li>
+    </ol>
+    <p><strong>Get in early.</strong> The daily ones are worth bonus XP for the first hour, and being first to finish one gets you a badge nobody can take off you.</p>
+
+    <h3>Two rules</h3>
+    <p><strong>Ask first &mdash; and say it&rsquo;s for the Challenge.</strong> Everyone at Oakham knows what that means.</p>
+    <p class="say">&ldquo;Can I get a photo with you for the GCS Challenge?&rdquo;</p>
+    <p>If they say no, fine &mdash; find someone else, there are seven other teams. <strong>And be kind.</strong> Laugh with people, not at them.</p>
+
+    <h3>The actual point</h3>
+    <p>You&rsquo;ll be there with <strong>seven squads you&rsquo;ve never met</strong>. Most of these make you go and talk to them. That&rsquo;s on purpose &mdash; by Thursday you should know people from every team, and that&rsquo;s worth more than the XP.</p>
+  </section>
+
+  <!-- ============================================ STAFF -->
+  <section id="p-staff" role="tabpanel" aria-labelledby="t-staff">
+    <h2>Start here</h2>
+    <p>Tap <b>Open the app</b> above, choose <b>Staff</b>, and enter the password from your email. Then pick your team and <strong>tap your own name</strong>.</p>
+    <p>Not listed? Tap <b>I&rsquo;m not listed</b> and type your name &mdash; it appears on roll calls and batting orders, so don&rsquo;t skip it.</p>
+    <div id="a2hs-staff"></div>
+
+    <h2>What you get</h2>
+    <ul>
+      <li><strong>Squad list</strong> &mdash; medical, dietary, and a parent on one tap. Your squad only</li>
+      <li><strong>Batting orders</strong> &mdash; set one and it lands on the scorer&rsquo;s screen automatically. The opposition can&rsquo;t see it</li>
+      <li><strong>Roll call</strong> &mdash; tick-list register for meals and matches</li>
+      <li><strong>Messaging</strong> &mdash; your whole squad, or one player privately</li>
+    </ul>
+
+    <h2>Please message through the app</h2>
+    <div class="card teal">
+      <p>No numbers change hands. No group chat with children in it. Every message on the record from a named account.</p>
+      <p><b>Please don&rsquo;t set up a squad WhatsApp group for Oakham.</b></p>
+      <p>It doesn&rsquo;t buzz their phone, so anything urgent still needs saying out loud &mdash; and tell them on Monday: <i>check the app, that&rsquo;s where I&rsquo;ll message you.</i></p>
+    </div>
+
+    <h2>Before Monday</h2>
+    <ol class="steps">
+      <li><strong>Check your squad list</strong> and tell us anything wrong.</li>
+      <li><strong>Read the medical notes.</strong> There are a handful that matter. Know them before the first meal, not at it.</li>
+      <li><strong>Send the parents&rsquo; link</strong> to your families &mdash; this page works for them too.</li>
+    </ol>
+
+    <h2>The challenge &mdash; what we need from you</h2>
+    <p><strong>Mention it.</strong> A word at breakfast &mdash; &ldquo;anyone done today&rsquo;s one yet?&rdquo; &mdash; is worth more than anything in the app. Players who start on day one keep going; ones who don&rsquo;t, never start.</p>
+    <p>And reinforce the rule. Before anyone else is in a photo they must be asked, <strong>and told it&rsquo;s for the GCS Challenge</strong>.</p>
+    <p class="say">&ldquo;Can I get a photo with you for the GCS Challenge?&rdquo;</p>
+    <p>Say it at Monday&rsquo;s team meeting and correct the bare version if you hear it. If a player would rather not be in photos, let us know quietly &mdash; no need to make anything of it.</p>
+  </section>
+
+  <footer>
+    <p><b>Oakham School Cricket Pavilion</b><br>Kilburn Road, Oakham, Rutland LE15 6QL</p>
+    <p>Problems? Find TCA staff at the pavilion, or use <b>Get help now</b> in the app.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  /* ---- countdown to the first ball: Monday 3 August 2026, 14:30 ---- */
+  var START = new Date(2026,7,3,14,30,0);
+  var END   = new Date(2026,7,6,18,30,0);
+  function pad(n){ return n<10?('0'+n):String(n); }
+  function tick(){
+    var now=new Date(), board=document.getElementById('board'), note=document.getElementById('boardnote');
+    var d=document.getElementById('d'), h=document.getElementById('h'), m=document.getElementById('m');
+    if(now>=END){
+      board.classList.remove('live');
+      d.textContent='—'; h.textContent='—'; m.textContent='—';
+      note.textContent='That\u2019s a wrap. See you next time.';
+      return;
+    }
+    if(now>=START){
+      board.classList.add('live');
+      var day=Math.floor((now-START)/86400000)+1;
+      d.textContent=day; h.textContent=pad(now.getHours()); m.textContent=pad(now.getMinutes());
+      board.children[0].querySelector('span').textContent='DAY';
+      board.children[1].querySelector('span').textContent='HRS';
+      board.children[2].querySelector('span').textContent='MIN';
+      note.textContent='Under way now \u2014 live scores in the app.';
+      return;
+    }
+    var ms=START-now;
+    d.textContent=Math.floor(ms/86400000);
+    h.textContent=pad(Math.floor(ms/3600000)%24);
+    m.textContent=pad(Math.floor(ms/60000)%60);
+  }
+  tick(); setInterval(tick,20000);
+
+  /* ---- add to home screen, for the device actually in their hand ---- */
+  var ua=navigator.userAgent||'';
+  var iOS=/iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints>1);
+  var android=/Android/i.test(ua);
+  var steps = iOS
+    ? '<div class="home"><i>\u{1F4F2}</i><div><b>Add to your home screen</b><br>Tap <b>Share</b> at the bottom of Safari, scroll down, then <b>Add to Home Screen</b>.</div></div>'
+    : android
+    ? '<div class="home"><i>\u{1F4F2}</i><div><b>Add to your home screen</b><br>Tap the <b>three dots</b> in Chrome, then <b>Add to Home screen</b>.</div></div>'
+    : '<div class="home"><i>\u{1F4F2}</i><div><b>Open this on your phone</b><br>Then add it to your home screen \u2014 iPhone: Share \u2192 Add to Home Screen. Android: three dots \u2192 Add to Home screen.</div></div>';
+  ['parent','player','staff'].forEach(function(k){
+    var el=document.getElementById('a2hs-'+k); if(el) el.innerHTML=steps;
+  });
+
+  /* ---- who are you ---- */
+  window.pick=function(k){
+    ['parent','player','staff'].forEach(function(x){
+      document.getElementById('p-'+x).classList.toggle('on', x===k);
+      document.getElementById('t-'+x).setAttribute('aria-selected', x===k?'true':'false');
+    });
+    try{ history.replaceState(null,'','?for='+k); }catch(e){}
+  };
+  var q=(location.search.match(/[?&]for=(parent|player|staff)/)||[])[1];
+  if(q) window.pick(q);
+})();
+</script>
+</body>
+</html>
