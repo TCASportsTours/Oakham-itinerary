@@ -945,7 +945,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ej · consent-record</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ek · consent-fix</div>
     </section>
 
     <!-- TODAY -->
@@ -6109,14 +6109,15 @@
                 accepted_at: Date.now(), rules:true, behaviour:true };
     CONSENTS[id] = rec;
     try{
-      fetch(API+'?type=consents', { method:'POST', headers:{'content-type':'application/json'},
-        body: JSON.stringify({ ok:true, ts:Date.now(), data:{ __merge:true, ['c_'+id]:rec } }) })
+      var body={}; body['c_'+id]=rec;
+      fetch('/.netlify/functions/tour?type=consents',{method:'POST',
+        headers:{'content-type':'application/json'}, body:JSON.stringify(body), keepalive:true})
       .catch(function(){});
     }catch(e){}
   }
 
   function fetchConsents(cb){
-    getJSON(API+'?type=consents').then(function(r){ return r.json(); }).then(function(d){
+    getJSON('?type=consents').then(function(r){ return r.ok?r.json():{}; }).then(function(d){
       var raw = (d&&d.data)||d||{};
       CONSENTS = {};
       Object.keys(raw).forEach(function(k){
