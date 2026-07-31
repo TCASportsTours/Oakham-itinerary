@@ -18,7 +18,7 @@ import { getStore } from "@netlify/blobs";
 //           votes, pre-orders and check-ins are MERGED by their top-level keys
 //           so two phones submitting at the same moment can't wipe each other.
 
-const MERGE = new Set(["checkins", "votes", "preorders", "lineups", "feedback", "departures", "challenges"]);
+const MERGE = new Set(["checkins", "votes", "preorders", "lineups", "feedback", "departures", "challenges", "consents"]);
 
 export default async (req) => {
   const headers = {
@@ -87,7 +87,7 @@ export default async (req) => {
       await store.set(key, "{}");
       return reply(headers, 200, { ok: true, cleared: key });
     }
-    const RESETTABLE = new Set(["votes", "preorders", "checkins", "stats", "challenges"]);
+    const RESETTABLE = new Set(["votes", "preorders", "checkins", "stats", "challenges", "consents"]);
     if (!RESETTABLE.has(type)) return reply(headers, 400, { ok: false, error: "refused: that slot can't be cleared" });
     await store.set(key, "{}");
     return reply(headers, 200, { ok: true, cleared: key });
