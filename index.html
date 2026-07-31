@@ -348,6 +348,11 @@
   .pvbar span{display:block;font-size:11px;color:rgba(255,255,255,.85);margin-top:1px}
   .pvbar button{background:rgba(22,22,21,.35);color:#fff;border:1px solid rgba(255,255,255,.35);
     border-radius:9px;padding:7px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;flex:0 0 auto}
+  .pvcrumb{display:flex;align-items:center;gap:9px;margin-top:8px;padding:10px 12px;border-radius:11px;
+    background:rgba(119,119,201,.14);border:1px solid rgba(119,119,201,.36)}
+  .pvcrumb>i{font-size:17px;color:#9a9ad6;flex:0 0 auto}
+  .pvcrumb span{font-size:13.5px;color:#fff}
+  .pvcrumb b{color:var(--faint);font-weight:400;padding:0 2px}
   .pvgrid{display:flex;flex-direction:column;gap:8px;margin-top:8px}
   .pvopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
     background:var(--surface);border:1px solid var(--surface-line);border-radius:13px;padding:12px;font:inherit}
@@ -637,7 +642,9 @@
   .chcard.tourwide .cheyebrow{color:#9a9ad6}
   .cheyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff9d52;display:flex;align-items:center;gap:6px}
   .chtitle{font-weight:700;font-style:italic;font-size:23px;color:#fff;line-height:1.15;margin:8px 0 0}
-  .chdesc{font-size:14px;line-height:1.55;color:var(--muted);margin-top:8px}
+  /* pre-line so a blank line in the spreadsheet becomes a paragraph break. Descriptions
+     are escaped, so HTML tags in the sheet would print as literal text. */
+  .chdesc{font-size:14px;line-height:1.55;color:var(--muted);margin-top:8px;white-space:pre-line}
   .chrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
   .chpill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;
     background:rgba(255,255,255,.06);color:var(--muted)}
@@ -945,7 +952,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ek · consent-fix</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30en · desc-linebreaks</div>
     </section>
 
     <!-- TODAY -->
@@ -2622,7 +2629,10 @@
     if(isStaff && MEALS && MEALS.length) help.push(tile('acc-teal','openMealOrders()','ti-tools-kitchen-2','Meal pre-orders'));
     if(isStaff) help.push(tile('acc-orange','openSendAlert()','ti-send','Send alert'));
     help.push(tile('acc-teal','openFeedback()','ti-message-2-heart','Send feedback'));
-    if(isAdmin || _previewOn()) help.push(tile('acc-purple','openPreview()','ti-eye','View as\u2026'));
+    /* Admin only \u2014 and NOT while previewing, because a real coach or player would
+       never see this tile and its presence made the preview inaccurate. The banner
+       across the top is the way back out. */
+    if(isAdmin) help.push(tile('acc-purple','openPreview()','ti-eye','View as\u2026'));
     help.push(tile('acc-orange pulse','openSocials()','ti-brand-instagram','Follow the tour'));
     if(!isStandalone() && a2hsPlatform()!=='other') help.push(tile('acc-purple','openA2HS()','ti-device-mobile-down','Add to home screen'));
     if(isAdmin) help.push(tile('acc-teal','openConsents()','ti-checkbox','Rules accepted'));
@@ -5195,6 +5205,10 @@
              '</div>'+
              (chDesc(x)?'<div class="chdesc">'+esc(chDesc(x))+'</div>':'')+chFollowBtn(x)+
              '<div class="chrow"><span class="chpill"><i class="ti ti-calendar"></i> Closes end of day '+lastTourDay()+'</span></div>'+
+             /* This third card had no caption block, so the all-tournament challenges in
+                the Open now list showed no Copy caption & tags button. */
+             (x.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText'+esc(x.id)+'">'+esc(x.caption)+'</div>'+
+               '<button class="chcopy" onclick="copyCaptionFor(\''+esc(x.id)+'\')"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
              (sub
                ? '<div class="chdone">'+chStatusChip(sub)+(sub.status==='rejected'&&sub.note?'<div class="chnote">'+esc(sub.note)+'</div>':'')+
                  (sub.status==='rejected'&&open?'<button class="cta chcta" onclick="openSubmit(\''+esc(x.id)+'\')"><i class="ti ti-refresh"></i> Try again</button>':'')+'</div>'
@@ -5991,51 +6005,89 @@
   var _preview=null;
   function _previewOn(){ return !!_preview; }
 
-  function openPreview(){
-    if(!isAdmin && !_previewOn()) return;
+  /* Stepped picker that mirrors the real sign-in: role, then team, then name.
+     Same order the actual user goes through, so what you pick is what they'd have. */
+  var _pv = {step:1, kind:'', team:'', who:''};
+
+  function openPreview(step){
+    if(!isAdmin) return;
+    if(!step){ _pv={step:1,kind:'',team:'',who:''}; }
+    else { _pv.step=step; }
     showOnly('s-detail');
     document.getElementById('appTitle').textContent='View as\u2026';
-    document.getElementById('appSub').textContent='See what everyone else sees';
-    var teams=(TEAMS_LIST||[]);
-    var teamOpts=teams.map(function(t){ return '<option value="'+attr(t)+'">'+esc(t)+'</option>'; }).join('');
-    var h='<div class="chintro"><b>Preview any role.</b><p>The app behaves exactly as it would for that person \u2014 same tiles, same permissions, same hidden bits. A banner stays at the top so you can come straight back.</p></div>';
+    document.getElementById('appSub').textContent='See exactly what they see';
+    var h='';
 
-    h+='<label class="chlab">Team <span style="font-weight:400;color:var(--faint)">(for player, coach and supporter)</span></label>'+
-       '<select id="pvTeam" class="chinput">'+teamOpts+'</select>'+
-       '<label class="chlab">Player <span style="font-weight:400;color:var(--faint)">(optional \u2014 needed for XP and voting)</span></label>'+
-       '<select id="pvPlayer" class="chinput"><option value="">No name</option></select>';
-
-    h+='<div class="eyebrow" style="margin-top:18px">Preview as</div><div class="pvgrid">'+
-       pvBtn('player','ti-user','Player','Their squad, XP, challenges')+
-       pvBtn('staff','ti-whistle','Coach / manager','Squad list, roll call, batting orders')+
-       pvBtn('supporter','ti-users','Supporter','Parent view, no welfare details')+
-       pvBtn('scorer','ti-pencil','Scorer','Officials screen, both batting orders')+
-       pvBtn('umpire','umpire','Umpire','Officials screen')+
-       pvBtn('groundstaff','ti-tractor','Groundstaff','Officials screen, limited')+
-       '</div>';
-
+    if(_pv.step===1){
+      h+='<div class="chintro"><b>Pick a role.</b><p>The app behaves exactly as it would for that person \u2014 same tiles, same permissions, same hidden bits. A banner stays at the top so you can come straight back.</p></div>';
+      h+='<div class="pvgrid">'+
+        pvBtn('player','ti-user','Player','Their squad, XP, challenges, voting')+
+        pvBtn('staff','ti-whistle','Coach / manager','Squad list, roll call, batting orders')+
+        pvBtn('supporter','ti-users','Supporter','Parent view, no welfare details')+
+        pvBtn('scorer','ti-pencil','Scorer','Officials screen, both batting orders')+
+        pvBtn('umpire','umpire','Umpire','Officials screen')+
+        pvBtn('groundstaff','ti-tractor','Groundstaff','Officials screen, limited')+
+        '</div>';
+    }
+    else if(_pv.step===2){
+      h+=pvCrumb()+'<div class="eyebrow" style="margin-top:14px">Which team?</div><div class="pvgrid">';
+      (TEAMS_LIST||[]).forEach(function(t){
+        h+='<button class="pvopt" onclick="pvPickTeam(\''+attr(t).replace(/'/g,"\\'")+'\')">'+
+           '<span class="ic">'+iconHTML('ti-shield')+'</span>'+
+           '<span class="tx"><b>'+esc(t)+'</b></span><i class="ti ti-chevron-right"></i></button>';
+      });
+      h+='</div><button class="chmore" onclick="openPreview(1)"><i class="ti ti-arrow-left"></i> Back</button>';
+    }
+    else {
+      var list=((PLAYERS||{})[_pv.team]||[]).filter(function(n){return n&&String(n).trim();});
+      h+=pvCrumb()+'<div class="eyebrow" style="margin-top:14px">Which player?</div><div class="pvgrid">';
+      h+='<button class="pvopt" onclick="pvPickPlayer(\'\')">'+
+         '<span class="ic">'+iconHTML('ti-dots')+'</span>'+
+         '<span class="tx"><b>No name</b><span>Signed in, but hasn\u2019t picked themselves</span></span>'+
+         '<i class="ti ti-chevron-right"></i></button>';
+      list.forEach(function(n){
+        h+='<button class="pvopt" onclick="pvPickPlayer(\''+attr(n).replace(/'/g,"\\'")+'\')">'+
+           '<span class="ic">'+iconHTML('ti-user')+'</span>'+
+           '<span class="tx"><b>'+esc(n)+'</b></span><i class="ti ti-chevron-right"></i></button>';
+      });
+      if(!list.length) h+='<div class="readonly" style="justify-content:flex-start">No players published for this team.</div>';
+      h+='</div><button class="chmore" onclick="openPreview(2)"><i class="ti ti-arrow-left"></i> Back</button>';
+    }
     document.getElementById('detailBody').innerHTML=h;
-    var ts=document.getElementById('pvTeam');
-    if(ts){ ts.value = teams.indexOf(currentSquad)>=0?currentSquad:(teams[0]||''); ts.onchange=pvFillPlayers; }
-    pvFillPlayers();
   }
+
+  function pvCrumb(){
+    var lbl=pvLabel(_pv.kind);
+    return '<div class="pvcrumb"><i class="ti ti-eye"></i><span>'+esc(lbl)+
+           (_pv.team?' <b>\u203a</b> '+esc(_pv.team):'')+'</span></div>';
+  }
+  function pvLabel(k){
+    return {player:'Player',staff:'Coach / manager',supporter:'Supporter',
+            scorer:'Scorer',umpire:'Umpire',groundstaff:'Groundstaff'}[k]||k;
+  }
+  function pvPickRole(kind){
+    _pv.kind=kind;
+    /* Officials aren't attached to a squad, so they skip straight through. */
+    if(kind==='scorer'||kind==='umpire'||kind==='groundstaff'){ startPreview(kind); return; }
+    openPreview(2);
+  }
+  function pvPickTeam(t){
+    _pv.team=t;
+    if(_pv.kind==='player'){ openPreview(3); return; }
+    startPreview(_pv.kind);
+  }
+  function pvPickPlayer(n){ _pv.who=n; startPreview('player'); }
+
   function pvBtn(role,icon,label,sub){
-    return '<button class="pvopt" onclick="startPreview(\''+role+'\')">'+
+    return '<button class="pvopt" onclick="pvPickRole(\''+role+'\')">'+
       '<span class="ic">'+iconHTML(icon)+'</span>'+
       '<span class="tx"><b>'+esc(label)+'</b><span>'+esc(sub)+'</span></span>'+
       '<i class="ti ti-chevron-right"></i></button>';
   }
-  function pvFillPlayers(){
-    var ts=document.getElementById('pvTeam'), ps=document.getElementById('pvPlayer');
-    if(!ts||!ps) return;
-    var list=((PLAYERS||{})[ts.value]||[]).filter(function(n){return n&&String(n).trim();});
-    ps.innerHTML='<option value="">No name</option>'+list.map(function(n){ return '<option value="'+attr(n)+'">'+esc(n)+'</option>'; }).join('');
-  }
 
   function startPreview(kind){
-    var ts=document.getElementById('pvTeam'), ps=document.getElementById('pvPlayer');
-    var team=(ts&&ts.value)||currentSquad||(TEAMS_LIST||[])[0]||'';
-    var who=(ps&&ps.value)||'';
+    var team=_pv.team||currentSquad||(TEAMS_LIST||[])[0]||'';
+    var who=_pv.who||'';
     if(!_preview){
       /* Park the real session so exiting puts everything back exactly as it was. */
       _preview={saved:{isStaff:isStaff,isAdmin:isAdmin,role:role,squad:currentSquad,player:currentPlayer,
@@ -6090,7 +6142,7 @@
     bar.style.display='';
     bar.innerHTML='<i class="ti ti-eye"></i><div><b>Previewing as '+esc(label)+'</b>'+
       (detail?'<span>'+esc(detail)+'</span>':'')+'</div>'+
-      '<button onclick="exitPreview()">Exit</button>';
+      '<button onclick="exitPreview()"><i class="ti ti-x"></i> Exit</button>';
   }
 
   /* ==========================================================================
