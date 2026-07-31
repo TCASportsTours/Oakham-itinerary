@@ -60,7 +60,8 @@
   .iconbtn:active{transform:scale(.93)}
   .phone.locked .iconbtn, .phone.locked .tabbar{display:none}
 
-  .screens{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 22px}
+  .screens{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;
+    padding:0 16px 22px;-webkit-overflow-scrolling:touch}
   .screens::-webkit-scrollbar{width:0}
   .screen{display:none;animation:fade .25s ease}
   .screen.active{display:block}
@@ -573,7 +574,7 @@
   .a2hslink.show{display:inline-flex}
   @media (max-width:500px){
     body{padding:0}
-    .phone{width:100%;height:100dvh;max-height:none;border-radius:0;border:none;box-shadow:none}
+    .phone{width:100%;height:100vh;height:100dvh;max-height:none;border-radius:0;border:none;box-shadow:none}
     .notch{height:calc(6px + env(safe-area-inset-top))}
     .notch::after{display:none}
     .appbar{padding-top:8px}
@@ -919,7 +920,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eh · add-to-home</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ei · tabbar-and-dismiss</div>
     </section>
 
     <!-- TODAY -->
@@ -3684,7 +3685,7 @@
      is a standing reminder rather than a gate. It disappears for good once they're
      running standalone, or when they dismiss it. */
   function a2hsDismissKey(){ return 'gcs_a2hs_x_'+(SETTINGS.tourName||'tour'); }
-  function dismissA2HS(ev){
+  function dismissA2HSNudge(ev){
     if(ev&&ev.stopPropagation) ev.stopPropagation();
     try{ localStorage.setItem(a2hsDismissKey(),'1'); }catch(e){}
     renderToday();
@@ -3695,7 +3696,7 @@
     return '<div class="a2hsnudge" onclick="openA2HS()">'+
       '<i class="ti ti-device-mobile-down"></i>'+
       '<div><b>Add this to your home screen</b><span>Opens full screen, and no hunting through WhatsApp for the link.</span></div>'+
-      '<i class="ti ti-x x" onclick="dismissA2HS(event)"></i></div>';
+      '<i class="ti ti-x x" onclick="dismissA2HSNudge(event)"></i></div>';
   }
   var toastT;
   function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},1800);}
