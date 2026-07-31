@@ -678,6 +678,31 @@
   .prizebox b{color:#fff;font-weight:700}
   .prizebox>div>b{display:block;font-size:15.5px;font-style:italic;margin-bottom:3px}
   .prizebox span{display:block;font-size:13px;color:var(--muted);line-height:1.6}
+  .cwrap{display:flex;gap:14px;align-items:center;margin-top:12px;background:var(--surface);
+    border:1px solid var(--surface-line);border-radius:14px;padding:14px}
+  .cwrap .cbig{text-align:center;flex:0 0 auto;min-width:62px}
+  .cwrap .cbig b{display:block;font-size:30px;font-weight:800;font-style:italic;color:#ff9d52;line-height:1}
+  .cwrap .cbig span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .cwrap>div>b{display:block;font-size:14px;color:#fff}
+  .cbar{height:7px;border-radius:4px;background:rgba(255,255,255,.10);margin:7px 0 5px;overflow:hidden}
+  .cbar i{display:block;height:100%;background:linear-gradient(90deg,#ff7c1a,#51cea7)}
+  .cwrap>div>span{display:block;font-size:11.5px;color:var(--muted)}
+  .crow2{display:flex;gap:7px;margin-top:12px}
+  .crow2 .cibtn{flex:1;max-width:none;margin:0}
+  .crow2 .cibtn.on{background:rgba(255,124,26,.18);border-color:rgba(255,124,26,.5);color:#ff9d52}
+  .cteam{display:flex;align-items:center;gap:10px;margin-top:8px;padding:12px 13px;border-radius:13px;
+    background:var(--surface);border:1px solid var(--surface-line);cursor:pointer}
+  .cteam.full{border-color:rgba(81,206,167,.38)}
+  .cteam>i{font-size:18px;color:var(--faint);flex:0 0 auto}
+  .cteam b{font-size:15px;color:#fff}
+  .ccount{font-size:13px;font-weight:700;color:var(--muted);flex:0 0 auto}
+  .ccount.ok{color:#7bdcc0}
+  .crowitem{display:flex;align-items:center;gap:10px;padding:9px 13px 9px 34px}
+  .crowitem>i{font-size:17px;color:#7bdcc0;flex:0 0 auto}
+  .crowitem.no>i{color:var(--faint)}
+  .crowitem b{display:block;font-size:14px;color:#fff;font-weight:600}
+  .crowitem span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+  .crowitem.no b{color:var(--muted)}
   .chsteps3{display:flex;align-items:center;gap:6px;margin:10px 2px 4px}
   .chsteps3 span{width:26px;height:4px;border-radius:2px;background:var(--surface-line)}
   .chsteps3 span.on{background:var(--orange)}
@@ -920,7 +945,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ei · tabbar-and-dismiss</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ej · consent-record</div>
     </section>
 
     <!-- TODAY -->
@@ -1020,6 +1045,10 @@
     <section class="screen" id="s-pitchmap">
       <button class="backbtn" onclick="appBack()"><i class="ti ti-chevron-left"></i> Back</button>
       <div id="pitchMapBody"></div>
+    </section>
+    <section class="screen" id="s-consents">
+      <button class="backbtn" onclick="go('more')"><i class="ti ti-chevron-left"></i> Back</button>
+      <div id="consentBody"></div>
     </section>
     <section class="screen" id="s-chterms">
       <button class="backbtn" id="chTermsBack" onclick="go('more')"><i class="ti ti-chevron-left"></i> Back</button>
@@ -1843,7 +1872,7 @@
     var wl=document.getElementById('welcomeLead'); if(wl){ wl.textContent='Staff sign-in — choose your team.'; wl.style.color=''; wl.style.fontWeight=''; }
     renderTeamButtons();
   }
-  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1,'s-chterms':1,'s-pitchmap':1};
+  var _screenScroll={}, _DRILL={'s-detail':1,'s-sos':1,'s-checkin':1,'s-challenge':1,'s-chsubmit':1,'s-chdone':1,'s-myxp':1,'s-chadmin':1,'s-chterms':1,'s-pitchmap':1,'s-consents':1};
   function showOnly(id){
     var cur=document.querySelector('.screen.active'); var curId=cur?cur.id:'';
     if(curId && curId!=='s-detail') _screenScroll[curId]=screens.scrollTop;   // remember scroll (not the reused detail screen)
@@ -2596,6 +2625,7 @@
     if(isAdmin || _previewOn()) help.push(tile('acc-purple','openPreview()','ti-eye','View as\u2026'));
     help.push(tile('acc-orange pulse','openSocials()','ti-brand-instagram','Follow the tour'));
     if(!isStandalone() && a2hsPlatform()!=='other') help.push(tile('acc-purple','openA2HS()','ti-device-mobile-down','Add to home screen'));
+    if(isAdmin) help.push(tile('acc-teal','openConsents()','ti-checkbox','Rules accepted'));
     var _hh=document.getElementById('moreHelp');
     if(_hh) _hh.innerHTML=tileSection('Help & people','sec-teal',help);
     // 2) Tour info: spreadsheet tiles + Hotel + FAQ (everyone) + Flights (everyone) + Excursions (staff & supporters)
@@ -4909,6 +4939,7 @@
     if(!_termsOK.rules){ chTermsGo(2); return; }
     _termsOK.behave=true;
     try{ localStorage.setItem(chTermsKey(),'1'); }catch(e){}
+    recordConsent();
     _gated=false;
     var ph=document.querySelector('.phone'); if(ph) ph.classList.remove('gated');
     if(_termsThen==='app'){ _termsThen='challenge'; go('today'); toast('Welcome to Oakham'); return; }
@@ -6060,6 +6091,117 @@
     bar.innerHTML='<i class="ti ti-eye"></i><div><b>Previewing as '+esc(label)+'</b>'+
       (detail?'<span>'+esc(detail)+'</span>':'')+'</div>'+
       '<button onclick="exitPreview()">Exit</button>';
+  }
+
+  /* ==========================================================================
+     RULES ACCEPTED  —  a record, not just a flag on a phone
+     --------------------------------------------------------------------------
+     localStorage told us a player had accepted on that device, which is no use
+     if anyone ever asks who agreed to what. Acceptance now posts to the same
+     backend as challenge submissions, keyed by player, and merged so two phones
+     accepting at once can't overwrite each other.
+     ========================================================================== */
+  var CONSENTS = {}, _consentsFetched = false, _consentOutstanding = false, _consentOpen = {};
+
+  function recordConsent(){
+    var id = myPlayerId(); if(!id) return;
+    var rec = { player_id:id, team:currentSquad, player:currentPlayer,
+                accepted_at: Date.now(), rules:true, behaviour:true };
+    CONSENTS[id] = rec;
+    try{
+      fetch(API+'?type=consents', { method:'POST', headers:{'content-type':'application/json'},
+        body: JSON.stringify({ ok:true, ts:Date.now(), data:{ __merge:true, ['c_'+id]:rec } }) })
+      .catch(function(){});
+    }catch(e){}
+  }
+
+  function fetchConsents(cb){
+    getJSON(API+'?type=consents').then(function(r){ return r.json(); }).then(function(d){
+      var raw = (d&&d.data)||d||{};
+      CONSENTS = {};
+      Object.keys(raw).forEach(function(k){
+        var v = raw[k];
+        if(v && typeof v==='object' && v.player_id) CONSENTS[v.player_id]=v;
+      });
+      _consentsFetched = true;
+      if(cb) cb();
+    }).catch(function(){ _consentsFetched=true; if(cb) cb(); });
+  }
+
+  function consentWhen(ts){
+    if(!ts) return '';
+    var d=new Date(ts), n=new Date();
+    var day = (d.toDateString()===n.toDateString()) ? 'today' :
+              (d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]);
+    return day+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  }
+
+  function openConsents(){
+    if(!isAdmin) return;
+    showOnly('s-consents');
+    document.getElementById('appTitle').textContent='Rules accepted';
+    document.getElementById('appSub').textContent='Tournament staff only';
+    document.getElementById('consentBody').innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:14px"><i class="ti ti-loader"></i> Loading\u2026</div>';
+    fetchConsents(renderConsents);
+  }
+  function toggleConsentTeam(t){ _consentOpen[t] = !_consentOpen[t]; renderConsents(); }
+  function toggleOutstanding(){ _consentOutstanding = !_consentOutstanding; renderConsents(); }
+
+  function renderConsents(){
+    var teams = (TEAMS_LIST||[]).slice();
+    var total=0, done=0, rows=[];
+    teams.forEach(function(t){
+      var list = ((PLAYERS||{})[t]||[]).filter(function(n){ return n && String(n).trim(); });
+      var players = list.map(function(n){
+        var id = chSlug(t)+'__'+chSlug(n);
+        return { name:n, rec:CONSENTS[id]||null };
+      });
+      total += players.length;
+      done  += players.filter(function(p){ return !!p.rec; }).length;
+      rows.push({ team:t, players:players });
+    });
+
+    var pct = total ? Math.round(done/total*100) : 0;
+    var h='<div class="cwrap"><div class="cbig"><b>'+done+'</b><span>of '+total+'</span></div>'+
+      '<div style="flex:1;min-width:0"><b>Players accepted</b>'+
+      '<div class="cbar"><i style="width:'+pct+'%"></i></div>'+
+      '<span>'+(total-done)+' still to go</span></div></div>';
+
+    h+='<div class="crow2">'+
+       '<button class="cibtn'+(_consentOutstanding?'':' on')+'" onclick="if('+(_consentOutstanding?'1':'0')+')toggleOutstanding()">All teams</button>'+
+       '<button class="cibtn'+(_consentOutstanding?' on':'')+'" onclick="if('+(_consentOutstanding?'0':'1')+')toggleOutstanding()">Not yet accepted</button>'+
+       '</div>';
+    h+='<button class="chmore" onclick="openConsents()"><i class="ti ti-refresh"></i> Refresh</button>';
+
+    if(_consentOutstanding){
+      /* One flat list across the whole tournament \u2014 who to chase, nothing else. */
+      var missing=[];
+      rows.forEach(function(r){ r.players.forEach(function(p){ if(!p.rec) missing.push({team:r.team,name:p.name}); }); });
+      h+='<div class="eyebrow" style="margin-top:18px">Not yet accepted \u00b7 '+missing.length+'</div>';
+      if(!missing.length) h+='<div class="readonly" style="justify-content:flex-start"><i class="ti ti-circle-check"></i> Everyone has accepted.</div>';
+      missing.forEach(function(m){
+        h+='<div class="crowitem no"><i class="ti ti-circle-dashed"></i><div style="flex:1;min-width:0"><b>'+esc(m.name)+'</b><span>'+esc(m.team)+'</span></div></div>';
+      });
+    } else {
+      rows.forEach(function(r){
+        var n=r.players.filter(function(p){return !!p.rec;}).length, all=r.players.length;
+        var open=!!_consentOpen[r.team];
+        h+='<div class="cteam'+(n===all&&all?' full':'')+'" onclick="toggleConsentTeam(\''+attr(r.team).replace(/'/g,"\\'")+'\')">'+
+             '<i class="ti ti-chevron-'+(open?'down':'right')+'"></i>'+
+             '<div style="flex:1;min-width:0"><b>'+esc(r.team)+'</b></div>'+
+             '<span class="ccount'+(n===all&&all?' ok':'')+'">'+n+' / '+all+'</span></div>';
+        if(open){
+          if(!all) h+='<div class="readonly" style="justify-content:flex-start">No players published for this team.</div>';
+          r.players.forEach(function(p){
+            h+='<div class="crowitem'+(p.rec?'':' no')+'">'+
+               '<i class="ti ti-'+(p.rec?'circle-check':'circle-dashed')+'"></i>'+
+               '<div style="flex:1;min-width:0"><b>'+esc(p.name)+'</b>'+
+               (p.rec?'<span>Accepted '+esc(consentWhen(p.rec.accepted_at))+'</span>':'<span>Not yet</span>')+'</div></div>';
+          });
+        }
+      });
+    }
+    document.getElementById('consentBody').innerHTML=h;
   }
 
   function bootstrap(){
