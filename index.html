@@ -763,6 +763,8 @@
   .chcap{margin-top:12px;background:rgba(119,119,201,.12);border:1px solid rgba(119,119,201,.3);border-radius:12px;padding:10px 12px}
   .chcap .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9a9ad6}
   .chcap .t{font-size:13px;color:#fff;line-height:1.5;margin-top:4px}
+  .chcap .tags{display:block;font-size:12.5px;color:#7bdcc0;line-height:1.5;margin-top:7px;
+    word-break:break-word}
   .chcopy{margin-top:8px;width:100%;background:rgba(119,119,201,.2);color:#9a9ad6;border:1px solid rgba(119,119,201,.4);
     border-radius:10px;padding:8px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
   .chcta{width:100%;justify-content:center;box-sizing:border-box;margin-top:14px}
@@ -952,7 +954,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30en · desc-linebreaks</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eo · caption-tags-shown</div>
     </section>
 
     <!-- TODAY -->
@@ -5136,7 +5138,7 @@
              (chDesc(x)?'<div class="chdesc">'+esc(chDesc(x))+'</div>':'')+chFollowBtn(x)+
              '<div class="chrow"><span class="chpill"><i class="ti ti-clock-hour-4"></i> '+(open?'Closes end of day 1':esc(chClosedReason(x)||'Closed'))+'</span></div>'+
              (!sub&&open&&!firstFinisher(x.id)?'<div class="chfirst"><i class="ti ti-flag-2"></i><div><b>Nobody has done this one yet</b><span>First one in takes the Trailblazer badge.</span></div></div>':'')+
-             (x.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText'+esc(x.id)+'">'+esc(x.caption)+'</div>'+
+             (x.caption?'<div class="chcap"><div class="l">Caption idea</div>'+capBlock(x.caption,esc(x.id))+
                '<button class="chcopy" onclick="copyCaptionFor(\''+esc(x.id)+'\')"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
              (sub
                ? '<div class="chdone">'+chStatusChip(sub)+(sub.status==='rejected'&&sub.note?'<div class="chnote">'+esc(sub.note)+'</div>':'')+
@@ -5179,7 +5181,7 @@
            '</div>'+
            (chInEarly(c)&&!mine?'<div class="chearly"><i class="ti ti-clock-bolt"></i><div><b>Early bird: +'+chEarlyXP(c)+' XP</b><span>Get it in within '+esc(chEarlyLeft(c))+' (by '+esc(minToHHMM(chEarlyEndsMin(c)))+') and the bonus is yours.</span></div></div>':'')+
            (!mine&&open&&!firstFinisher(c.id)?'<div class="chfirst"><i class="ti ti-flag-2"></i><div><b>Nobody has done this one yet</b><span>First one in takes the Trailblazer badge.</span></div></div>':'')+
-           (c.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText">'+esc(c.caption)+'</div>'+
+           (c.caption?'<div class="chcap"><div class="l">Caption idea</div>'+capBlock(c.caption,'')+
              '<button class="chcopy" onclick="copyCaption()"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
            (mine
              ? '<div class="chdone">'+chStatusChip(mine)+(mine.status==='rejected'&&mine.note?'<div class="chnote">'+esc(mine.note)+'</div>':'')+
@@ -5207,7 +5209,7 @@
              '<div class="chrow"><span class="chpill"><i class="ti ti-calendar"></i> Closes end of day '+lastTourDay()+'</span></div>'+
              /* This third card had no caption block, so the all-tournament challenges in
                 the Open now list showed no Copy caption & tags button. */
-             (x.caption?'<div class="chcap"><div class="l">Caption idea</div><div class="t" id="chCapText'+esc(x.id)+'">'+esc(x.caption)+'</div>'+
+             (x.caption?'<div class="chcap"><div class="l">Caption idea</div>'+capBlock(x.caption,esc(x.id))+
                '<button class="chcopy" onclick="copyCaptionFor(\''+esc(x.id)+'\')"><i class="ti ti-copy"></i> Copy caption &amp; tags</button></div>':'')+
              (sub
                ? '<div class="chdone">'+chStatusChip(sub)+(sub.status==='rejected'&&sub.note?'<div class="chnote">'+esc(sub.note)+'</div>':'')+
@@ -5308,13 +5310,32 @@
     return h;
   }
 
+  /* The preview shows exactly what lands on the clipboard \u2014 sentence in white, every
+     tag underneath in teal. Hiding them would leave anyone writing their own caption
+     unaware the tags are required, and their post unfindable. */
+  function capBlock(text,id){
+    var full=String(text||'').trim();
+    var m=full.match(/^([\s\S]*?)(\s(?:@[\w.]+\s*)+)$/);
+    var sentence=(m?m[1]:full).trim();
+    var own=(m?m[2]:'').trim();
+    var tags=(own?own+' ':'')+socialTagLine();
+    return '<div class="t" id="chCapText'+(id||'')+'">'+esc(sentence)+
+           '<span class="tags">'+esc(tags)+'</span></div>';
+  }
+  /* Tags are already in the block, so copy what's shown rather than appending again. */
+  function capText(el){
+    var tagEl=el.querySelector?el.querySelector('.tags'):null;
+    var tags=tagEl?tagEl.textContent.trim():socialTagLine();
+    var sentence=el.textContent.replace(tags,'').trim();
+    return sentence+'\n\n'+tags;
+  }
   function copyCaptionFor(id){
     var t=document.getElementById('chCapText'+id); if(!t) return;
-    chCopyText(t.textContent+'\n\n'+socialTagLine());
+    chCopyText(capText(t));
   }
   function copyCaption(){
     var t=document.getElementById('chCapText'); if(!t) return;
-    chCopyText(t.textContent+'\n\n'+socialTagLine());
+    chCopyText(capText(t));
   }
   function chCopyText(txt){
     try{
