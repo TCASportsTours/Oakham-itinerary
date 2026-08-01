@@ -710,6 +710,10 @@
   .crowitem b{display:block;font-size:14px;color:#fff;font-weight:600}
   .crowitem span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
   .crowitem.no b{color:var(--muted)}
+  .undobtn{width:32px;height:32px;border-radius:9px;flex:0 0 auto;cursor:pointer;font:inherit;font-size:16px;
+    background:rgba(255,124,26,.14);border:1px solid rgba(255,124,26,.38);color:#ff9d52;
+    display:flex;align-items:center;justify-content:center}
+  .undobtn:active{filter:brightness(1.25)}
   .chsteps3{display:flex;align-items:center;gap:6px;margin:10px 2px 4px}
   .chsteps3 span{width:26px;height:4px;border-radius:2px;background:var(--surface-line)}
   .chsteps3 span.on{background:var(--orange)}
@@ -954,7 +958,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eo · caption-tags-shown</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eq · preview-lock-and-undo</div>
     </section>
 
     <!-- TODAY -->
@@ -1634,7 +1638,7 @@
       if(isAdmin || !currentSquad) return;                 // tournament admin isn't a single team
       var body={kind:kind, role:role, team:currentSquad, player:currentPlayer||''};
       if(extra){ for(var k in extra) body[k]=extra[k]; }
-      fetch('/.netlify/functions/tour?type=stats',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:true});
+      apiPost('/.netlify/functions/tour?type=stats',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:true});
     }catch(e){}
   }
   function trackLogin(){ if(_loginTracked) return; if(role==='player' && !currentPlayer) return; _loginTracked=true; track('login'); }
@@ -1826,7 +1830,7 @@
     if(!confirm('Delete this scheduled alert? It won\u2019t be sent.')) return;
     getJSON('?type=scheduled').then(function(r){return r.ok?r.json():[];}).then(function(list){
       if(!Array.isArray(list))list=[]; list=list.filter(function(a){return a&&a.id!==id;});
-      return fetch('/.netlify/functions/tour?type=scheduled',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)}).then(function(r){return r.json();});
+      return apiPost('/.netlify/functions/tour?type=scheduled',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)}).then(function(r){return r.json();});
     }).then(function(j){ if(j&&j.ok){ toast('Deleted'); viewScheduled(); } else toast('Couldn\u2019t delete \u2014 try again'); })
       .catch(function(){ toast('Couldn\u2019t delete \u2014 check your connection'); });
   }
@@ -1852,7 +1856,7 @@
     var postAlert=function(){
       getJSON('?type=alerts').then(function(r){return r.ok?r.json():[];}).then(function(list){
         if(!Array.isArray(list))list=[]; list.unshift(a); list=list.slice(0,20);
-        return fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)}).then(function(r){return r.json();});
+        return apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)}).then(function(r){return r.json();});
       }).then(function(j){
         if(j&&j.ok){ _staffPhotoData=null; toast('Alert sent to '+alertAudLabel(a)); go('more'); }
         else { toast('Send failed — try again'); reEnable(); }
@@ -1861,7 +1865,7 @@
     var scheduleAlert=function(){
       getJSON('?type=scheduled').then(function(r){return r.ok?r.json():[];}).then(function(list){
         if(!Array.isArray(list))list=[]; list.push(a); list.sort(function(x,y){return (x.sendAt||0)-(y.sendAt||0);});
-        return fetch('/.netlify/functions/tour?type=scheduled',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)}).then(function(r){return r.json();});
+        return apiPost('/.netlify/functions/tour?type=scheduled',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)}).then(function(r){return r.json();});
       }).then(function(j){ if(j&&j.ok){ _staffPhotoData=null; toast('Scheduled for '+new Date(a.sendAt).toLocaleString()); go('more'); } else { toast('Couldn\u2019t schedule \u2014 try again'); reEnable(); } })
         .catch(function(){ toast('Couldn\u2019t schedule \u2014 check your connection'); reEnable(); });
     };
@@ -1869,7 +1873,7 @@
     if(photo){
       var slot='photo_'+Date.now()+Math.random().toString(36).slice(2,7);
       toast('Uploading photo\u2026');
-      fetch('/.netlify/functions/tour?type='+slot,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({img:photo, ts:Date.now()})})
+      apiPost('/.netlify/functions/tour?type='+slot,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({img:photo, ts:Date.now()})})
         .then(function(r){return r.json();}).then(function(j){ if(j&&j.ok){ a.photo=slot; finish(); } else { toast('Photo upload failed'); reEnable(); } })
         .catch(function(){ toast('Photo upload failed — check your connection'); reEnable(); });
     } else { finish(); }
@@ -2046,7 +2050,7 @@
       if(!Array.isArray(list))list=[];
       list=list.filter(function(x){return !(x&&x.team==='officials'&&x.kind==='lineup'&&x.evKey===a.evKey&&x.squad===a.squad);});
       list.unshift(a); list=list.slice(0,20);
-      return fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)});
+      return apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)});
     }).then(function(r){return r.json();}).then(function(j){
       if(j&&j.ok){ ALERTS=ALERTS.filter(function(x){return !(x&&x.team==='officials'&&x.kind==='lineup'&&x.evKey===a.evKey&&x.squad===a.squad);}); ALERTS.unshift(a); toast('Umpires & scorers notified'); }
       else toast('Couldn\u2019t notify \u2014 try again');
@@ -2150,7 +2154,7 @@
     if(!_lineup.length){ toast('Add players first'); return; }
     var e=_lineupEvent, obj={order:_lineup.slice(), ts:Date.now(), by:(currentPlayer||'Staff')};
     var body={}; body[_lineupKey]=obj;
-    fetch('/.netlify/functions/tour?type=lineups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+    apiPost('/.netlify/functions/tour?type=lineups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
       .then(function(r){return r.json();}).then(function(j){
         if(!(j&&j.ok)){ toast('Couldn\u2019t share — try again'); return; }
         LINEUPS[_lineupKey]=obj;
@@ -2163,7 +2167,7 @@
           if(!Array.isArray(list))list=[];
           list=list.filter(function(x){return !(x&&x.team==='officials'&&x.kind==='lineup'&&x.evKey===aOff.evKey&&x.squad===aOff.squad);});
           list.unshift(aOff); list.unshift(aSquad); list=list.slice(0,20);
-          return fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)});
+          return apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(list)});
         }).then(function(){
           ALERTS=ALERTS.filter(function(x){return !(x&&x.team==='officials'&&x.kind==='lineup'&&x.evKey===aOff.evKey&&x.squad===aOff.squad);}); ALERTS.unshift(aOff);
           toast('Shared with '+currentSquad+' & match officials'); renderToday(); openEvent(e._i);
@@ -2185,7 +2189,7 @@
     var obj={order:[], ts:Date.now(), by:(currentPlayer||'Staff'), cleared:true};
     var body={}; body[key]=obj;
     var isLineupAlert=function(x){ return x && x.kind==='lineup' && x.evKey===evk && (x.team===sq || (x.team==='officials' && x.squad===sq)); };
-    fetch('/.netlify/functions/tour?type=lineups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+    apiPost('/.netlify/functions/tour?type=lineups',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
       .then(function(r){return r.json();}).then(function(j){
         _lineup=[]; LINEUPS[key]=obj;
         ALERTS=(ALERTS||[]).filter(function(x){return !isLineupAlert(x);});
@@ -2193,7 +2197,7 @@
           if(!Array.isArray(list)) list=[];
           var next=list.filter(function(x){return !isLineupAlert(x);});
           if(next.length!==list.length){
-            return fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)}).then(function(){ return j; });
+            return apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)}).then(function(){ return j; });
           }
           return j;
         }).catch(function(){ return j; });
@@ -2533,7 +2537,7 @@
   function openDepTeam(team){ fetchDepartures(function(){ renderDepTeam(team); }); }
   function _stageState(key){ var st=DEP_STATE[key]||{}; return {ci:!!(st.ci||st.in), sec:!!st.sec, gate:!!st.gate}; }
   function _soloState(team,name){ return _stageState(depKey(team,name)); }
-  function _postDepObj(k,obj){ var body={}; body[k]=Object.assign({ts:Date.now()},obj); fetch('/.netlify/functions/tour?type=departures',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:true}).catch(function(){}); }
+  function _postDepObj(k,obj){ var body={}; body[k]=Object.assign({ts:Date.now()},obj); apiPost('/.netlify/functions/tour?type=departures',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:true}).catch(function(){}); }
   function toggleStage(team,key,stage){
     var c=_stageState(key); c[stage]=!c[stage];
     if(stage==='ci'&&!c.ci){ c.sec=false; c.gate=false; }
@@ -3011,6 +3015,28 @@
   function top3(counts){ return Object.keys(counts).map(function(k){return {k:k,n:counts[k]};}).sort(function(a,b){return b.n-a.n || (a.k<b.k?-1:1);}).slice(0,3); }
   var MEDAL=['🥇','🥈','🥉'];
   /* Cache-busting GET so the browser/CDN can't serve a stale schedule or vote list */
+  /* ==========================================================================
+     PREVIEW IS READ-ONLY
+     --------------------------------------------------------------------------
+     Viewing as a player put real data on the server: consents, votes, challenge
+     submissions, meal orders, feedback. A vote is one-per-device and final, so a
+     single preview could have spent a real player's ballot.
+
+     Rather than guard each of the twenty-odd call sites, every write goes through
+     here. If a preview is running the request is swallowed and the caller gets a
+     resolved promise, so nothing downstream breaks.
+     ========================================================================== */
+  function apiPost(url, opts){
+    if(typeof _preview!=='undefined' && _preview){
+      var slot=(String(url).match(/type=([a-z]+)/)||[])[1]||'that';
+      toast('Preview only \u2014 nothing saved');
+      try{ console.info('[preview] blocked write to '+slot); }catch(e){}
+      return Promise.resolve({ ok:true, preview:true,
+        json:function(){ return Promise.resolve({ok:true,preview:true}); } });
+    }
+    return fetch(url, opts);
+  }
+
   function getJSON(path){ var u='/.netlify/functions/tour'+(path||''); u+=(u.indexOf('?')>=0?'&':'?')+'_='+Date.now(); return fetch(u,{cache:'no-store'}); }
   /* True if the object looks like the published tour blob (so we never aggregate it as votes/orders, nor write into a copy of it) */
   function looksLikeTourBlob(o){ return !!(o && typeof o==='object' && !Array.isArray(o) && (o.events||o.settings||o.days||o.teams||o.announcements||o.moreContent)); }
@@ -3264,7 +3290,7 @@
     getJSON('?type=votes').then(function(r){return r.ok?r.json():{};}).then(function(all){
       if(looksLikeTourBlob(all)||!all||typeof all!=='object'||Array.isArray(all)) all={};   // never write votes INTO the tour blob
       all[id]=_ballot;
-      return fetch('/.netlify/functions/tour?type=votes',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(all)});
+      return apiPost('/.netlify/functions/tour?type=votes',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(all)});
     }).then(function(){ pollVoteConfirm(0); }).catch(function(){ setVoteStatus('offline'); clearTimeout(_voteTimer); _voteTimer=setTimeout(pushVote,5000); });
   }
   function pollVoteConfirm(n){
@@ -3453,7 +3479,7 @@
     getJSON('?type=preorders').then(function(r){return r.ok?r.json():{};}).then(function(all){
       if(looksLikeTourBlob(all)||!all||typeof all!=='object'||Array.isArray(all)) all={};
       all[id]={name:_order.name,team:_order.team,orders:_order.orders||{}};
-      return fetch('/.netlify/functions/tour?type=preorders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(all)});
+      return apiPost('/.netlify/functions/tour?type=preorders',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(all)});
     }).then(function(r){return r.json();}).then(function(j){ toast(j&&j.ok?'Pre-order sent!':'Saved on this phone (offline)'); renderMore(); go('more'); })
     .catch(function(){ toast('Saved on this phone — needs signal to send'); renderMore(); go('more'); });
   }
@@ -4282,7 +4308,7 @@
     var ts=Date.now(), id='fb_'+ts+'_'+Math.random().toString(36).slice(2,8);
     var entry={ ts:ts, name:nm, role:feedbackRole(), team:(typeof currentSquad!=='undefined'?currentSquad:'')||'', text:txt };
     var body={}; body[id]=entry;
-    fetch('/.netlify/functions/tour?type=feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
+    apiPost('/.netlify/functions/tour?type=feedback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)})
       .then(function(r){return r.json();})
       .then(function(res){
         if(res&&res.ok){
@@ -4600,7 +4626,7 @@
   function clearAllAlertsApp(){
     if(!isAdmin) return;
     if(!confirm('Clear ALL alerts for everyone? This removes every alert from every phone and can\u2019t be undone.')) return;
-    fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify([])})
+    apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify([])})
       .then(function(r){return r.json();}).then(function(j){
         if(j&&j.ok){ ALERTS=[]; toast('All alerts cleared'); renderAlertsFeed(); }
         else toast('Couldn\u2019t clear \u2014 try again');
@@ -4659,7 +4685,7 @@
       if((list||[]).some(function(a){return a&&a.id===id;})) return;   // already announced
       var a={id:id, team:'all', kind:'vote', text:'Players\u2019 Player voting is now open \u2014 tap to cast your votes.', ts:Date.now()};
       var next=[a].concat(list||[]).slice(0,20);
-      fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)})
+      apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)})
         .then(function(){ ALERTS=next; renderAlertsFeed(); showNextAlert(); }).catch(function(){});
     }catch(e){}
   }
@@ -5521,7 +5547,7 @@
 
     var send=function(){
       var payload={}; payload[id]=sub;
-      fetch('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+      apiPost('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
         .then(function(r){
           /* 409 = the server found the link already in use between this phone loading the
              list and hitting Submit. Nothing was saved. */
@@ -5569,7 +5595,7 @@
     };
 
     if(story && _shotData){
-      fetch('/.netlify/functions/tour?type=shot&id='+encodeURIComponent(id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({data:_shotData})})
+      apiPost('/.netlify/functions/tour?type=shot&id='+encodeURIComponent(id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({data:_shotData})})
         .then(function(r){ if(!r.ok) throw new Error('image failed'); send(); })
         .catch(function(){
           btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Submit';
@@ -5739,7 +5765,7 @@
   }
   function saveSub(s,cb){
     var payload={}; payload[s.submission_id]=s;
-    fetch('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
+    apiPost('/.netlify/functions/tour?type=challenges',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
       .then(function(r){ if(!r.ok) throw new Error('x'); SUBS[s.submission_id]=s; if(cb)cb(); renderChAdmin(); })
       .catch(function(){ toast('Couldn\u2019t save \u2014 try again'); });
   }
@@ -5805,7 +5831,7 @@
     try{
       var a={id:'ch'+Date.now().toString(36),ts:Date.now(),title:String(title||'').slice(0,120),body:String(body||'').slice(0,300),from:chName()};
       var next=[a].concat(ALERTS||[]).slice(0,20);
-      fetch('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)})
+      apiPost('/.netlify/functions/tour?type=alerts',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(next)})
         .then(function(){ ALERTS=next; renderAlertsFeed(); }).catch(function(){});
     }catch(e){}
   }
@@ -6183,7 +6209,7 @@
     CONSENTS[id] = rec;
     try{
       var body={}; body['c_'+id]=rec;
-      fetch('/.netlify/functions/tour?type=consents',{method:'POST',
+      apiPost('/.netlify/functions/tour?type=consents',{method:'POST',
         headers:{'content-type':'application/json'}, body:JSON.stringify(body), keepalive:true})
       .catch(function(){});
     }catch(e){}
@@ -6195,7 +6221,9 @@
       CONSENTS = {};
       Object.keys(raw).forEach(function(k){
         var v = raw[k];
-        if(v && typeof v==='object' && v.player_id) CONSENTS[v.player_id]=v;
+        /* A cleared player is written back as a tombstone rather than removed, because
+           the store merges and cannot delete. Skip them on read. */
+        if(v && typeof v==='object' && v.player_id && !v.__delete) CONSENTS[v.player_id]=v;
       });
       _consentsFetched = true;
       if(cb) cb();
@@ -6208,6 +6236,38 @@
     var day = (d.toDateString()===n.toDateString()) ? 'today' :
               (d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]);
     return day+' '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  }
+
+  /* Somebody taps through the rules on the wrong name, or a phone gets handed over
+     mid-sign-in. This wipes that player's record so they start clean, and it names
+     exactly what will go before doing anything. */
+  function clearPlayerData(pid,name){
+    if(!isAdmin) return;
+    var subs = subsList().filter(function(x){ return x.player_id===pid; });
+    var hasConsent = !!CONSENTS[pid];
+    var bits=[];
+    if(hasConsent) bits.push('their acceptance of the rules');
+    if(subs.length) bits.push(subs.length+' challenge '+(subs.length===1?'entry':'entries')+
+      ' worth '+subs.reduce(function(a,x){return a+(parseInt(x.xp_awarded,10)||0);},0)+' XP');
+    if(!bits.length){ toast('Nothing to clear for '+name); return; }
+    if(!confirm('Clear '+name+'?\n\nThis removes '+bits.join(' and ')+
+       '.\n\nThey will be asked to accept the rules again next time they sign in. This cannot be undone.')) return;
+
+    if(hasConsent){
+      delete CONSENTS[pid];
+      var body={}; body['c_'+pid]={ __delete:true, player_id:pid, cleared_at:Date.now() };
+      apiPost('/.netlify/functions/tour?type=consents',{method:'POST',
+        headers:{'content-type':'application/json'}, body:JSON.stringify(body)}).catch(function(){});
+    }
+    subs.forEach(function(x){
+      x.status='rejected'; x.xp_awarded=0; x.note='Cleared by GCS staff';
+      var b={}; b[x.submission_id]=x;
+      apiPost('/.netlify/functions/tour?type=challenges',{method:'POST',
+        headers:{'content-type':'application/json'}, body:JSON.stringify(b)}).catch(function(){});
+      delete SUBS[x.submission_id];
+    });
+    toast(name+' cleared');
+    renderConsents();
   }
 
   function openConsents(){
@@ -6267,10 +6327,14 @@
         if(open){
           if(!all) h+='<div class="readonly" style="justify-content:flex-start">No players published for this team.</div>';
           r.players.forEach(function(p){
+            var pid = chSlug(r.team)+'__'+chSlug(p.name);
             h+='<div class="crowitem'+(p.rec?'':' no')+'">'+
                '<i class="ti ti-'+(p.rec?'circle-check':'circle-dashed')+'"></i>'+
                '<div style="flex:1;min-width:0"><b>'+esc(p.name)+'</b>'+
-               (p.rec?'<span>Accepted '+esc(consentWhen(p.rec.accepted_at))+'</span>':'<span>Not yet</span>')+'</div></div>';
+               (p.rec?'<span>Accepted '+esc(consentWhen(p.rec.accepted_at))+'</span>':'<span>Not yet</span>')+'</div>'+
+               (p.rec?'<button class="undobtn" title="Clear this player" onclick="clearPlayerData(\''+
+                  attr(pid)+'\',\''+attr(p.name).replace(/'/g,"\\'")+'\')"><i class="ti ti-rotate-2"></i></button>':'')+
+               '</div>';
           });
         }
       });
