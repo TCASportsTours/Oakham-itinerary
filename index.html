@@ -958,7 +958,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eq · preview-lock-and-undo</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30er · admin-scores</div>
     </section>
 
     <!-- TODAY -->
@@ -5682,9 +5682,56 @@
   function chFilter(f){ _chFilter=f; _chSticky={}; renderChAdmin(); }
   /* Deferred: re-rendering inside the click can cancel the browser opening the tab. */
   function chMarkSeen(id){ _chSeen[id]=1; setTimeout(renderChAdmin,400); }
+  function chAdminTabs(all,counts){
+    if(!counts){
+      counts={pending:0,approved:0,rejected:0,unverified:0};
+      all.forEach(function(s){
+        if(counts[s.status]!==undefined) counts[s.status]++;
+        if(s.status==='approved' && s.auto_approved && s.verified===false) counts.unverified++;
+      });
+    }
+    return '<div class="chtabs">'+
+      ['pending','unverified','approved','rejected','all','scores'].map(function(f){
+        var n = f==='scores' ? null : (f==='all'?all.length:counts[f]);
+        var lbl = f==='scores' ? 'Scores' : (f.charAt(0).toUpperCase()+f.slice(1));
+        return '<button class="'+(_chFilter===f?'on':'')+(f==='unverified'?' warn':'')+'" onclick="chFilter(\''+f+'\')">'+
+               lbl+(n!==null?' <span>'+n+'</span>':'')+'</button>';
+      }).join('')+'</div>';
+  }
+
+  /* Team table first: it's the one people ask about, and it's the shorter list. */
+  function chScoresHTML(){
+    var tb=teamBoard(), pb=playerBoard();
+    if(!pb.length) return '<div class="readonly" style="justify-content:flex-start;margin-top:14px"><i class="ti ti-info-circle"></i> No XP awarded yet.</div>';
+    var h='<div class="eyebrow" style="margin-top:16px">Teams</div>';
+    h+='<table class="vtable pts"><thead><tr><th class="c1">#</th><th class="c3">Team</th><th class="c2">Points</th></tr></thead><tbody>';
+    tb.forEach(function(r,i){
+      h+='<tr class="'+(i===0?'filled':'')+'"><td class="c1"><b>'+(i+1)+'</b></td>'+
+         '<td class="c3"><b>'+esc(r.team)+'</b></td>'+
+         '<td class="c2"><span class="vp">'+r.xp+'</span><i>xp</i></td></tr>';
+    });
+    h+='</tbody></table>';
+
+    h+='<div class="eyebrow" style="margin-top:20px">Players <span style="color:var(--faint);font-weight:400">'+pb.length+' scoring</span></div>';
+    h+='<table class="vtable pts"><thead><tr><th class="c1">#</th><th class="c3">Player</th><th class="c2">Points</th></tr></thead><tbody>';
+    pb.slice(0,40).forEach(function(r,i){
+      h+='<tr class="'+(i===0?'filled':'')+'"><td class="c1"><b>'+(i+1)+'</b></td>'+
+         '<td class="c3"><b>'+esc(r.name)+'</b><span>'+esc(r.team)+'</span></td>'+
+         '<td class="c2"><span class="vp">'+r.xp+'</span><i>xp</i></td></tr>';
+    });
+    h+='</tbody></table>';
+    if(pb.length>40) h+='<div class="readonly" style="justify-content:flex-start">Showing the top 40 of '+pb.length+'.</div>';
+    h+='<button class="chmore" onclick="chFilter(\'pending\')"><i class="ti ti-arrow-left"></i> Back to submissions</button>';
+    return h;
+  }
+
   function renderChAdmin(){
     var host=document.getElementById('chAdminBody'); if(!host) return;
     var all=subsList();
+    /* Tournament staff land on the approvals queue, so the leaderboards \u2014 which live
+       on the player screen \u2014 were unreachable for them. This is the same data,
+       rendered where staff actually are. */
+    if(_chFilter==='scores'){ host.innerHTML=chAdminTabs(all)+chScoresHTML(); return; }
     var counts={pending:0,approved:0,rejected:0,unverified:0};
     all.forEach(function(s){
       if(counts[s.status]!==undefined) counts[s.status]++;
@@ -5715,13 +5762,7 @@
             (c?'<button class="channounce" onclick="announceChallenge()"><i class="ti ti-send"></i> Announce</button>':'')+
           '</div>';
 
-    h+='<div class="chtabs">'+
-         ['pending','unverified','approved','rejected','all'].map(function(f){
-           var n=f==='all'?all.length:counts[f];
-           var lbl=f.charAt(0).toUpperCase()+f.slice(1);
-           return '<button class="'+(_chFilter===f?'on':'')+(f==='unverified'?' warn':'')+'" onclick="chFilter(\''+f+'\')">'+lbl+' <span>'+n+'</span></button>';
-         }).join('')+
-       '</div>';
+    h+=chAdminTabs(all,counts);
 
     if(!list.length){
       h+='<div class="readonly" style="justify-content:flex-start;margin-top:12px"><i class="ti ti-info-circle"></i> Nothing here.</div>';
