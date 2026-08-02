@@ -987,7 +987,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30et · screenshot-first</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30eu · screenshot-visible</div>
     </section>
 
     <!-- TODAY -->
@@ -5564,7 +5564,9 @@
       challenge_id:c.id,
       platform:plat,
       post_url:story?'':link,
-      story_screenshot:story?('shot_'+id):'',
+      /* Every entry carries a screenshot now, so the key is always set \u2014 gating this
+         on Story meant the image uploaded but nothing recorded where it went. */
+      story_screenshot:(_shotData?('shot_'+id):''),
       /* Kept for the record: true when an adult did the posting. posted_by carries the
          detail, so the two routes can be told apart later without guessing. */
       posted_by:who,
@@ -5630,7 +5632,7 @@
         });
     };
 
-    if(story && _shotData){
+    if(_shotData){
       apiPost('/.netlify/functions/tour?type=shot&id='+encodeURIComponent(id),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({data:_shotData})})
         .then(function(r){ if(!r.ok) throw new Error('image failed'); send(); })
         .catch(function(){
@@ -5850,7 +5852,7 @@
             (!s.guardian_confirmation?'<div class="chperm no"><i class="ti ti-alert-triangle"></i> Not stated who posted it</div>':''))+
            '<div class="chsubact">'+
              (s.post_url?'<a class="chbtn view'+(_chSeen[s.submission_id]?' seen':'')+'" href="'+attr(s.post_url)+'" target="_blank" rel="noopener" onclick="chMarkSeen(\''+esc(s.submission_id)+'\')"><i class="ti '+(_chSeen[s.submission_id]?'ti-eye-check':'ti-external-link')+'"></i> '+(_chSeen[s.submission_id]?'Opened':'View post')+'</a>':'')+
-             (s.story_screenshot?'<button class="chbtn view" onclick="viewShot(\''+esc(s.submission_id)+'\')"><i class="ti ti-photo"></i> View screenshot</button>':'')+
+             (s.story_screenshot?'<button class="chbtn view" onclick="viewShot(\''+esc(s.submission_id)+'\')"><i class="ti ti-photo"></i> <span>Hide screenshot</span></button>':'')+
              /* Once you've settled it, the Approve/Reject pair is replaced by the result.
                 One decision, one click \u2014 no way to double-approve or undo by accident. */
              (settled
@@ -5865,6 +5867,7 @@
          '</div>';
     });
     host.innerHTML=h;
+    autoShots();
   }
   function saveSub(s,cb){
     var payload={}; payload[s.submission_id]=s;
@@ -5915,12 +5918,23 @@
     s.xp_awarded=(parseInt(s.xp_awarded,10)||0)+add;
     saveSub(s,function(){ toast('Now '+s.xp_awarded+' XP'); });
   }
-  function viewShot(id){
+  /* Opened automatically for anything awaiting a decision \u2014 it is the thing being
+     judged, so making staff tap for it on every card is a tap too many. */
+  function autoShots(){
+    subsList().forEach(function(s){
+      if(!s.story_screenshot) return;
+      if(s.status!=='pending' && !(s.status==='approved'&&s.auto_approved&&s.verified===false)) return;
+      var host=document.getElementById('shot-'+s.submission_id);
+      if(host && !host.innerHTML) viewShot(s.submission_id, true);
+    });
+  }
+  function viewShot(id, keepOpen){
     var host=document.getElementById('shot-'+id); if(!host) return;
-    if(host.innerHTML){ host.innerHTML=''; return; }
+    if(host.innerHTML && !keepOpen){ host.innerHTML=''; return; }
+    if(host.innerHTML) return;
     host.innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-loader-2"></i> Loading\u2026</div>';
     getJSON('?type=shot&id='+encodeURIComponent(id)).then(function(r){return r.json();})
-      .then(function(o){ host.innerHTML=(o&&o.data)?'<img src="'+o.data+'" class="chshot" alt="Story screenshot">':'<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-photo-off"></i> Screenshot not found.</div>'; })
+      .then(function(o){ host.innerHTML=(o&&o.data)?'<img src="'+o.data+'" class="chshot" alt="Screenshot of the post">':'<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-photo-off"></i> Screenshot not found.</div>'; })
       .catch(function(){ host.innerHTML='<div class="readonly" style="justify-content:flex-start;margin-top:8px"><i class="ti ti-photo-off"></i> Couldn\u2019t load it.</div>'; });
   }
   function announceChallenge(){
