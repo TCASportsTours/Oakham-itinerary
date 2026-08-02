@@ -886,6 +886,28 @@
   .chwarn{display:flex;gap:7px;align-items:flex-start;margin-top:9px;font-size:11.5px;line-height:1.5;color:#ff9d52;
     background:rgba(255,157,82,.13);border:1px solid rgba(255,157,82,.35);border-radius:9px;padding:8px 10px}
   .chwarn i{font-size:15px;flex:0 0 auto}
+  .leadstrip{margin-top:12px;padding:13px;border-radius:14px;cursor:pointer;
+    background:linear-gradient(105deg,rgba(255,124,26,.13),rgba(119,119,201,.13));
+    border:1px solid rgba(255,124,26,.38)}
+  .leadstrip:active{filter:brightness(1.12)}
+  .leadstrip.empty{display:flex;align-items:center;gap:12px}
+  .leadstrip.empty>i:first-child{font-size:24px;color:#ff9d52;flex:0 0 auto}
+  .leadstrip.empty div{flex:1;min-width:0}
+  .leadstrip.empty b{display:block;font-size:15px;color:#fff}
+  .leadstrip.empty span{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+  .leadstrip.empty .arr{font-size:18px;color:var(--faint)}
+  .lcols{display:flex;gap:10px}
+  .lcol{flex:1;min-width:0}
+  .lcol .lh{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+    color:#ff9d52;font-weight:700;margin-bottom:6px}
+  .lrow{display:flex;align-items:baseline;gap:7px;margin-bottom:4px}
+  .lrow b{font-size:11px;color:var(--faint);font-weight:700;flex:0 0 auto;width:9px}
+  .lrow .n{flex:1;min-width:0;font-size:13.5px;color:#fff;font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lrow .x{font-size:13.5px;font-weight:800;font-style:italic;color:#ff9d52;flex:0 0 auto}
+  .lrow.none{color:var(--faint);font-size:13px}
+  .lmore{margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.09);
+    font-size:12.5px;color:#ff9d52;font-weight:700;display:flex;align-items:center;gap:4px}
   .chadminhead{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--surface-line);
     border-radius:13px;padding:13px;margin-top:12px}
   .chadminhead b{display:block;font-size:15px;color:#fff}
@@ -958,7 +980,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30er · admin-scores</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30es · scores-up-top</div>
     </section>
 
     <!-- TODAY -->
@@ -5700,6 +5722,28 @@
   }
 
   /* Team table first: it's the one people ask about, and it's the shorter list. */
+  /* Top two of each board, tappable through to the full tables. */
+  function chLeadStrip(){
+    var tb=teamBoard(), pb=playerBoard();
+    if(!pb.length){
+      return '<div class="leadstrip empty" onclick="chFilter(\'scores\')">'+
+        '<i class="ti ti-trophy"></i><div><b>Scores</b><span>No XP awarded yet</span></div>'+
+        '<i class="ti ti-chevron-right arr"></i></div>';
+    }
+    function col(title,rows,nameKey){
+      var out='<div class="lcol"><span class="lh">'+title+'</span>';
+      rows.slice(0,2).forEach(function(r,i){
+        out+='<div class="lrow"><b>'+(i+1)+'</b><span class="n">'+esc(r[nameKey])+'</span>'+
+             '<span class="x">'+r.xp+'</span></div>';
+      });
+      if(!rows.length) out+='<div class="lrow none">\u2014</div>';
+      return out+'</div>';
+    }
+    return '<div class="leadstrip" onclick="chFilter(\'scores\')">'+
+      '<div class="lcols">'+col('Teams',tb,'team')+col('Players',pb,'name')+'</div>'+
+      '<div class="lmore">Full scoreboard <i class="ti ti-chevron-right"></i></div></div>';
+  }
+
   function chScoresHTML(){
     var tb=teamBoard(), pb=playerBoard();
     if(!pb.length) return '<div class="readonly" style="justify-content:flex-start;margin-top:14px"><i class="ti ti-info-circle"></i> No XP awarded yet.</div>';
@@ -5746,8 +5790,12 @@
 
     /* What the app has actually got, so a challenge that isn't appearing can be traced
        to how its Day column was read rather than guessed at. */
+    /* The diagnostic panel and the announce header pushed the tabs below the fold, so
+       the scores were two scrolls away. Who's winning goes first \u2014 it's the thing
+       staff glance at most and it's two lines. */
     var np=preChallenges().length, nd=dailyChallenges().length, nt=tourChallenges().length;
-    var h='<div class="chloaded"><b>Challenges loaded: '+CHALLENGES.length+'</b>'+
+    var h=chLeadStrip();
+    h+='<div class="chloaded"><b>Challenges loaded: '+CHALLENGES.length+'</b>'+
           '<span>'+np+' pre-tour \u00b7 '+nd+' daily \u00b7 '+nt+' all-tournament \u00b7 phase: '+tourPhase()+' \u00b7 tour day '+DEMO_TODAY+'</span>'+
           (np&&DEMO_TODAY>1?'<div class="chwarn"><i class="ti ti-alert-triangle"></i> The tour day is set to '+DEMO_TODAY+', so pre-tour challenges are shut. They only run up to the end of day 1 \u2014 set the day back to 1 in admin.html to see them live.</div>':'')+
           (CHALLENGES.length?'<div class="chloadlist">'+CHALLENGES.map(function(x){
