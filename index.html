@@ -886,6 +886,13 @@
   .chwarn{display:flex;gap:7px;align-items:flex-start;margin-top:9px;font-size:11.5px;line-height:1.5;color:#ff9d52;
     background:rgba(255,157,82,.13);border:1px solid rgba(255,157,82,.35);border-radius:9px;padding:8px 10px}
   .chwarn i{font-size:15px;flex:0 0 auto}
+  .chopt{font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);font-weight:600;margin-left:6px}
+  .chstory{display:flex;gap:10px;align-items:flex-start;margin:12px 0 4px;padding:11px 12px;
+    border-radius:12px;background:rgba(119,119,201,.13);border:1px solid rgba(119,119,201,.36)}
+  .chstory>i{font-size:19px;color:#9a9ad6;flex:0 0 auto}
+  .chstory span{font-size:12.5px;color:var(--muted);line-height:1.55}
+  .chstory b{color:#fff}
   .leadstrip{margin-top:12px;padding:13px;border-radius:14px;cursor:pointer;
     background:linear-gradient(105deg,rgba(255,124,26,.13),rgba(119,119,201,.13));
     border:1px solid rgba(255,124,26,.38)}
@@ -980,7 +987,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30es · scores-up-top</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30et · screenshot-first</div>
     </section>
 
     <!-- TODAY -->
@@ -5065,7 +5072,7 @@
       chTermRow('ti-camera','1. You take the photo','Each challenge tells you what to capture. You take it yourself \u2014 you\u2019re the one who\u2019s there.')+
       chTermRow('ti-brand-instagram','2. Post it with the tags','It must be tagged <b>@'+esc(igHandle())+'</b> and include <b>'+esc(tags)+'</b>. Tap <i>Copy caption &amp; tags</i> and paste. Without the tags we can\u2019t find it and it may be turned down.')+
       chTermRow('ti-user-check','3. Your own account, or a parent\u2019s','If you\u2019re 13 or over you can post it yourself. If you haven\u2019t got an account, a parent or guardian posts it for you \u2014 same XP either way.')+
-      chTermRow('ti-link','4. Send us the link','Paste the link into the app. If it was a Story, upload a screenshot instead, because Stories vanish within a day.')+
+      chTermRow('ti-camera','4. Send us a screenshot','Take a screenshot of your post and upload it in the app. Most accounts are private, so a link on its own tells us nothing \u2014 the screenshot is what we check.<br><br>If your account is public you can paste the link too, but it\u2019s optional.<br><br>Want it reposted? Put it on your Story as well and mention @'+esc(igHandle())+'. That lets us see it and share it even from a private account.')+
       chTermRow('ti-copy-off','One post per challenge','A link that has already been entered by anyone will be refused. You can\u2019t reuse your own post from another day either.')+
       chTermRow('ti-users','Ask first \u2014 and say it\u2019s for the Challenge','If someone else is going to be in the photo, ask them \u2014 and <b>say it\u2019s for the '+esc(chName())+'</b>. Everyone here knows what that means.<br><br>Use these words:<br><b>\u201cCan I get a photo with you for the GCS Challenge?\u201d</b><br><br>If they say no, that\u2019s completely fine. Some players have asked us not to be photographed at all, so \u201cno thanks\u201d is a normal answer and nobody has to explain it.')+
       chTermRow('ti-eye-off','What not to post','Nothing showing room numbers, room doors or where the squads are sleeping. No location tags at the accommodation. Nothing in swimwear or changing rooms.')+
@@ -5424,19 +5431,23 @@
         '<label class="chlab">Where was it posted?</label>'+
         '<select id="chPlat" class="chinput" onchange="chPlatChanged()">'+opts+'</select>'+
 
-        '<div id="chLinkWrap">'+
-          '<label class="chlab">Link to the post</label>'+
-          '<input id="chLink" class="chinput" type="url" inputmode="url" placeholder="Paste the link here" autocomplete="off" oninput="chLinkCheck()">'+
-          '<div id="chDupe"></div>'+
-          '<div class="chhint">On Instagram: tap the three dots on the post &rarr; Copy link.</div>'+
-        '</div>'+
-
-        '<div id="chShotWrap" style="display:none">'+
-          '<label class="chlab">Upload a screenshot of the Story</label>'+
+        /* Most players' accounts are private, so a link is something we usually can't
+           open. The screenshot is the entry now; the link is a bonus when it works. */
+        '<div id="chShotWrap">'+
+          '<label class="chlab">Screenshot of your post</label>'+
           '<input id="chShot" type="file" accept="image/*" style="display:none" onchange="chShotPicked(this)">'+
           '<button class="chupload" onclick="document.getElementById(\'chShot\').click()"><i class="ti ti-camera"></i> <span id="chShotLabel">Choose screenshot</span></button>'+
           '<div id="chShotPrev"></div>'+
-          '<div class="chhint">Stories vanish after 24 hours, so we need a picture of it instead of a link.</div>'+
+          '<div class="chhint">Take a screenshot once it\u2019s posted, with the caption and tags showing if you can. Most accounts are private so we can\u2019t see the post itself \u2014 this is what we check.</div>'+
+        '</div>'+
+
+        '<div class="chstory"><i class="ti ti-brand-instagram"></i><span><b>Want it reposted?</b> Add it to your Story too and mention <b>@'+esc(igHandle())+'</b>. That lets us see it and share it even if your account is private. Stories only last a day, so do it there and then.</span></div>'+
+
+        '<div id="chLinkWrap">'+
+          '<label class="chlab">Link to the post <i class="chopt">optional</i></label>'+
+          '<input id="chLink" class="chinput" type="url" inputmode="url" placeholder="Paste the link, if you have one" autocomplete="off" oninput="chLinkCheck()">'+
+          '<div id="chDupe"></div>'+
+          '<div class="chhint">Only useful if your account is public. On Instagram: three dots on the post &rarr; Copy link. Leave it blank otherwise.</div>'+
         '</div>'+
 
         '<label class="chlab" style="margin-top:18px">Who posted it?</label>'+
@@ -5481,9 +5492,13 @@
     if(b) b.style.display=(v==='guardian')?'':'none';
   }
   function chPlatChanged(){
+    /* Screenshot and link are both offered whatever the platform: a Story just means
+       there'll never be a link. Only the wording changes. */
     var v=document.getElementById('chPlat').value, story=platIsStory(v);
-    document.getElementById('chLinkWrap').style.display=story?'none':'';
-    document.getElementById('chShotWrap').style.display=story?'':'none';
+    var lw=document.getElementById('chLinkWrap');
+    if(lw) lw.style.display = story ? 'none' : '';
+    var lbl=document.querySelector('#chShotWrap .chlab');
+    if(lbl) lbl.innerHTML = story ? 'Screenshot of your Story' : 'Screenshot of your post';
     if(!story) chLinkCheck(); else { var b=document.getElementById('chDupe'); if(b) b.innerHTML=''; }
   }
   function chShotPicked(input){
@@ -5523,11 +5538,10 @@
     var feature=document.getElementById('chFeature').checked;
 
     if(!who){ chErr('Please say who posted it.'); return; }
-    if(story && !_shotData){ chErr('Please add a screenshot of the Story.'); return; }
-    if(!story && !link){ chErr('Please paste the link to the post.'); return; }
-    if(!story && !/^https?:\/\//i.test(link)){ chErr('That doesn\u2019t look like a link \u2014 it should start with https://'); return; }
+    if(!_shotData){ chErr('Please add a screenshot of your post \u2014 that\u2019s how we check it.'); return; }
+    if(link && !/^https?:\/\//i.test(link)){ chErr('That doesn\u2019t look like a link \u2014 it should start with https://, or leave it blank.'); return; }
     if(!chOpen(c)){ chErr('This challenge has closed.'); return; }
-    if(!story){
+    if(link){
       var existing0=mySubFor(c.id);
       var dup=findDuplicate(link, existing0&&existing0.submission_id);
       if(dup){
