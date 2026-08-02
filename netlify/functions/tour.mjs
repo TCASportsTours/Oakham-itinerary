@@ -243,12 +243,13 @@ export default async (req) => {
           try { host = new URL(String(sub.post_url)).hostname.replace(/^www\./i, ""); } catch { host = ""; }
         }
 
-        // No link at all — a Story screenshot. Nothing can be checked automatically, so
-        // a human looks at every one of these before any XP is awarded.
-        if (!sub.post_url) {
-          sub.auto_result = "screenshot \u2014 needs approving";
-          continue;
-        }
+        // The screenshot is the entry now, because most players' accounts are private and
+        // a link we cannot open verifies nothing. Every submission goes to a human. The
+        // duplicate check above still runs first, so a reused link is still blocked.
+        sub.auto_result = sub.post_url
+          ? (host ? host + " \u2014 needs approving" : "not a valid link \u2014 needs approving")
+          : "screenshot \u2014 needs approving";
+        continue;
 
         if (!host) { sub.auto_result = "that isn't a valid link"; continue; }
 
