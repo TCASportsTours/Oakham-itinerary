@@ -907,6 +907,13 @@
   .chstory>i{font-size:19px;color:#9a9ad6;flex:0 0 auto}
   .chstory span{font-size:12.5px;color:var(--muted);line-height:1.55}
   .chstory b{color:#fff}
+  .fmtcard{background:var(--surface);border:1px solid var(--surface-line);border-radius:14px;
+    padding:14px;margin-top:9px}
+  .fmtcard.lead{background:linear-gradient(105deg,rgba(255,124,26,.13),rgba(119,119,201,.12));
+    border-color:rgba(255,124,26,.4)}
+  .fmtcard b{display:block;font-size:16px;font-weight:700;font-style:italic;color:#fff;line-height:1.25}
+  .fmtcard p{font-size:13.5px;color:var(--muted);line-height:1.65;margin-top:6px;white-space:pre-line}
+  .fmtcard.lead p{color:rgba(255,255,255,.88)}
   .leadstrip{margin-top:12px;padding:13px;border-radius:14px;cursor:pointer;
     background:linear-gradient(105deg,rgba(255,124,26,.13),rgba(119,119,201,.13));
     border:1px solid rgba(255,124,26,.38)}
@@ -1002,7 +1009,7 @@
         <div class="err" id="staffErr">That password isn't right. Try again.</div>
       </div>
       <button class="a2hslink" id="a2hsLink" onclick="openA2HS()"><i class="ti ti-device-mobile-down"></i> Add this app to your phone</button>
-      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ev · screenshot-thumbnails</div>
+      <div style="text-align:center;font-size:10px;color:var(--faint);margin-top:22px;letter-spacing:.04em">Build 2026‑07‑30ew · tournament-format</div>
     </section>
 
     <!-- TODAY -->
@@ -1031,6 +1038,7 @@
 
     <!-- CRICKET -->
     <section class="screen" id="s-cricket">
+      <div id="formatBox"></div>
       <div class="placeholder" style="margin-top:48px">
         <div class="big" style="background:rgba(255,124,26,.13);border-color:rgba(255,124,26,.4);color:#ff9d52"><i class="ti ti-trophy"></i></div>
         <b>Global Cricket Series Live</b>
@@ -1953,6 +1961,7 @@
     if(['today','updates','cricket','more','rules'].indexOf(name)>-1){lastTab=name;setTab(name);}else{setTab('');}
     if(name==='updates') renderAlertsFeed();
     if(name==='rules') renderRules();
+    if(name==='cricket') renderFormat();
     showOnly('s-'+name);
     if(name==='today'){document.getElementById('appTitle').textContent=SETTINGS.tourName||'Tour';
       document.getElementById('appSub').textContent=currentSquad+' · '+(SETTINGS.weatherLabel||'')+' · Day '+DEMO_TODAY+' of '+TOTAL_DAYS;}
@@ -2652,6 +2661,22 @@
       (sub?'<span style="display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px">'+sub+'</span>':'')+
       '</div></div>';
   }
+  /* Pulled from More content so it stays editable in the spreadsheet: any row whose
+     Group is "Cricket screen" lands here, in sheet order. */
+  function renderFormat(){
+    var host=document.getElementById('formatBox'); if(!host) return;
+    var rows=(MORECONTENT||[]).filter(function(r){
+      return String(r.group||'').trim().toLowerCase()==='cricket screen';
+    });
+    if(!rows.length){ host.innerHTML=''; return; }
+    var h='<div class="eyebrow" style="margin-top:12px">'+esc(rows[0].tile||'How it works')+'</div>';
+    rows.forEach(function(r,i){
+      h+='<div class="fmtcard'+(i===0?' lead':'')+'">'+
+         '<b>'+esc(r.heading||'')+'</b>'+
+         '<p>'+esc(r.text||'')+'</p></div>';
+    });
+    host.innerHTML=h;
+  }
   function renderMore(){
     var hostEl=document.getElementById('moreDynamic'); if(!hostEl)return;
     var groups=[], idx={};
@@ -2699,6 +2724,9 @@
     buckets[DEFAULT_SECTION]=[];
     infoIdx.forEach(function(i,n){ var g=groups[i]; var acc=TILE_ACCENTS[n%TILE_ACCENTS.length];
       var sec=(g.group||'').trim()||DEFAULT_SECTION;
+      /* "Cricket screen" in the Group column puts the content on the Cricket tab
+         instead of making a tile, so the format sits with the fixtures. */
+      if(sec.toLowerCase()==='cricket screen') return;
       if(!(sec in buckets)){ buckets[sec]=[]; bucketOrder.push(sec); }
       buckets[sec].push('<div class="tile '+acc+'" onclick="openMore('+i+')" style="position:relative'+(g.highlight?';border-color:rgba(255,124,26,.6)':'')+'">'+
          (g.highlight?'<span style="position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--orange)"></span>':'')+
