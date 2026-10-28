@@ -5,7 +5,7 @@ import { Button } from '@/components/ui'
 export function UpdatePrompt() {
   const [update, setUpdate] = useState<null | (() => void)>(null)
   useEffect(() => {
-    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
+    if (!import.meta.env.PROD || import.meta.env.VITE_EMBED || !('serviceWorker' in navigator)) return
     import('virtual:pwa-register').then(({ registerSW }) => {
       const updateSW = registerSW({
         immediate: true,

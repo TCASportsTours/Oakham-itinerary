@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { useSearchParams } from 'react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
@@ -29,6 +30,7 @@ export function weightStats(ws: WeightEntry[], startKg: number, targetKg: number
 }
 
 export function WeightPage() {
+  const confirm = useConfirm()
   const profile = useProfile()
   const [params, setParams] = useSearchParams()
   const ws = useLiveQuery(() => weights(), [])
@@ -73,7 +75,7 @@ export function WeightPage() {
               <span className="w-24 text-sm text-muted">{formatUK(w.date)}</span>
               <span className="tnum flex-1 font-semibold">{formatWeight(w.weight_kg, unit)}</span>
               <Button size="icon" variant="ghost" aria-label={`Edit weight on ${formatUK(w.date)}`} onClick={() => setEditing(w)}><Pencil className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" aria-label={`Delete weight on ${formatUK(w.date)}`} onClick={() => window.confirm('Delete this weight entry?') && deleteWeight(w.id)}><Trash2 className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" aria-label={`Delete weight on ${formatUK(w.date)}`} onClick={async () => (await confirm({ title: 'Delete weight?', message: `The entry for ${formatUK(w.date)} will be removed.`, confirmLabel: 'Delete', destructive: true })) && deleteWeight(w.id)}><Trash2 className="h-4 w-4" /></Button>
             </li>
           ))}
         </ul>

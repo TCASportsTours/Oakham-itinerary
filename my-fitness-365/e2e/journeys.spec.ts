@@ -160,8 +160,8 @@ test('progress: weight in st/lb, waist/chest/shoulders, private photos and compa
   await expect(page.getByText(/Later photo opacity/)).toBeVisible()
   // Delete removes the photo
   await page.goto('/progress/photos')
-  page.once('dialog', (d) => d.accept())
   await page.getByRole('button', { name: 'Delete Back photo from 30/09/2026' }).click()
+  await page.getByRole('button', { name: 'Delete', exact: true }).click()
   await expect(page.getByAltText(/Back progress photo, 30\/09\/2026/)).toHaveCount(0)
 })
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { useSearchParams } from 'react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Pencil, Plus, Ruler, Trash2 } from 'lucide-react'
@@ -21,6 +22,7 @@ export function measurementSummary(all: BodyMeasurement[], type: MeasurementType
 }
 
 export function MeasurementsPage() {
+  const confirm = useConfirm()
   const profile = useProfile()
   const all = useLiveQuery(() => measurements(), [])
   const [params, setParams] = useSearchParams()
@@ -86,7 +88,7 @@ export function MeasurementsPage() {
                     <span className="w-24">{formatUK(m.date)}</span>
                     <span className="tnum flex-1 text-ink">{fmt(m.value, m.type)}{(isArm || isThigh) && ` (${m.type.endsWith('left') ? 'L' : 'R'})`}</span>
                     <Button size="icon" variant="ghost" aria-label={`Edit ${measurementLabel(m.type)} on ${formatUK(m.date)}`} onClick={() => setEditing(m)}><Pencil className="h-4 w-4" /></Button>
-                    <Button size="icon" variant="ghost" aria-label={`Delete ${measurementLabel(m.type)} on ${formatUK(m.date)}`} onClick={() => window.confirm('Delete this measurement?') && deleteMeasurement(m.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" aria-label={`Delete ${measurementLabel(m.type)} on ${formatUK(m.date)}`} onClick={async () => (await confirm({ title: 'Delete measurement?', message: `${measurementLabel(m.type)} on ${formatUK(m.date)} will be removed.`, confirmLabel: 'Delete', destructive: true })) && deleteMeasurement(m.id)}><Trash2 className="h-4 w-4" /></Button>
                   </li>
                 ))}
               </ul>

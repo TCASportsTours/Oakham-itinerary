@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Bike, ChevronRight, Info, Play, Replace } from 'lucide-react'
@@ -243,6 +244,7 @@ export function SessionDetail() {
 }
 
 function Rides() {
+  const confirm = useConfirm()
   const all = useLiveQuery(() => rides(), [])
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<CyclingSession | null>(null)
@@ -282,7 +284,7 @@ function Rides() {
               <p className="tnum text-sm text-muted">{r.duration_min} min{r.distance_km ? ` · ${r.distance_km} km` : ''}{r.elevation_m ? ` · ${r.elevation_m} m up` : ''}{r.rpe ? ` · RPE ${r.rpe}` : ''}{r.est_kcal ? ` · ~${r.est_kcal} kcal est.` : ''}</p>
             </div>
             <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Edit</Button>
-            <Button size="sm" variant="ghost" onClick={() => window.confirm('Delete this ride?') && deleteRide(r.id)}>Delete</Button>
+            <Button size="sm" variant="ghost" onClick={async () => (await confirm({ title: 'Delete ride?', message: `The ride on ${formatUK(r.date)} will be removed.`, confirmLabel: 'Delete', destructive: true })) && deleteRide(r.id)}>Delete</Button>
           </li>
         ))}
       </ul>

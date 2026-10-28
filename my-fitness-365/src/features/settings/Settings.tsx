@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Cloud, Download, HardDrive, LogOut, RefreshCw, Trash2, Upload } from 'lucide-react'
 import { Badge, Button, Card, Collapsible, Field, Input, PageHeader, SectionTitle, Segmented } from '@/components/ui'
@@ -16,6 +17,7 @@ export function SettingsPage() {
   const profile = useProfile()
   const settings = useSettings()
   const session = useSession()
+  const confirm = useConfirm()
   const pending = useLiveQuery(() => pendingCount(), [])
   const fileRef = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState<string | null>(null)
@@ -125,17 +127,15 @@ export function SettingsPage() {
             <p>Deletion is permanent. Export a backup first if you might want your records later.</p>
             {session.mode === 'local' ? (
               <Button variant="danger" className="w-full" onClick={async () => {
-                if (!window.confirm('Delete ALL data on this device, including photos? This cannot be undone.')) return
-                if (window.prompt('Type DELETE to confirm') !== 'DELETE') return
+                if (!(await confirm({ title: 'Delete all data?', message: 'Every record and photo on this device will be erased. This cannot be undone.', confirmLabel: 'Delete everything', destructive: true, requireText: 'DELETE' }))) return
                 clearPhotoCache()
                 await wipeLocalData()
-                window.location.href = '/'
+                window.location.reload()
               }}><Trash2 className="h-4 w-4" aria-hidden /> Delete all data on this device</Button>
             ) : (
               <Button variant="danger" className="w-full" onClick={async () => {
                 if (!supabase || !session.userId) return
-                if (!window.confirm('Delete your account and ALL data, including every progress photo, from the cloud and this device? This cannot be undone.')) return
-                if (window.prompt('Type DELETE to confirm') !== 'DELETE') return
+                if (!(await confirm({ title: 'Delete account?', message: 'Your account and all data, including every progress photo, will be erased from the cloud and this device. This cannot be undone.', confirmLabel: 'Delete account', destructive: true, requireText: 'DELETE' }))) return
                 // Photos first (storage objects), then the account (cascades every table).
                 const { data: files } = await supabase.storage.from(PHOTO_BUCKET).list(session.userId, { limit: 1000 })
                 if (files?.length) await supabase.storage.from(PHOTO_BUCKET).remove(files.map((f) => `${session.userId}/${f.name}`))
@@ -144,7 +144,7 @@ export function SettingsPage() {
                 clearPhotoCache()
                 await wipeLocalData()
                 await supabase.auth.signOut()
-                window.location.href = '/'
+                window.location.reload()
               }}><Trash2 className="h-4 w-4" aria-hidden /> Delete account and all data</Button>
             )}
           </div>

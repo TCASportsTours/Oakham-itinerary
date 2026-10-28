@@ -37,6 +37,11 @@ export function Layout() {
           <WifiOff className="h-4 w-4" aria-hidden /> Offline — changes are saved on this device{mode === 'cloud' ? ' and will sync later' : ''}.
         </div>
       )}
+      {import.meta.env.VITE_EMBED && (
+        <p role="note" className="pt-safe bg-data/20 px-4 pb-2 text-center text-xs text-[#d4d4f5]">
+          Test version — data stays in this browser. Downloads, the camera and Add to Home Screen only work in the installed app.
+        </p>
+      )}
       <main className="flex-1 px-4 pb-28">
         <Outlet />
       </main>

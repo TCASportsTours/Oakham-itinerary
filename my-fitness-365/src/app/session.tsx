@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { useLiveQuery } from 'dexie-react-hooks'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '@/data/supabase'
@@ -30,6 +31,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<string | null>(null)
   const [lastSync, setLastSync] = useState<SyncResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const confirm = useConfirm()
 
   useEffect(() => {
     if (!supabase) return
@@ -77,7 +79,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       await syncNow().catch(() => undefined)
       const pending = await pendingCount()
-      if (pending > 0 && !window.confirm(`${pending} change(s) have not reached the cloud yet and will be lost if you sign out now. Sign out anyway?`)) {
+      if (pending > 0 && !(await confirm({ title: 'Sign out?', message: `${pending} change(s) have not reached the cloud yet and will be lost if you sign out now.`, confirmLabel: 'Sign out anyway', destructive: true }))) {
         return { ok: false, pending }
       }
       await supabase.auth.signOut()
@@ -88,7 +90,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setUserId(null)
     if (!supabase) window.location.reload()
     return { ok: true, pending: 0 }
-  }, [])
+  }, [confirm])
 
   const sync = useCallback(async () => {
     setLastSync(await syncNow())

@@ -243,7 +243,3 @@ export function Stat({ label, value, sub }: { label: string; value: ReactNode; s
     </div>
   )
 }
-
-export function confirmAction(message: string) {
-  return window.confirm(message)
-}

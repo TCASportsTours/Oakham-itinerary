@@ -1,4 +1,5 @@
-import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router'
+import { createBrowserRouter, createMemoryRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router'
+import { ConfirmProvider } from '@/components/confirm'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SessionProvider, useProfile, useSession } from '@/app/session'
 import { Layout } from '@/app/Layout'
@@ -67,15 +68,18 @@ export const routes = [
   },
 ]
 
-const router = createBrowserRouter(routes)
+// The embedded test build runs inside a frame that doesn't share URL paths, so it keeps routes in memory.
+const router = import.meta.env.VITE_ROUTER === 'memory' ? createMemoryRouter(routes) : createBrowserRouter(routes)
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <RouterProvider router={router} />
-        <UpdatePrompt />
-      </SessionProvider>
+      <ConfirmProvider>
+        <SessionProvider>
+          <RouterProvider router={router} />
+          <UpdatePrompt />
+        </SessionProvider>
+      </ConfirmProvider>
     </QueryClientProvider>
   )
 }

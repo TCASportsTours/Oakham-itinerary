@@ -5,11 +5,15 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  // `--mode artifact` builds a self-contained test copy for a private claude.ai page (no service worker).
+  base: mode === 'artifact' ? './' : '/',
+  build: { outDir: mode === 'artifact' ? 'dist-artifact' : 'dist' },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   plugins: [
     react(),
     tailwindcss(),
+    mode !== 'artifact' &&
     VitePWA({
       registerType: 'prompt',
       injectRegister: false,
@@ -45,4 +49,4 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
   },
-})
+}))

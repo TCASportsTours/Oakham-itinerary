@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { useNavigate, useParams } from 'react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Check, ChevronLeft, ChevronRight, Minus, Plus, SkipForward, Timer, X } from 'lucide-react'
@@ -16,6 +17,7 @@ const REST_KEY = 'mf365-rest-until'
 export function Player() {
   const { id = '' } = useParams()
   const nav = useNavigate()
+  const confirm = useConfirm()
   const session = useLiveQuery(() => get('workout_sessions', id), [id])
   const detail = useLiveQuery(() => (session ? getTemplateDetail(session.template_id) : undefined), [session?.template_id])
   const sets = useLiveQuery(() => getSessionSets(id), [id])
@@ -126,7 +128,7 @@ export function Player() {
           <Button variant="primary" size="lg" className="w-full" onClick={async () => { await finishSession(session, notes); sessionStorage.removeItem(REST_KEY); nav(`/workouts/history/${session.id}`, { replace: true }) }}>
             <Check className="h-5 w-5" aria-hidden /> Save workout
           </Button>
-          <Button variant="danger" className="w-full" onClick={async () => { if (window.confirm('Discard this workout? Logged sets stay in the database but the session will be marked abandoned.')) { await abandonSession(session); nav('/workouts', { replace: true }) } }}>
+          <Button variant="danger" className="w-full" onClick={async () => { if (await confirm({ title: 'Abandon workout?', message: 'Sets you logged are kept, but this session will be marked abandoned rather than completed.', confirmLabel: 'Abandon', destructive: true })) { await abandonSession(session); nav('/workouts', { replace: true }) } }}>
             <X className="h-4 w-4" aria-hidden /> Abandon workout
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useConfirm } from '@/components/confirm'
 import { Link, useNavigate } from 'react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Camera, Columns2, ImageUp, Lock, Maximize2, RotateCw, ShieldAlert, Trash2, X } from 'lucide-react'
@@ -42,6 +43,7 @@ function PrivacyNote() {
 }
 
 export function PhotosPage() {
+  const confirm = useConfirm()
   const all = useLiveQuery(() => listPhotos(), [])
   if (!all) return null
   const byDate = new Map<string, ProgressPhoto[]>()
@@ -67,7 +69,7 @@ export function PhotosPage() {
                   <figcaption className="flex items-center justify-between text-xs text-muted">
                     {VIEW_LABEL[v]}
                     {p.storage === 'cloud' && !p.uploaded && <Badge tone="warn">Not uploaded</Badge>}
-                    <button type="button" aria-label={`Delete ${VIEW_LABEL[v]} photo from ${formatUK(date)}`} className="p-1 text-faint hover:text-danger" onClick={() => window.confirm('Permanently delete this photo? This removes the image and its details.') && deletePhoto(p)}>
+                    <button type="button" aria-label={`Delete ${VIEW_LABEL[v]} photo from ${formatUK(date)}`} className="p-1 text-faint hover:text-danger" onClick={async () => (await confirm({ title: 'Delete photo?', message: 'This permanently removes the image and its details.', confirmLabel: 'Delete', destructive: true })) && deletePhoto(p)}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </figcaption>
