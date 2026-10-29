@@ -97,7 +97,7 @@ test('meals: plan, swap dinner, log what was eaten, shopping list', async ({ pag
   // choose a specific chicken dinner
   await dinnerSection.getByRole('button', { name: /^Change / }).click()
   await page.getByLabel('Search recipes').fill('Lemon chicken')
-  await page.getByRole('button', { name: /Lemon chicken with steamed vegetables/ }).click()
+  await page.locator('dialog[open]').getByRole('button', { name: /Lemon chicken with steamed vegetables/ }).click()
   await expect(dinnerSection.getByText('Lemon chicken with steamed vegetables')).toBeVisible()
   // planned ≠ eaten until logged
   await expect(page.getByText('Nothing logged yet.', { exact: false })).toBeVisible()
@@ -137,6 +137,7 @@ test('progress: weight in st/lb, waist/chest/shoulders, private photos and compa
   await page.getByLabel('Waist at navel', { exact: true }).fill('101.5')
   await page.getByLabel('Chest', { exact: true }).fill('108')
   await page.getByLabel('Shoulders', { exact: true }).fill('121')
+  await expect(page.getByText(/How to measure your waist at navel/)).toBeVisible()
   await page.getByRole('button', { name: 'Save 3 measurements' }).click()
   await expect(page.getByRole('heading', { name: 'Waist at navel' })).toBeVisible()
   await expect(page.getByText('101.5cm').first()).toBeVisible()
@@ -149,6 +150,7 @@ test('progress: weight in st/lb, waist/chest/shoulders, private photos and compa
       await page.getByLabel('Upload photo from library').setInputFiles({ name: 'p.png', mimeType: 'image/png', buffer: readFileSync(ICON) })
       await expect(page.getByAltText('Preview of adjusted photo')).toBeVisible()
       await page.getByRole('button', { name: `Save ${view.toLowerCase()}` }).click()
+      if (view !== 'Back') await expect(page.getByRole('radio', { name: `${view} ✓` })).toBeVisible()
     }
     await expect(page).toHaveURL(/\/progress\/photos$/)
   }

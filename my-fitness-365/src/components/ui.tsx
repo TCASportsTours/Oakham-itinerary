@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
+import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { ChevronDown, X } from 'lucide-react'
 import { Link } from 'react-router'
 import { cn } from '@/lib/cn'
@@ -195,10 +195,33 @@ export function Segmented<T extends string>({ value, onChange, options, label }:
   )
 }
 
+/**
+ * Space hidden by the on-screen keyboard. iOS shrinks the *visual* viewport when the
+ * keyboard opens but leaves the layout viewport alone, so a bottom sheet would otherwise
+ * sit partly behind the keyboard and stop scrolling short of its last fields.
+ */
+export function useVisibleViewport() {
+  const [vp, setVp] = useState(() => ({ height: typeof window === 'undefined' ? 800 : window.innerHeight, keyboard: 0 }))
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const update = () => setVp({ height: vv.height, keyboard: Math.max(0, window.innerHeight - vv.height - vv.offsetTop) })
+    update()
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+    }
+  }, [])
+  return vp
+}
+
 /** Modal bottom sheet using the native <dialog> element (focus trap + Esc for free). */
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  const vp = useVisibleViewport()
   useEffect(() => {
     const d = ref.current
     if (!d) return
@@ -215,11 +238,17 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
         onClose()
       }}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-0 mt-auto max-h-[90dvh] w-full max-w-none overflow-y-auto rounded-t-3xl bg-surface p-0 text-ink sm:m-auto sm:max-w-lg sm:rounded-3xl"
+      // Keep the focused field visible once the keyboard has finished opening.
+      onFocus={(e) => {
+        const el = e.target as HTMLElement
+        if (el.matches('input, textarea, select')) window.setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 350)
+      }}
+      style={{ maxHeight: `${Math.round(vp.height * 0.92)}px`, marginBottom: vp.keyboard ? `${Math.round(vp.keyboard)}px` : undefined }}
+      className="m-0 mt-auto w-full max-w-none overflow-y-auto overscroll-contain rounded-t-3xl bg-surface p-0 text-ink [touch-action:pan-y] sm:m-auto sm:max-w-lg sm:rounded-3xl"
     >
       {open && (
         <div className="pb-safe p-4">
-          <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="sticky -top-4 z-10 -mx-4 -mt-4 mb-3 flex items-center justify-between gap-2 bg-surface px-4 pb-2 pt-4">
             <h2 id={titleId} className="text-xl font-bold italic">
               {title}
             </h2>

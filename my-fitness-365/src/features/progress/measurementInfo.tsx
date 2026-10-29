@@ -37,9 +37,9 @@ export const COMMON_TIPS = COMMON
 export const measurementLabel = (t: MeasurementType) => (t === 'body_fat_pct' ? 'Estimated body fat %' : MEASUREMENTS.find((m) => m.type === t)?.label ?? t)
 
 /** Simple front-view figure with the tape position highlighted. */
-export function TapeIllustration({ info }: { info: MeasurementInfo }) {
+export function TapeIllustration({ info, className = 'h-44 w-28 shrink-0' }: { info: MeasurementInfo; className?: string }) {
   return (
-    <svg viewBox="0 0 120 200" className="h-44 w-28 shrink-0" role="img" aria-label={`Tape placement for ${info.label}`}>
+    <svg viewBox="0 0 120 200" className={className} role="img" aria-label={`Tape placement for ${info.label}`}>
       <g fill="#2b2b29" stroke="#4a4a45" strokeWidth="1.5">
         <circle cx="60" cy="20" r="13" />
         <rect x="53" y="31" width="14" height="12" rx="3" />

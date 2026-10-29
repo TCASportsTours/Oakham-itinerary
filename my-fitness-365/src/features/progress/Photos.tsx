@@ -101,7 +101,7 @@ export function NewPhoto() {
   const [savedViews, setSavedViews] = useState<PhotoView[]>([])
 
   useEffect(() => {
-    if (!source) return
+    if (!source) return setPreview(null)
     let url: string | null = null
     let live = true
     renderPhoto(source, adj).then(({ blob }) => {
@@ -128,14 +128,15 @@ export function NewPhoto() {
 
   const save = async () => {
     if (!source) return
+    const picked = source
     setSaving(true)
     try {
-      const out = await renderPhoto(source, adj)
+      const out = await renderPhoto(picked, adj)
       await savePhoto({ date, view, notes, ...out })
       const done = [...savedViews, view]
       setSavedViews(done)
-      setSource(null)
-      setPreview(null)
+      // Only clear if the user hasn't already picked the next photo while this one saved.
+      setSource((cur) => (cur === picked ? null : cur))
       setNotes('')
       const next = PHOTO_VIEWS.find((v) => !done.includes(v))
       if (next) setView(next)

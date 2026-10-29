@@ -10,7 +10,7 @@ import { change } from '@/lib/stats'
 import { formatUK, today } from '@/lib/dates'
 import { cmToIn, formatLength, inToCm } from '@/lib/units'
 import type { BodyMeasurement, LengthUnit, MeasurementType } from '@/data/types'
-import { COMMON_TIPS, MEASUREMENTS, TapeIllustration, measurementLabel } from './measurementInfo'
+import { COMMON_TIPS, MEASUREMENTS, TapeIllustration, measurementLabel, type MeasurementInfo } from './measurementInfo'
 import { PairChart, TrendChart } from './lazyCharts'
 
 export function measurementSummary(all: BodyMeasurement[], type: MeasurementType) {
@@ -146,12 +146,13 @@ function AddMeasurements({ unit: defaultUnit, onClose }: { unit: LengthUnit; onC
           <Field label="Unit" htmlFor="m-unit"><Segmented label="Unit" value={unit} onChange={setUnit} options={[{ value: 'cm', label: 'cm' }, { value: 'in', label: 'inches' }]} /></Field>
         </div>
         <p className="text-sm text-faint">Fill in only what you measured today — everything is optional.</p>
-        <div className="grid grid-cols-2 gap-3">
+        <p className="text-xs text-faint">Tip: the return key on the keyboard moves to the next body part, so you can skip any you’re not measuring today.</p>
+        <div className="space-y-3">
           {fields.map((m) => (
-            <Field key={m.type} label={m.label} htmlFor={`m-${m.type}`}>
-              <Input id={`m-${m.type}`} type="number" inputMode="decimal" step="0.1" min="0" value={values[m.type] ?? ''} onChange={(e) => setValues({ ...values, [m.type]: e.target.value })} placeholder={unit} />
-            </Field>
+            <MeasureField key={m.type} info={m} unit={unit} value={values[m.type] ?? ''} onChange={(v) => setValues({ ...values, [m.type]: v })} />
           ))}
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           {showOptional && (
             <Field label="Est. body fat %" htmlFor="m-bf" hint="Only if measured by a device — the app never estimates this from photos.">
               <Input id="m-bf" type="number" inputMode="decimal" step="0.1" value={values.body_fat_pct ?? ''} onChange={(e) => setValues({ ...values, body_fat_pct: e.target.value })} />
@@ -160,9 +161,65 @@ function AddMeasurements({ unit: defaultUnit, onClose }: { unit: LengthUnit; onC
         </div>
         <Button size="sm" variant="ghost" onClick={() => setShowOptional(!showOptional)}>{showOptional ? 'Hide optional' : 'Show optional (natural waist, calves, body fat)'}</Button>
         <Field label="Notes" htmlFor="m-notes"><Textarea id="m-notes" value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
-        <Button type="submit" variant="primary" size="lg" className="w-full" disabled={filled === 0}>Save {filled || ''} measurement{filled === 1 ? '' : 's'}</Button>
+        {/* Always reachable: save whatever has been filled in, without scrolling past the rest. */}
+        <div className="sticky -bottom-4 -mx-4 bg-surface px-4 pb-4 pt-2">
+          <Button type="submit" variant="primary" size="lg" className="w-full" disabled={filled === 0}>{filled === 0 ? 'Fill in at least one box' : `Save ${filled} measurement${filled === 1 ? '' : 's'}`}</Button>
+        </div>
       </form>
     </Sheet>
+  )
+}
+
+/** One body part: tape-position picture, the method, the box, and full instructions on tap. */
+function MeasureField({ info, unit, value, onChange }: { info: MeasurementInfo; unit: LengthUnit; value: string; onChange: (v: string) => void }) {
+  const id = `m-${info.type}`
+  return (
+    <div className="rounded-2xl bg-surface-2/60 p-3">
+      <div className="flex gap-3">
+        <TapeIllustration info={info} className="h-24 w-14 shrink-0" />
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <label htmlFor={id} className="block font-semibold">{info.label}</label>
+          <p className="text-xs text-muted">{info.method}</p>
+          <div className="flex items-center gap-2">
+            <Input
+              id={id}
+              type="number"
+              inputMode="decimal"
+              enterKeyHint="next"
+              step="0.1"
+              min="0"
+              value={value}
+              placeholder="Skip"
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={(e) => {
+                // Return moves to the next box instead of submitting, so boxes can be skipped.
+                if (e.key !== 'Enter') return
+                e.preventDefault()
+                const inputs = [...(e.currentTarget.form?.querySelectorAll<HTMLInputElement>('input[type="number"]') ?? [])]
+                const next = inputs[inputs.indexOf(e.currentTarget) + 1]
+                if (next) next.focus()
+                else e.currentTarget.blur()
+              }}
+              className="max-w-36"
+            />
+            <span className="text-muted">{unit}</span>
+          </div>
+        </div>
+      </div>
+      <details className="group mt-2">
+        <summary className="flex min-h-9 cursor-pointer list-none items-center gap-1 text-sm font-semibold text-accent [&::-webkit-details-marker]:hidden">
+          How to measure your {info.label.toLowerCase()} <span className="transition group-open:rotate-180" aria-hidden>▾</span>
+        </summary>
+        <div className="mt-2 flex gap-3 text-sm text-muted">
+          <TapeIllustration info={info} className="h-36 w-24 shrink-0" />
+          <div className="space-y-2">
+            <ol className="list-decimal space-y-1 pl-5">{info.steps.map((s) => <li key={s}>{s}</li>)}</ol>
+            <ul className="list-disc space-y-1 pl-5 text-faint">{COMMON_TIPS.slice(0, 2).map((s) => <li key={s}>{s}</li>)}</ul>
+            <p className="text-faint">How often: {info.frequency.toLowerCase()}.</p>
+          </div>
+        </div>
+      </details>
+    </div>
   )
 }
 
