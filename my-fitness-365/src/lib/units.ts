@@ -41,3 +41,24 @@ export const inToCm = (inch: number) => inch * CM_PER_INCH
 export function formatLength(cm: number, unit: 'cm' | 'in'): string {
   return unit === 'cm' ? `${round(cm, 1).toFixed(1)}cm` : `${round(cmToIn(cm), 1).toFixed(1)}in`
 }
+
+export const INCHES_PER_FOOT = 12
+
+export function cmToFtIn(cm: number): { ft: number; inch: number } {
+  const total = cm / CM_PER_INCH
+  let ft = Math.floor(total / INCHES_PER_FOOT)
+  let inch = Math.round((total - ft * INCHES_PER_FOOT) * 10) / 10
+  if (inch >= INCHES_PER_FOOT) {
+    ft += 1
+    inch = 0
+  }
+  return { ft, inch }
+}
+
+export const ftInToCm = (ft: number, inch: number) => (ft * INCHES_PER_FOOT + inch) * CM_PER_INCH
+
+/** "5ft 9in (175cm)" — inches rounded to the nearest whole inch for display. */
+export function formatHeight(cm: number) {
+  const totalIn = Math.round(cm / CM_PER_INCH)
+  return `${Math.floor(totalIn / 12)}ft ${totalIn % 12}in (${Math.round(cm)}cm)`
+}

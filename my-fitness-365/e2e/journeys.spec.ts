@@ -81,6 +81,7 @@ test('ride: record a mountain bike ride', async ({ page }) => {
   await page.getByLabel('Distance (km)').fill('28.5')
   await expect(page.getByText(/MET 8.5 ×/)).toBeVisible()
   await page.getByRole('button', { name: 'Save ride' }).click()
+  await expect(page.getByRole('button', { name: 'Save ride' })).toHaveCount(0) // sheet closes once the ride is stored
   await page.goto('/workouts?tab=rides')
   await expect(page.getByText(/90 min · 28.5 km/)).toBeVisible()
 })

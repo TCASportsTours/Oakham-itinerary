@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { kgToStLb, stLbToKg, formatWeight } from './units'
+import { kgToStLb, stLbToKg, formatWeight, cmToFtIn, ftInToCm, formatHeight } from './units'
 import { ukUnits, alcoholKcal } from './alcohol'
 import { macroTargets, inferDayType } from './nutrition'
 import { rollingAverage, byDate } from './stats'
@@ -12,6 +12,12 @@ describe('units', () => {
     expect(stLbToKg(13, 7)).toBeCloseTo(85.73, 2)
     expect(formatWeight(83, 'st')).toBe('13st 1lb (83.0kg)')
     expect(formatWeight(83, 'kg')).toBe('83.0kg')
+  })
+  it('converts cm ⇄ feet/inches', () => {
+    expect(cmToFtIn(175)).toEqual({ ft: 5, inch: 8.9 })
+    expect(ftInToCm(5, 9)).toBeCloseTo(175.26, 2)
+    expect(cmToFtIn(182.88)).toEqual({ ft: 6, inch: 0 })
+    expect(formatHeight(175)).toBe('5ft 9in (175cm)')
   })
 })
 

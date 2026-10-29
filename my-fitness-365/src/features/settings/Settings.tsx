@@ -4,6 +4,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Cloud, Download, HardDrive, LogOut, RefreshCw, Trash2, Upload } from 'lucide-react'
 import { Badge, Button, Card, Collapsible, Field, Input, PageHeader, SectionTitle, Segmented } from '@/components/ui'
 import { ScheduleEditor } from '@/components/ScheduleEditor'
+import { WeightField } from '@/components/WeightField'
+import { HeightInput } from '@/components/HeightInput'
 import { useProfile, useSession, useSettings } from '@/app/session'
 import { updateProfile, updateSettings } from '@/services/profile'
 import { csvExports, downloadFile, exportAll, exportWithPhotos, importAll, wipeLocalData } from '@/services/backup'
@@ -58,14 +60,17 @@ export function SettingsPage() {
         <Field label="Name" htmlFor="s-name"><Input id="s-name" defaultValue={profile.display_name} onBlur={(e) => updateProfile({ display_name: e.target.value.trim() })} /></Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Age" htmlFor="s-age"><Input id="s-age" type="number" defaultValue={profile.age} onBlur={num((v) => updateProfile({ age: v }))} /></Field>
-          <Field label="Height (cm)" htmlFor="s-height"><Input id="s-height" type="number" defaultValue={profile.height_cm} onBlur={num((v) => updateProfile({ height_cm: v }))} /></Field>
-          <Field label="Starting baseline (kg)" htmlFor="s-start"><Input id="s-start" type="number" step="0.1" defaultValue={profile.start_weight_kg} onBlur={num((v) => updateProfile({ start_weight_kg: v }))} /></Field>
-          <Field label="First milestone (kg)" htmlFor="s-target"><Input id="s-target" type="number" step="0.1" defaultValue={profile.target_weight_kg} onBlur={num((v) => updateProfile({ target_weight_kg: v }))} /></Field>
-          <Field label="Long-term from (kg)" htmlFor="s-ltmin"><Input id="s-ltmin" type="number" step="0.5" defaultValue={profile.long_term_min_kg} onBlur={num((v) => updateProfile({ long_term_min_kg: v }))} /></Field>
-          <Field label="Long-term to (kg)" htmlFor="s-ltmax"><Input id="s-ltmax" type="number" step="0.5" defaultValue={profile.long_term_max_kg} onBlur={num((v) => updateProfile({ long_term_max_kg: v }))} /></Field>
           <Field label="Programme start" htmlFor="s-pstart"><Input id="s-pstart" type="date" defaultValue={profile.program_start_date} onBlur={(e) => e.target.value && updateProfile({ program_start_date: e.target.value })} /></Field>
           <Field label="Heaviest dumbbell (kg)" htmlFor="s-db"><Input id="s-db" type="number" defaultValue={profile.max_dumbbell_kg} onBlur={num((v) => updateProfile({ max_dumbbell_kg: v }))} /></Field>
         </div>
+        <fieldset>
+          <legend className="mb-1.5 text-sm font-semibold text-muted">Height</legend>
+          <HeightInput valueCm={profile.height_cm} onSave={(cm) => updateProfile({ height_cm: cm })} idPrefix="s-height" />
+        </fieldset>
+        <WeightField id="s-start" label="Starting baseline" unit={profile.weight_unit} valueKg={profile.start_weight_kg} onSave={(kg) => updateProfile({ start_weight_kg: kg })} />
+        <WeightField id="s-target" label="First milestone" unit={profile.weight_unit} valueKg={profile.target_weight_kg} onSave={(kg) => updateProfile({ target_weight_kg: kg })} />
+        <WeightField id="s-ltmin" label="Longer-term range: from" unit={profile.weight_unit} valueKg={profile.long_term_min_kg} onSave={(kg) => updateProfile({ long_term_min_kg: kg })} />
+        <WeightField id="s-ltmax" label="Longer-term range: to" unit={profile.weight_unit} valueKg={profile.long_term_max_kg} onSave={(kg) => updateProfile({ long_term_max_kg: kg })} />
         <Field label="Equipment" htmlFor="s-eq"><Input id="s-eq" defaultValue={profile.equipment} onBlur={(e) => updateProfile({ equipment: e.target.value })} /></Field>
         <Field label="Weight display" htmlFor="s-wu"><Segmented label="Weight display" value={profile.weight_unit} onChange={(v) => updateProfile({ weight_unit: v })} options={[{ value: 'st', label: 'Stones & pounds' }, { value: 'kg', label: 'Kilograms' }]} /></Field>
         <Field label="Body measurements" htmlFor="s-lu"><Segmented label="Length unit" value={profile.length_unit} onChange={(v) => updateProfile({ length_unit: v })} options={[{ value: 'cm', label: 'Centimetres' }, { value: 'in', label: 'Inches' }]} /></Field>

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Navigate } from 'react-router'
 import { Button, Card, Field, Input, Segmented } from '@/components/ui'
 import { WeightInput } from '@/components/WeightInput'
+import { WeightField } from '@/components/WeightField'
+import { HeightInput } from '@/components/HeightInput'
 import { ScheduleEditor } from '@/components/ScheduleEditor'
 import { Logo } from '@/components/Logo'
 import { useProfile, useSettings } from '@/app/session'
@@ -57,10 +59,11 @@ export function Onboarding() {
               <Field label="Age" htmlFor="age">
                 <Input id="age" type="number" inputMode="numeric" defaultValue={profile.age} onBlur={(e) => updateProfile({ age: Number(e.target.value) || profile.age })} />
               </Field>
-              <Field label="Height (cm)" htmlFor="height">
-                <Input id="height" type="number" inputMode="decimal" defaultValue={profile.height_cm} onBlur={(e) => updateProfile({ height_cm: Number(e.target.value) || profile.height_cm })} />
-              </Field>
             </div>
+            <fieldset>
+              <legend className="mb-1.5 text-sm font-semibold text-muted">Height</legend>
+              <HeightInput valueCm={profile.height_cm} onSave={(cm) => updateProfile({ height_cm: cm })} idPrefix="onboard-height" />
+            </fieldset>
             <Field label="Sex used for energy estimates" htmlFor="sex">
               <Segmented label="Sex" value={profile.sex} onChange={(v) => updateProfile({ sex: v })} options={[{ value: 'male', label: 'Male' }, { value: 'female', label: 'Female' }]} />
             </Field>
@@ -93,20 +96,10 @@ export function Onboarding() {
         {step === 3 && (
           <Card className="space-y-4">
             <h1 className="text-2xl">Goals</h1>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="First milestone (kg)" htmlFor="target">
-                <Input id="target" type="number" step="0.1" defaultValue={profile.target_weight_kg} onBlur={(e) => updateProfile({ target_weight_kg: Number(e.target.value) || profile.target_weight_kg })} />
-              </Field>
-              <Field label="Starting baseline (kg)" htmlFor="start">
-                <Input id="start" type="number" step="0.1" defaultValue={profile.start_weight_kg} onBlur={(e) => updateProfile({ start_weight_kg: Number(e.target.value) || profile.start_weight_kg })} />
-              </Field>
-              <Field label="Longer-term from (kg)" htmlFor="ltmin">
-                <Input id="ltmin" type="number" step="0.5" defaultValue={profile.long_term_min_kg} onBlur={(e) => updateProfile({ long_term_min_kg: Number(e.target.value) || profile.long_term_min_kg })} />
-              </Field>
-              <Field label="Longer-term to (kg)" htmlFor="ltmax">
-                <Input id="ltmax" type="number" step="0.5" defaultValue={profile.long_term_max_kg} onBlur={(e) => updateProfile({ long_term_max_kg: Number(e.target.value) || profile.long_term_max_kg })} />
-              </Field>
-            </div>
+            <WeightField id="target" label="First milestone" unit={unit} valueKg={profile.target_weight_kg} onSave={(kg) => updateProfile({ target_weight_kg: kg })} />
+            <WeightField id="start" label="Starting baseline" unit={unit} valueKg={profile.start_weight_kg} onSave={(kg) => updateProfile({ start_weight_kg: kg })} />
+            <WeightField id="ltmin" label="Longer-term range: from" unit={unit} valueKg={profile.long_term_min_kg} onSave={(kg) => updateProfile({ long_term_min_kg: kg })} />
+            <WeightField id="ltmax" label="Longer-term range: to" unit={unit} valueKg={profile.long_term_max_kg} onSave={(kg) => updateProfile({ long_term_max_kg: kg })} />
             <p className="text-sm text-faint">Focus: reduce body fat, build chest, shoulders, back and abs, keep riding. The longer-term range is subject to review.</p>
           </Card>
         )}
