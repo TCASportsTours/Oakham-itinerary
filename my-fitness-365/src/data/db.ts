@@ -39,6 +39,8 @@ export class FitnessDB extends Dexie {
       blobs: 'id, user_id',
       meta: 'key',
     })
+    // v2: Strava imports are matched by their Strava activity id.
+    this.version(2).stores({ cycling_sessions: 'id, user_id, date, external_id' })
   }
 }
 

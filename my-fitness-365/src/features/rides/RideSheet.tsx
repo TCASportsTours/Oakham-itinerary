@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Button, Field, Input, Segmented, Sheet, Textarea } from '@/components/ui'
 import { recordRide, editRide } from '@/services/rides'
 import { weights } from '@/services/body'
-import { useProfile } from '@/app/session'
+import { useProfile, useSettings } from '@/app/session'
 import type { CyclingSession, RideIntensity } from '@/data/types'
 import type { PlanItem } from '@/services/diary'
 
@@ -29,6 +29,11 @@ export function RideSheet({ open, onClose, date, plan, ride }: { open: boolean; 
   const [kcal, setKcal] = useState(ride?.est_kcal != null ? String(ride.est_kcal) : '')
   const [kcalTouched, setKcalTouched] = useState(Boolean(ride))
 
+  const settings = useSettings()
+  const counted = (settings?.count_ride_kcal ?? true) && (settings?.ride_kcal_source ?? 'strava') === 'all'
+  const allowanceNote = counted
+    ? `Counted in this day's food allowance (${settings?.ride_kcal_share ?? 100}%).`
+    : 'Not added to your food allowance — only Strava rides are counted (change this in Settings).'
   const minutes = Number(duration) || 0
   const estimate = estimateRideKcal(intensity, weightKg, minutes)
   useEffect(() => {
@@ -86,7 +91,7 @@ export function RideSheet({ open, onClose, date, plan, ride }: { open: boolean; 
         <Field
           label="Estimated energy (kcal)"
           htmlFor="ride-kcal"
-          hint={`Estimate only: MET ${RIDE_MET[intensity]} × ${weightKg.toFixed(1)}kg × ${(minutes / 60).toFixed(2)}h = ${estimate} kcal. Not added to your food allowance automatically — your daily targets already allow for riding.`}
+          hint={`Estimate only: MET ${RIDE_MET[intensity]} × ${weightKg.toFixed(1)}kg × ${(minutes / 60).toFixed(2)}h = ${estimate} kcal. ${allowanceNote}`}
         >
           <Input
             id="ride-kcal"

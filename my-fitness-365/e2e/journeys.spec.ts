@@ -178,3 +178,11 @@ test('export: JSON download contains recorded data', async ({ page }) => {
   expect(json.tables.weight_entries).toHaveLength(1)
   expect(json.tables.weight_entries[0].weight_kg).toBeCloseTo(88.904, 2)
 })
+
+test('settings: ride calories count by default; Strava waits for set-up', async ({ page }) => {
+  await skipOnboarding(page)
+  await page.goto('/settings')
+  await expect(page.getByRole('checkbox', { name: 'Add ride calories to my food allowance' })).toBeChecked()
+  await expect(page.getByRole('radio', { name: 'Strava rides' })).toHaveAttribute('aria-checked', 'true')
+  await expect(page.getByText('Not set up yet')).toBeVisible()
+})

@@ -1,6 +1,6 @@
 # My Fitness 365 — Acceptance checklist
 
-**Document v1 · app v1.0.0 · 28/10/2026**
+**Document v2 · app v1.1.0 · 29/10/2026**
 
 ✅ Complete and tested · 🟡 Implemented but not fully tested · ⛔ Blocked · ⬜ Not yet implemented
 
@@ -60,4 +60,5 @@
 | Offline: cached app, today's plan, workout logging, queued sync | ✅ |
 | Export JSON/CSV, validated import, deletion, account deletion | ✅ / 🟡 (account deletion tested in rls; storage-file removal step not tested live) |
 | Push notifications | ⬜ (in-app reminders only) |
-| Strava / Apple Health | ⬜ (not faked) |
+| Strava import + ride calories in allowance | 🟡 built and unit-tested with a simulated Strava; waiting for your Strava API application + deployment |
+| Apple Health | ⬜ (not possible from a web app) |

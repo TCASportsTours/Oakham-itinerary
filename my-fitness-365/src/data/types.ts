@@ -61,6 +61,12 @@ export interface UserSettings extends Row {
   measurement_reminders: boolean
   notifications_enabled: boolean
   rest_timer_default_s: number
+  /** Add recorded ride calories to the day's food allowance. */
+  count_ride_kcal: boolean
+  /** Which rides count: only Strava-imported ones, or manual estimates too. */
+  ride_kcal_source: 'strava' | 'all'
+  /** Percentage of ride calories added (100 = all of them). */
+  ride_kcal_share: number
 }
 
 export type ActivityKind = 'workout' | 'ride' | 'combined' | 'recovery' | 'rest' | 'social'
@@ -197,6 +203,10 @@ export interface CyclingSession extends Row {
   notes: string
   completed: boolean
   scheduled_activity_id: string | null
+  /** 'strava' rows were imported; est_kcal is then Strava's own calorie figure. */
+  source: 'manual' | 'strava'
+  external_id: string | null
+  avg_hr: number | null
 }
 
 export type IngredientCategory =

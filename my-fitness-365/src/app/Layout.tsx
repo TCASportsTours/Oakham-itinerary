@@ -3,6 +3,7 @@ import { CalendarDays, Dumbbell, Home, LineChart, Utensils, WifiOff } from 'luci
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/cn'
 import { useSession } from './session'
+import { useStravaAutoImport } from '@/features/strava/Strava'
 
 const tabs = [
   { to: '/', label: 'Today', icon: Home, end: true },
@@ -28,6 +29,7 @@ function useOnline() {
 }
 
 export function Layout() {
+  useStravaAutoImport()
   const online = useOnline()
   const { mode } = useSession()
   return (

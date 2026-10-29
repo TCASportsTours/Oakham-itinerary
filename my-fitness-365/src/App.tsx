@@ -17,6 +17,7 @@ import { MeasurementsPage } from '@/features/progress/Measurements'
 import { PhotosPage, NewPhoto, ComparePhotos } from '@/features/progress/Photos'
 import { SettingsPage } from '@/features/settings/Settings'
 import { UpdatePrompt } from '@/app/UpdatePrompt'
+import { StravaCallback } from '@/features/strava/Strava'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { networkMode: 'offlineFirst', retry: 1 } } })
 
@@ -40,6 +41,7 @@ export const routes = [
     element: <Gate />,
     children: [
       { path: '/onboarding', element: <Onboarding /> },
+      { path: '/strava/callback', element: <StravaCallback /> },
       { path: '/workouts/session/:id', element: <div className="mx-auto max-w-xl px-4"><Player /></div> },
       {
         element: <Layout />,

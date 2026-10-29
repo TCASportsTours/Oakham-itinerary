@@ -42,4 +42,7 @@ export const DEFAULT_SETTINGS = (schedule: Record<string, string[]>): S => ({
   measurement_reminders: true,
   notifications_enabled: false,
   rest_timer_default_s: 90,
+  count_ride_kcal: true,
+  ride_kcal_source: 'strava',
+  ride_kcal_share: 100,
 })

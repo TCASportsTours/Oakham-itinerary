@@ -24,6 +24,9 @@ function sqlColumns() {
     }
     out.set(m[1], cols)
   }
+  for (const m of sql.matchAll(/alter table public\.(\w+)([\s\S]*?);/g)) {
+    for (const c of m[2].matchAll(/add column (\w+)/g)) out.get(m[1])?.add(c[1])
+  }
   return out
 }
 

@@ -42,7 +42,7 @@ export function NutritionSummary({ date }: { date: string }) {
     <div className="space-y-3">
       <div className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-faint">{DAY_TYPE_LABEL[t.type]}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-faint">{t.rideCredits.length ? `${DAY_TYPE_LABEL[t.base.type]} + rides` : DAY_TYPE_LABEL[t.type]}</p>
           <p className="tnum text-3xl font-bold">
             {k(eaten.kcal)} <span className="text-base font-semibold text-muted">/ {k(t.kcal)} kcal food</span>
           </p>
@@ -52,6 +52,12 @@ export function NutritionSummary({ date }: { date: string }) {
         </p>
       </div>
       <Progress value={eaten.kcal} max={t.kcal} label="Food calories" tone={remaining < 0 ? 'warn' : 'accent'} />
+      {t.rideCredits.length > 0 && (
+        <p className="tnum text-sm text-muted">
+          {DAY_TYPE_LABEL[t.base.type]} base {k(t.base.kcal)}
+          {t.rideCredits.map((c) => ` + ${k(c.kcal)} ${c.source === 'strava' ? 'Strava' : 'ride estimate'} (${c.name})`).join('')} = <span className="font-semibold text-ink">{k(t.kcal)} kcal</span>
+        </p>
+      )}
       <div className="grid grid-cols-3 gap-3 text-sm">
         <MacroBar label="Protein" value={eaten.protein} target={t.protein} />
         <MacroBar label="Carbs" value={eaten.carbs} target={t.carbs} />

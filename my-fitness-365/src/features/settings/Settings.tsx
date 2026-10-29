@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { Cloud, Download, HardDrive, LogOut, RefreshCw, Trash2, Upload } from 'lucide-react'
 import { Badge, Button, Card, Collapsible, Field, Input, PageHeader, SectionTitle, Segmented } from '@/components/ui'
 import { ScheduleEditor } from '@/components/ScheduleEditor'
+import { RideCaloriesCard, StravaCard } from '@/features/strava/Strava'
 import { WeightField } from '@/components/WeightField'
 import { HeightInput } from '@/components/HeightInput'
 import { useProfile, useSession, useSettings } from '@/app/session'
@@ -91,6 +92,10 @@ export function SettingsPage() {
         })}
       </Card>
 
+      <RideCaloriesCard />
+
+      <StravaCard />
+
       <Card>
         <SectionTitle>Default week</SectionTitle>
         <p className="mb-3 text-sm text-muted">Changes apply to days you haven’t edited. Past and customised days keep their history.</p>
@@ -155,7 +160,7 @@ export function SettingsPage() {
           </div>
         </Collapsible>
       </Card>
-      <p className="pb-4 text-center text-xs text-faint">My Fitness 365 · v1.0.0</p>
+      <p className="pb-4 text-center text-xs text-faint">My Fitness 365 · v1.1.0</p>
     </div>
   )
 }

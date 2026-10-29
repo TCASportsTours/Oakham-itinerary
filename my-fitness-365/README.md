@@ -1,6 +1,6 @@
 # My Fitness 365
 
-**Version 1.0.0 · README v1 · 28/10/2026**
+**Version 1.1.0 · README v2 · 29/10/2026**
 
 A personal, iPhone-first fitness PWA: daily plan, diary, three-session dumbbell programme with a guided workout player, mountain-bike log, chicken-and-veg meal planner with shopping lists, drinks tracker, weight in stones/pounds, body measurements and private progress photos.
 
@@ -70,7 +70,22 @@ Keep this as a **separate Netlify site** from the Oakham tour site (whose config
 
 Any static host with HTTPS and an SPA fallback to `index.html` works too.
 
-## 5. Install on iPhone
+## 5. Connect Strava (optional)
+
+Strava sign-in needs a secret key, so it only works on the deployed site (the Netlify functions in `netlify/functions/` hold the secret; the browser never sees it).
+
+1. At https://www.strava.com/settings/api create an API application. Set **Authorization Callback Domain** to your site's domain only (e.g. `my-fitness-365.netlify.app`, no `https://`).
+2. Netlify → Site configuration → Environment variables:
+   - `VITE_STRAVA_CLIENT_ID` = the Client ID (public; used by the app)
+   - `STRAVA_CLIENT_ID` = the same Client ID (used by the functions)
+   - `STRAVA_CLIENT_SECRET` = the Client Secret (**functions only — never a `VITE_` variable**)
+3. Redeploy, then in the app: Settings → Strava → **Connect with Strava**.
+
+What it does: asks for `activity:read_all` (so rides marked "Only you" import too); imports rides (road, mountain, gravel, e-bike, virtual) from the last 14 days on first connect and new ones whenever the app opens (at most every 15 minutes); takes Strava's own calorie figure from the detailed activity (or its kilojoules if no calorie figure); matches a ride you already logged by hand on the same day (within 20 minutes' duration) instead of duplicating it; ticks off that day's planned ride. Tokens are kept only on the device (not synced or exported) and are removed on sign-out or **Disconnect**, which also revokes access on Strava.
+
+**Ride calories in the allowance** (Settings → Ride calories): on by default for Strava rides, optional for hand-recorded rides, with a share (%) setting. Once a counted ride is recorded, that day's target becomes the day's non-riding target (gym or rest) plus the ride calories — so a cycling day's built-in riding allowance is never counted twice. Example: rest 2,100 + Strava 1,100 = 3,200 kcal.
+
+## 6. Install on iPhone
 
 1. Open the HTTPS address in **Safari**.
 2. Tap **Share** → **Add to Home Screen** → **Add**.
@@ -78,7 +93,7 @@ Any static host with HTTPS and an SPA fallback to `index.html` works too.
 
 Notes: install only works from Safari over HTTPS. iOS can clear website storage for sites that go unused for a long time; the app requests persistent storage, but in **local-only mode keep regular backups** (Settings → Export & backup).
 
-## 6. Backup, restore and deletion
+## 7. Backup, restore and deletion
 
 - **Settings → Export & backup**
   - *All data (JSON)* — every record, schema-versioned.
@@ -90,7 +105,7 @@ Notes: install only works from Safari over HTTPS. iOS can clear website storage 
   - Cloud mode: removes every photo file from storage, then calls `delete_my_account()`, which deletes the auth user and cascades to every table; local data is then wiped.
 - **Sign-out** pushes pending changes (warns if some could not be sent), then clears all local records, cached photos and the sync queue from the device.
 
-## 7. Architecture
+## 8. Architecture
 
 ```
 src/
@@ -110,6 +125,6 @@ e2e/            Playwright journeys + PWA tests
 
 **Dates:** date-only values are stored as `YYYY-MM-DD` calendar dates computed in Europe/London (BST/GMT-safe); timestamps are UTC ISO strings.
 
-## 8. Design
+## 9. Design
 
 Dark theme by default. GCS palette tokens: near-black `#161615` background, Wicket teal `#51cea7` as the fresh-green accent, Sunset orange `#ff7c1a` for warnings, Ocean purple `#7777c9` for data. Josefin Sans throughout (bundled, works offline), bold italic for headlines. Chart colours were checked with a colour-blind-safety validator; two-series charts also use a dashed line so colour is never the only cue.

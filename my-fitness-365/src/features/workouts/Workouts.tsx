@@ -280,8 +280,9 @@ function Rides() {
           <li key={r.id} className="flex items-center gap-3 rounded-2xl bg-surface p-3">
             <Bike className="h-5 w-5 text-data" aria-hidden />
             <div className="min-w-0 flex-1">
-              <p className="font-semibold">{formatUK(r.date)} · {r.intensity[0].toUpperCase() + r.intensity.slice(1)}</p>
-              <p className="tnum text-sm text-muted">{r.duration_min} min{r.distance_km ? ` · ${r.distance_km} km` : ''}{r.elevation_m ? ` · ${r.elevation_m} m up` : ''}{r.rpe ? ` · RPE ${r.rpe}` : ''}{r.est_kcal ? ` · ~${r.est_kcal} kcal est.` : ''}</p>
+              <p className="font-semibold">{formatUK(r.date)} · {r.intensity[0].toUpperCase() + r.intensity.slice(1)} {r.source === 'strava' && <Badge className="ml-1 bg-[#fc4c02]/15 text-[#ff8a50]">Strava</Badge>}</p>
+              {r.source === 'strava' && r.notes && <p className="text-sm">{r.notes}</p>}
+              <p className="tnum text-sm text-muted">{r.duration_min} min{r.distance_km ? ` · ${r.distance_km} km` : ''}{r.elevation_m ? ` · ${r.elevation_m} m up` : ''}{r.rpe ? ` · RPE ${r.rpe}` : ''}{r.avg_hr ? ` · ${r.avg_hr} bpm` : ''}{r.est_kcal ? ` · ${r.est_kcal} kcal ${r.source === 'strava' ? '(Strava)' : 'est.'}` : ''}</p>
             </div>
             <Button size="sm" variant="ghost" onClick={() => setEditing(r)}>Edit</Button>
             <Button size="sm" variant="ghost" onClick={async () => (await confirm({ title: 'Delete ride?', message: `The ride on ${formatUK(r.date)} will be removed.`, confirmLabel: 'Delete', destructive: true })) && deleteRide(r.id)}>Delete</Button>

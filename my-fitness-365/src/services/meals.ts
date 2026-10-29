@@ -60,12 +60,46 @@ export async function dayType(date: string): Promise<DayType> {
   )
 }
 
+export interface RideCredit {
+  name: string
+  kcal: number
+  source: 'strava' | 'manual'
+}
+
+/**
+ * Food target for a date.
+ * Without counted rides: the planned day type's target (cycling days already allow for riding).
+ * With counted rides recorded: the day's non-riding base (gym or rest) plus the ride calories
+ * (× the chosen share), so riding is never counted twice.
+ */
 export async function dayTargets(date: string) {
   const settings = await getSettings()
+  const targets = settings?.calorie_targets ?? { cycling: 2600, rest: 2100, social_cycling: 2250, gym: 2300 }
   const type = await dayType(date)
-  const kcal = settings?.calorie_targets[type] ?? 2100
   const protein = settings?.protein_target_g ?? 170
-  return { type, kcal, ...macroTargets(kcal, protein, settings?.fat_share ?? 0.27) }
+  const fatShare = settings?.fat_share ?? 0.27
+
+  const countRides = settings?.count_ride_kcal ?? true
+  const onlyStrava = (settings?.ride_kcal_source ?? 'strava') === 'strava'
+  const share = (settings?.ride_kcal_share ?? 100) / 100
+  const rides = countRides
+    ? (await forDate('cycling_sessions', date)).filter((r) => r.completed && r.est_kcal && (!onlyStrava || r.source === 'strava'))
+    : []
+  const rideCredits: RideCredit[] = rides.map((r) => ({ name: r.notes || `${r.duration_min} min ride`, kcal: Math.round((r.est_kcal ?? 0) * share), source: r.source ?? 'manual' }))
+
+  if (!rideCredits.length) {
+    const kcal = targets[type]
+    return { type, kcal, base: { type, kcal }, rideCredits, ...macroTargets(kcal, protein, fatShare) }
+  }
+  const entry = await getDiaryEntry(date)
+  const plan = (await getDayPlan(date)).filter((p) => p.status !== 'cancelled' && p.status !== 'skipped')
+  const baseType: DayType =
+    entry?.day_type_override === 'rest' || entry?.day_type_override === 'gym'
+      ? entry.day_type_override
+      : inferDayType(plan.filter((p) => p.kind !== 'ride').map((p) => (p.kind === 'combined' ? 'workout' : p.kind)), [])
+  const base = targets[baseType]
+  const kcal = base + rideCredits.reduce((t, c) => t + c.kcal, 0)
+  return { type, kcal, base: { type: baseType, kcal: base }, rideCredits, ...macroTargets(kcal, protein, fatShare) }
 }
 
 // ── Planning ───────────────────────────────────────────────────────

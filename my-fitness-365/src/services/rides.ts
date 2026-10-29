@@ -2,7 +2,8 @@ import { create, list, remove, update } from '@/data/repo'
 import type { CyclingSession } from '@/data/types'
 import { resolveItem, type PlanItem } from './diary'
 
-export type RideInput = Omit<CyclingSession, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at' | 'scheduled_activity_id'>
+export type RideInput = Omit<CyclingSession, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at' | 'scheduled_activity_id' | 'source' | 'external_id' | 'avg_hr'> &
+  Partial<Pick<CyclingSession, 'source' | 'external_id' | 'avg_hr'>>
 
 export async function rides(): Promise<CyclingSession[]> {
   return (await list('cycling_sessions')).sort((a, b) => b.date.localeCompare(a.date))
@@ -10,7 +11,7 @@ export async function rides(): Promise<CyclingSession[]> {
 
 export async function recordRide(input: RideInput, plan?: PlanItem) {
   const scheduled = plan ? await resolveItem(plan) : undefined
-  const ride = await create('cycling_sessions', { ...input, scheduled_activity_id: scheduled?.id ?? null })
+  const ride = await create('cycling_sessions', { source: 'manual', external_id: null, avg_hr: null, ...input, scheduled_activity_id: scheduled?.id ?? null })
   if (scheduled && input.completed) {
     await update('scheduled_activities', scheduled.id, { status: 'completed', cycling_session_id: ride.id })
   }
