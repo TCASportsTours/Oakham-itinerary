@@ -18,6 +18,7 @@ import { PhotosPage, NewPhoto, ComparePhotos } from '@/features/progress/Photos'
 import { SettingsPage } from '@/features/settings/Settings'
 import { UpdatePrompt } from '@/app/UpdatePrompt'
 import { StravaCallback } from '@/features/strava/Strava'
+import { PrintSheets } from '@/features/workouts/PrintSheets'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { networkMode: 'offlineFirst', retry: 1 } } })
 
@@ -42,6 +43,7 @@ export const routes = [
     children: [
       { path: '/onboarding', element: <Onboarding /> },
       { path: '/strava/callback', element: <StravaCallback /> },
+      { path: '/workouts/print/:key', element: <PrintSheets /> },
       { path: '/workouts/session/:id', element: <div className="mx-auto max-w-xl px-4"><Player /></div> },
       {
         element: <Layout />,

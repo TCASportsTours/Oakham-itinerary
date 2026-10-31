@@ -50,6 +50,10 @@ Manifest, icons (192/512/maskable/apple-touch), service worker precache, offline
 - **Ride calories counted in the food allowance (your instruction, replacing the brief's "don't add ride calories" rule).** On by default for Strava rides; optional for hand-recorded rides; adjustable share. To avoid double counting, a day with a counted ride uses its non-riding target (gym or rest) plus the ride calories, instead of the cycling-day target. ✅ unit
 - **Strava link** built but switched off until set up: Connect/Disconnect, OAuth with state check, server-side token exchange/refresh (Netlify functions), import of rides with Strava calories, de-duplication against hand-logged rides, planned-ride completion, auto-import on open. ✅ unit (simulated Strava), 🟡 not run against the real Strava API.
 
+### v1.2 — Exercise diagrams and wall sheets (31/10/2026) ✅
+- Start → finish diagrams for all 15 exercises (one "hold" diagram for each plank), shown in the library, exercise pages, workout player and list thumbnails. Drawn as simple figures; they show positions and direction of movement, not fine technique.
+- One A4 wall sheet per workout (A Monday, B Wednesday, C Friday): diagram, sets × reps, rest, start weight (and last weight used, when recorded), key cue, one thing to avoid, and write-in boxes for weeks 1–8. In the app: Workouts → Plan → *Wall sheets to print*, or *Print this workout* on each workout. PDFs (v1) are in `docs/print/`; regenerate with `npm run preview` then `node scripts/print-sheets.mjs`.
+
 ## Bugs found and fixed during the build
 - Onboarding finished but the dashboard bounced back to step 1 (race between saving and the route guard). Fixed: the onboarding screen redirects once the saved profile says it is complete.
 - Sync failures recorded `[object Object]` because Supabase errors are not `Error` instances. Fixed (`errorMessage`), covered by a test.
@@ -59,7 +63,7 @@ Manifest, icons (192/512/maskable/apple-touch), service worker precache, offline
 ## Blockers ⛔
 
 1. **Exercise demonstration videos.** None are verified. This build environment's network blocks YouTube (the proxy refused `youtube.com/oembed`, so existence and embedding permission could not be checked). Rather than invent URLs, every exercise shows "Video unavailable" with the written instructions intact. You can paste a YouTube link per exercise (labelled "added by you — not verified"); it loads only when you tap *Load video*. Fix: fill `VERIFIED_VIDEOS` in `src/data/seed/exercises.ts` from a network that allows YouTube.
-2. **Exercise images.** No licensed start/finish images are bundled; a placeholder icon is shown. You can add your own start/finish photos per exercise. These are stored **on that device only** and are not synced.
+2. **Exercise photos.** Resolved for v1.2: every exercise now has start/finish diagrams drawn by the app. No licensed photographs are bundled; your own photos per exercise remain optional and device-only.
 3. **Verified UK food composition data (e.g. CoFID).** Not integrated. Ingredient values are hand-entered typical label values, marked as estimates in the app.
 
 ## Not yet implemented ⬜

@@ -5,6 +5,7 @@ import { db } from '@/data/db'
 import { create, getUserId, remove, update, where } from '@/data/repo'
 import { nowIso } from '@/lib/dates'
 import { Button, Collapsible, Field, Input } from '@/components/ui'
+import { ExerciseGlyph, FIGURES } from './figures'
 import type { Exercise, ExerciseMedia } from '@/data/types'
 
 /** First user-added image for an exercise, as an object URL (device-local). */
@@ -32,8 +33,8 @@ export function ExerciseThumb({ exercise, className = 'h-14 w-14' }: { exercise:
   return url ? (
     <img src={url} alt={`${exercise.name}`} className={`${className} shrink-0 rounded-xl object-cover`} />
   ) : (
-    <div className={`${className} flex shrink-0 items-center justify-center rounded-xl bg-surface-2 text-accent`} aria-hidden>
-      <Dumbbell className="h-6 w-6" />
+    <div className={`${className} flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface-2 text-accent`} aria-hidden>
+      {FIGURES[exercise.key] ? <ExerciseGlyph exerciseKey={exercise.key} className="h-full w-full" /> : <Dumbbell className="h-6 w-6" />}
     </div>
   )
 }
@@ -74,7 +75,7 @@ export function ExerciseImages({ exercise }: { exercise: Exercise }) {
   return (
     <div className="space-y-2">
       {media.length === 0 ? (
-        <p className="text-sm">No licensed demonstration images are bundled yet. You can add your own start and finish photos (kept on this device only).</p>
+        <p className="text-sm">The diagram above shows the movement. You can also add your own start and finish photos (kept on this device only).</p>
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {media.map((m) => (

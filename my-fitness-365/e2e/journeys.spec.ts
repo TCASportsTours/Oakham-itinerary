@@ -188,3 +188,14 @@ test('settings: ride calories count by default; Strava waits for set-up', async 
   await expect(page.getByRole('radio', { name: 'Strava rides' })).toHaveAttribute('aria-checked', 'true')
   await expect(page.getByText('Not set up yet')).toBeVisible()
 })
+
+test('exercise diagrams and printable wall sheets', async ({ page }) => {
+  await skipOnboarding(page)
+  await page.goto('/workouts?tab=library')
+  await page.getByRole('link', { name: /Flat dumbbell chest press/ }).click()
+  await expect(page.getByRole('img', { name: /Flat dumbbell chest press diagram/ })).toBeVisible()
+  await page.goto('/workouts/print/all')
+  await expect(page.locator('.sheet')).toHaveCount(3)
+  await expect(page.locator('.sheet').first().getByRole('img', { name: /diagram/ })).toHaveCount(5)
+  await expect(page.getByRole('button', { name: 'Print 3 pages' })).toBeVisible()
+})

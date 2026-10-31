@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useConfirm } from '@/components/confirm'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Bike, ChevronRight, Info, Play, Replace } from 'lucide-react'
-import { Badge, Button, Card, Collapsible, Field, Input, PageHeader, SectionTitle, Segmented, Select, Sheet } from '@/components/ui'
+import { Bike, ChevronRight, Info, Play, Printer, Replace } from 'lucide-react'
+import { Badge, Button, Card, Collapsible, Field, Input, LinkButton, PageHeader, SectionTitle, Segmented, Select, Sheet } from '@/components/ui'
 import { list, update, where } from '@/data/repo'
 import { completedSessions, getActiveSession, getTemplateDetail, previousPerformance, startSession } from '@/services/workouts'
 import { rides, weekTotals, deleteRide } from '@/services/rides'
@@ -67,6 +67,7 @@ function Programme() {
           </div>
         </Link>
       ))}
+      <LinkButton to="/workouts/print/all" className="w-full"><Printer className="h-4 w-4" aria-hidden /> Wall sheets to print (A, B and C)</LinkButton>
       <Collapsible title="Warm-up (every session)">
         <ol className="list-decimal space-y-1 pl-5">{WARMUP.map((w) => <li key={w}>{w}</li>)}</ol>
       </Collapsible>
@@ -128,6 +129,7 @@ export function TemplateDetail() {
           </li>
         ))}
       </ul>
+      <LinkButton to={`/workouts/print/${detail.template.key}`} className="w-full"><Printer className="h-4 w-4" aria-hidden /> Print this workout (A4 wall sheet)</LinkButton>
       <p className="text-sm text-faint">Suggested weights are starting suggestions only — start lighter, swap a movement or reduce sets whenever you need to.</p>
       {editing && <EditTemplateExercise te={editing} allExercises={allExercises} onClose={() => setEditing(null)} />}
     </div>

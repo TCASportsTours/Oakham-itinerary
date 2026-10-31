@@ -7,13 +7,25 @@ import { exerciseHistory } from '@/services/workouts'
 import { formatUK } from '@/lib/dates'
 import type { Exercise } from '@/data/types'
 import { ExerciseImages, ExerciseVideo } from './ExerciseMedia'
+import { ExerciseFigure, FIGURES } from './figures'
 import { StrengthChart } from '@/features/progress/lazyCharts'
 
 export function ExerciseBody({ exercise }: { exercise: Exercise }) {
   const all = useLiveQuery(() => list('exercises'), []) ?? []
   const alts = exercise.alternatives.map((k) => all.find((e) => e.key === k)).filter(Boolean) as Exercise[]
+  const figure = FIGURES[exercise.key]
   return (
     <div className="space-y-2">
+      {figure && (
+        <figure className="rounded-2xl bg-surface-2/60 p-3">
+          <ExerciseFigure exerciseKey={exercise.key} title={exercise.name} className="w-full" />
+          <figcaption className="mt-1 grid gap-1 text-sm text-muted sm:grid-cols-2">
+            {figure.caption.filter(Boolean).map((c, i) => (
+              <span key={c}><span className="font-semibold text-ink">{figure.finish ? `${i + 1}. ` : ''}</span>{c}</span>
+            ))}
+          </figcaption>
+        </figure>
+      )}
       <Collapsible title="How to perform" icon={<BookOpen className="h-5 w-5 text-accent" aria-hidden />} defaultOpen>
         <p className="mb-1 font-semibold text-ink">Set-up</p>
         <ul className="mb-3 list-disc space-y-1 pl-5">
@@ -25,7 +37,7 @@ export function ExerciseBody({ exercise }: { exercise: Exercise }) {
         </ol>
         <p className="mt-3 flex gap-2"><Wind className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden /> {exercise.breathing}</p>
       </Collapsible>
-      <Collapsible title="Exercise images" icon={<ImageIcon className="h-5 w-5 text-accent" aria-hidden />}>
+      <Collapsible title="Your own photos" icon={<ImageIcon className="h-5 w-5 text-accent" aria-hidden />}>
         <ExerciseImages exercise={exercise} />
       </Collapsible>
       <ExerciseVideo exercise={exercise} />

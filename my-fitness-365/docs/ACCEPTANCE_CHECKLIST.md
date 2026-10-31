@@ -15,7 +15,7 @@
 | 3 | See my planned activity | ✅ | e2e `diary`; unit `diary` |
 | 4 | Select another workout itinerary | ✅ | e2e `diary` (add activity, reschedule); unit |
 | 5 | Start Monday's chest workout | ✅ | e2e `workout` (Workout A) |
-| 6 | View the exercise image | ⛔ | No licensed images; placeholder shown; you can add your own photo (device-only). See BUILD_STATUS blockers |
+| 6 | View the exercise image | ✅ | Start/finish diagrams for all 15 exercises (drawn by the app), plus optional own photos. e2e `diagrams` |
 | 7 | Expand its instructions | ✅ | e2e `workout` |
 | 8 | Open a working demonstration video, where verified | ⛔ | None verified (YouTube blocked in the build environment). Shows "Video unavailable"; you can add your own link |
 | 9 | Record weight and reps lifted | ✅ | e2e `workout`; unit |
