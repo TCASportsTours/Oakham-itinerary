@@ -220,3 +220,18 @@ describe('data isolation (local)', () => {
     expect(await body.weights()).toHaveLength(1)
   })
 })
+
+describe('default updates', () => {
+  it('moves an untouched 14st 0lb baseline to 14st 5lb, but never overrides a user value', async () => {
+    const { applyDefaultUpdates } = await import('@/data/seed')
+    const { getProfile, updateProfile } = await import('./profile')
+    expect((await getProfile())!.start_weight_kg).toBeCloseTo(91.172, 3) // new installs
+    await updateProfile({ start_weight_kg: 88.9 })
+    await applyDefaultUpdates('user-a')
+    expect((await getProfile())!.start_weight_kg).toBeCloseTo(91.172, 3)
+    // a later user edit sticks, and the update only runs once
+    await updateProfile({ start_weight_kg: 88.9 })
+    await applyDefaultUpdates('user-a')
+    expect((await getProfile())!.start_weight_kg).toBe(88.9)
+  })
+})

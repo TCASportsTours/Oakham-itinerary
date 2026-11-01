@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '@/data/supabase'
 import { setSession } from '@/data/repo'
-import { seedUser } from '@/data/seed'
+import { applyDefaultUpdates, seedUser } from '@/data/seed'
 import { pendingCount, startAutoSync, syncNow, type SyncResult } from '@/data/sync'
 import { cloudConfigured } from '@/lib/env'
 import { clearPhotoCache } from '@/services/photos'
@@ -49,6 +49,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         if (!cloudConfigured) {
           setSession(LOCAL_USER_ID, false)
           await seedUser(LOCAL_USER_ID)
+          await applyDefaultUpdates(LOCAL_USER_ID)
           if (!cancelled) setUserId(LOCAL_USER_ID)
           return
         }
@@ -62,6 +63,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         // Pull first so another device's data wins over fresh seed rows.
         if (navigator.onLine) setLastSync(await syncNow().catch(() => null))
         await seedUser(uid)
+        await applyDefaultUpdates(uid)
         if (cancelled) return
         setUserId(uid)
         stopSync = startAutoSync((r) => setLastSync(r))

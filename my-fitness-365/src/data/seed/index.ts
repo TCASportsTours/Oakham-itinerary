@@ -1,5 +1,5 @@
 import { db } from '../db'
-import { getUserId, isSyncEnabled, newId, seedId } from '../repo'
+import { getUserId, isSyncEnabled, newId, seedId, update } from '../repo'
 import { nowIso, today } from '@/lib/dates'
 import type { Row, SyncedTable, SyncOperation } from '../types'
 import { EXERCISES, VERIFIED_VIDEOS } from './exercises'
@@ -7,7 +7,7 @@ import { WORKOUTS, WARMUP } from './workouts'
 import { ACTIVITY_TEMPLATES, DEFAULT_WEEKLY_SCHEDULE } from './activities'
 import { INGREDIENTS, INGREDIENT_SOURCE } from './ingredients'
 import { RECIPES } from './recipes'
-import { DEFAULT_PROFILE, DEFAULT_SETTINGS } from './profile'
+import { DEFAULT_PROFILE, DEFAULT_SETTINGS, OLD_START_WEIGHT_KG, START_WEIGHT_KG } from './profile'
 
 export const SEED_VERSION = 1
 
@@ -147,4 +147,18 @@ export async function seedUser(userId = getUserId()) {
     await db.meta.put({ key: metaKey, value: SEED_VERSION })
   })
   return true
+}
+
+/**
+ * One-off corrections to seeded defaults on existing installs. Only values the
+ * user never changed are touched (e.g. the old 14st 0lb starting baseline).
+ */
+export async function applyDefaultUpdates(userId = getUserId()) {
+  const key = `defaults-v2:${userId}`
+  if (await db.meta.get(key)) return
+  const profile = (await db.profiles.where('user_id').equals(userId).toArray()).find((p) => !p.deleted_at)
+  if (profile && profile.start_weight_kg === OLD_START_WEIGHT_KG) {
+    await update('profiles', profile.id, { start_weight_kg: START_WEIGHT_KG })
+  }
+  await db.meta.put({ key, value: true })
 }

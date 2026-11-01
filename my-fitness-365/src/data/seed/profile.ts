@@ -3,13 +3,18 @@ import type { Profile, UserSettings } from '../types'
 type P = Omit<Profile, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at'>
 type S = Omit<UserSettings, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'deleted_at'>
 
+/** Where the journey started: 14st 5lb (201 lb × 0.45359237 = 91.172 kg). */
+export const START_WEIGHT_KG = 91.172
+/** Earlier default, replaced on existing installs by applyDefaultUpdates. */
+export const OLD_START_WEIGHT_KG = 88.9
+
 /** Starting profile from the brief. All editable. Start weight is a baseline, not "current". */
 export const DEFAULT_PROFILE = (startDate: string): P => ({
   display_name: '',
   age: 51,
   sex: 'male',
   height_cm: 175,
-  start_weight_kg: 88.9,
+  start_weight_kg: START_WEIGHT_KG,
   target_weight_kg: 83,
   long_term_min_kg: 73,
   long_term_max_kg: 76,

@@ -14,7 +14,7 @@ test('onboarding records a fresh weight in stones and pounds', async ({ page }) 
   await page.getByRole('button', { name: 'Save weight' }).click()
   await page.getByRole('button', { name: 'Skip setup' }).click()
   await expect(page.getByText('13st 12lb').first()).toBeVisible()
-  await expect(page.getByText(/since your 14st 0lb baseline/)).toBeVisible()
+  await expect(page.getByText(/since your 14st 5lb baseline/)).toBeVisible()
 })
 
 test('diary: add, combine and reschedule activities; changes survive reload', async ({ page }) => {

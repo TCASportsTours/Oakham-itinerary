@@ -25,7 +25,7 @@ export function WeightInput({ unit, valueKg, onChange, idPrefix = 'weight' }: { 
   if (unit === 'kg') {
     return (
       <div className="flex items-center gap-2">
-        <Input id={`${idPrefix}-kg`} aria-label="Weight in kilograms" inputMode="decimal" type="number" step="0.1" value={kg} onChange={(e) => setKg(e.target.value)} placeholder="88.9" className="text-2xl font-bold" />
+        <Input id={`${idPrefix}-kg`} aria-label="Weight in kilograms" inputMode="decimal" type="number" step="0.1" value={kg} onChange={(e) => setKg(e.target.value)} placeholder="91.2" className="text-2xl font-bold" />
         <span className="text-muted">kg</span>
       </div>
     )

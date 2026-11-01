@@ -17,7 +17,7 @@ export function estimateRideKcal(intensity: RideIntensity, weightKg: number, min
 export function RideSheet({ open, onClose, date, plan, ride }: { open: boolean; onClose: () => void; date: string; plan?: PlanItem; ride?: CyclingSession }) {
   const profile = useProfile()
   const latestWeight = useLiveQuery(async () => (await weights()).at(-1)?.weight_kg, [])
-  const weightKg = latestWeight ?? profile?.start_weight_kg ?? 88.9
+  const weightKg = latestWeight ?? profile?.start_weight_kg ?? 91.2
   const [intensity, setIntensity] = useState<RideIntensity>(ride?.intensity ?? plan?.ride_intensity ?? 'moderate')
   const [rideDate, setRideDate] = useState(ride?.date ?? date)
   const [start, setStart] = useState(ride?.start_time ?? '')
