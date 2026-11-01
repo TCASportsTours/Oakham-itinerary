@@ -54,6 +54,12 @@ Manifest, icons (192/512/maskable/apple-touch), service worker precache, offline
 - Start → finish diagrams for all 15 exercises (one "hold" diagram for each plank), shown in the library, exercise pages, workout player and list thumbnails. Drawn as simple figures; they show positions and direction of movement, not fine technique.
 - One A4 wall sheet per workout (A Monday, B Wednesday, C Friday): diagram, sets × reps, rest, start weight (and last weight used, when recorded), key cue, one thing to avoid, and write-in boxes for weeks 1–8. In the app: Workouts → Plan → *Wall sheets to print*, or *Print this workout* on each workout. PDFs (v1) are in `docs/print/`; regenerate with `npm run preview` then `node scripts/print-sheets.mjs`.
 
+### v1.3 — Meal photo calorie estimates (01/11/2026) 🟡
+- Log food → Photo: Claude identifies each food in a meal photo and estimates grams, kcal and macros; you adjust grams (nutrients scale), remove items, then log. One-time opt-in per device; the photo is downsized, stripped of metadata and not stored. Netlify function holds the API key; daily cap (default 40) via Netlify Blobs.
+- ✅ unit-tested (request shape checked against the real Anthropic SDK with a stubbed network; refusal, oversize, wrong type and daily-cap paths). 🟡 **Not run against the live API** — needs your Anthropic API key and the deployed site, and every call costs money.
+- **Assumption — cost per photo:** roughly 1,500–2,000 input tokens (a 1,024px photo plus instructions) × $4 per million + roughly 1,000–2,500 output tokens (thinking + JSON) × $20 per million ≈ $0.03–0.06 (about 2–5p). Not measured; check your Anthropic usage page after the first few.
+- **Accuracy:** photo estimates are rough, especially for oil, sauces and hidden food; the app says so and lets you correct grams.
+
 ## Bugs found and fixed during the build
 - Onboarding finished but the dashboard bounced back to step 1 (race between saving and the route guard). Fixed: the onboarding screen redirects once the saved profile says it is complete.
 - Sync failures recorded `[object Object]` because Supabase errors are not `Error` instances. Fixed (`errorMessage`), covered by a test.

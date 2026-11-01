@@ -160,7 +160,7 @@ export function SettingsPage() {
           </div>
         </Collapsible>
       </Card>
-      <p className="pb-4 text-center text-xs text-faint">My Fitness 365 · v1.2.0</p>
+      <p className="pb-4 text-center text-xs text-faint">My Fitness 365 · v1.3.0</p>
     </div>
   )
 }

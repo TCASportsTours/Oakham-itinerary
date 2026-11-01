@@ -199,3 +199,10 @@ test('exercise diagrams and printable wall sheets', async ({ page }) => {
   await expect(page.locator('.sheet').first().getByRole('img', { name: /diagram/ })).toHaveCount(5)
   await expect(page.getByRole('button', { name: 'Print 3 pages' })).toBeVisible()
 })
+
+test('meal photo estimate is offered but waits for set-up', async ({ page }) => {
+  await skipOnboarding(page)
+  await page.getByRole('button', { name: 'Add meal' }).click()
+  await page.getByRole('radio', { name: 'Photo' }).click()
+  await expect(page.getByText('Not set up yet')).toBeVisible()
+})

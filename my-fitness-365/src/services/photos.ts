@@ -47,7 +47,7 @@ export interface Adjustments {
 export const defaultAdjustments: Adjustments = { rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, aspect: 3 / 4 }
 
 /** Rotate, crop (uniform scale only — never distorts the body) and encode as JPEG. */
-export async function renderPhoto(src: ImageBitmap | HTMLImageElement, adj: Adjustments): Promise<{ blob: Blob; width: number; height: number }> {
+export async function renderPhoto(src: ImageBitmap | HTMLImageElement, adj: Adjustments, maxDimension = MAX_PHOTO_DIMENSION): Promise<{ blob: Blob; width: number; height: number }> {
   const sw = 'naturalWidth' in src ? src.naturalWidth : src.width
   const sh = 'naturalHeight' in src ? src.naturalHeight : src.height
   const rotated = adj.rotation % 180 !== 0
@@ -65,7 +65,7 @@ export async function renderPhoto(src: ImageBitmap | HTMLImageElement, adj: Adju
   ch /= adj.zoom
   const cx = (rw - cw) / 2 + ((rw - cw) / 2) * adj.offsetX
   const cy = (rh - ch) / 2 + ((rh - ch) / 2) * adj.offsetY
-  const scale = Math.min(1, MAX_PHOTO_DIMENSION / Math.max(cw, ch))
+  const scale = Math.min(1, maxDimension / Math.max(cw, ch))
   const outW = Math.round(cw * scale)
   const outH = Math.round(ch * scale)
   const canvas = document.createElement('canvas')

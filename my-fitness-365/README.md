@@ -85,6 +85,12 @@ What it does: asks for `activity:read_all` (so rides marked "Only you" import to
 
 **Ride calories in the allowance** (Settings → Ride calories): on by default for Strava rides, optional for hand-recorded rides, with a share (%) setting. Once a counted ride is recorded, that day's target becomes the day's non-riding target (gym or rest) plus the ride calories — so a cycling day's built-in riding allowance is never counted twice. Example: rest 2,100 + Strava 1,100 = 3,200 kcal.
 
+## 5a. Meal photo calorie estimates (optional)
+
+Log food → **Photo**: take or choose a photo of a meal; the app sends a downsized copy (long edge 1,024px, re-encoded so location data is dropped) to the Netlify function `meal-photo`, which asks Claude (`claude-opus-5-5`, structured JSON output, server-side refusal fallback on) to list each food, its estimated grams, kcal, protein, carbs and fat, a confidence level and its assumptions. You can change the grams of any item (nutrients scale in proportion), remove items, and log the total. The photo is not stored by the app. Requires one-time opt-in on each device. Progress photos are never sent.
+
+Set up (Netlify → Environment variables): `ANTHROPIC_API_KEY` (server only), then `VITE_MEAL_PHOTO=1` and redeploy. Optional: `MEAL_PHOTO_DAILY_LIMIT` (default 40 per day, counted with Netlify Blobs) and `MEAL_PHOTO_ALLOWED_ORIGIN`. Cost is per photo and billed to your Anthropic account (see BUILD_STATUS for the estimate).
+
 ## 6. Install on iPhone
 
 1. Open the HTTPS address in **Safari**.

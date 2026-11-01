@@ -25,6 +25,7 @@ import {
 } from '@/services/meals'
 import { DAY_TYPE_LABEL } from '@/lib/nutrition'
 import type { FoodLogEntry, MealSlot, PlannedMeal, Recipe } from '@/data/types'
+import { MealPhotoPanel } from './MealPhoto'
 
 export const useCatalogue = () => useLiveQuery(() => loadCatalogue(), [])
 
@@ -263,7 +264,7 @@ export function FoodLogList({ date }: { date: string }) {
 
 export function AddFoodSheet({ open, onClose, date, defaultSlot = 'snack' }: { open: boolean; onClose: () => void; date: string; defaultSlot?: MealSlot | 'ride' }) {
   const cat = useCatalogue()
-  const [mode, setMode] = useState<'recipe' | 'custom'>('recipe')
+  const [mode, setMode] = useState<'recipe' | 'photo' | 'custom'>('recipe')
   const [slot, setSlot] = useState<MealSlot | 'ride'>(defaultSlot)
   const [form, setForm] = useState({ name: '', kcal: '', protein: '', carbs: '', fat: '' })
   if (!cat) return null
@@ -284,8 +285,10 @@ export function AddFoodSheet({ open, onClose, date, defaultSlot = 'snack' }: { o
             ))}
           </Select>
         </Field>
-        <Segmented label="Food source" value={mode} onChange={setMode} options={[{ value: 'recipe', label: 'From recipes' }, { value: 'custom', label: 'Custom food' }]} />
-        {mode === 'recipe' ? (
+        <Segmented label="Food source" value={mode} onChange={setMode} options={[{ value: 'recipe', label: 'Recipes' }, { value: 'photo', label: 'Photo' }, { value: 'custom', label: 'Custom' }]} />
+        {mode === 'photo' ? (
+          <MealPhotoPanel date={date} slot={slot} onLogged={onClose} />
+        ) : mode === 'recipe' ? (
           <RecipeQuickList cat={cat} onPick={async (r, portions) => {
             await logRecipe(date, slot, r, portions, cat)
             onClose()
