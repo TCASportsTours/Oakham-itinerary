@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GCS Stat Attack v6</title>
+<meta name="theme-color" content="#161615">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<!--
+  GCS Stat Attack — v6
+  v6: 24 current players added; choose Legends (36), Current stars (24) or Everyone (60).
+  v5: 7th stat, All-round rating (batting avg / bowling avg x 100, needs 100+ Test wickets).
+  v4: every figure read directly from ESPNcricinfo Statsguru (20 Nov 2026); online
+      2-phone mode (needs netlify/functions/statattack.mjs deployed alongside).
+  v3: renamed GCS Stat Attack; retired players only.
+  v2: real cricketers; 2-player pass-and-play; GCS Bot.
+  Standalone build. Not yet wired into the itinerary app (index.html).
+-->
+<style>
+  :root{
+    --orange:#ff7c1a; --teal:#51cea7; --purple:#7777c9;
+    --ink:#161615; --white:#ffffff;
+    --surface:rgba(255,255,255,.055);
+    --surface-line:rgba(255,255,255,.10);
+    --muted:rgba(255,255,255,.62);
+    --faint:rgba(255,255,255,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Josefin Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--ink);color:#fff;min-height:100%}
+  body{min-height:100vh;min-height:100dvh;display:flex;justify-content:center;
+    background-color:var(--ink);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='64'%3E%3Ctext x='4' y='40' font-family='Arial' font-weight='bold' font-style='italic' font-size='30' fill='%23ffffff' fill-opacity='0.025'%3EGCS%3C/text%3E%3C/svg%3E")}
+  .app{width:100%;max-width:430px;padding:14px 16px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+
+  .hdr{display:flex;align-items:center;gap:11px}
+  .hdr img{width:38px;height:38px}
+  .hdr .t{flex:1;min-width:0}
+  .hdr b{display:block;font-weight:700;font-style:italic;font-size:19px;line-height:1.05}
+  .hdr span{font-size:11.5px;color:var(--muted)}
+  .iconbtn{width:36px;height:36px;border:none;border-radius:50%;background:var(--surface);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+  .score{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+  .pill{background:var(--surface);border:1px solid var(--surface-line);border-radius:14px;padding:8px 10px;text-align:center;min-width:0}
+  .pill small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pill b{font-size:22px;font-weight:700;font-style:italic}
+  .pill.p0 b{color:var(--orange)} .pill.p1 b{color:var(--purple)} .pill.pot b{color:var(--teal)}
+  .pill.on{border-color:currentColor}
+  .pill.p0.on{border-color:var(--orange)} .pill.p1.on{border-color:var(--purple)}
+  .pill.pot{min-width:70px}
+  .bar{height:6px;border-radius:3px;background:var(--purple);overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--orange);transition:width .4s}
+  .status{font-size:13.5px;color:var(--muted);text-align:center;min-height:18px}
+  .status b{color:#fff}
+
+  /* card */
+  .card{position:relative;border-radius:20px;overflow:hidden;background:#1f1f1d;border:2px solid var(--c);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .card .top{position:relative;padding:12px 14px 10px;background:var(--c);color:var(--ink)}
+  .card .top .no{position:absolute;top:10px;right:12px;font-size:12px;font-weight:700;opacity:.7}
+  .card .top .role{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .card .top h2{font-size:22px;font-weight:700;font-style:italic;line-height:1.05;margin-top:2px;padding-right:30px}
+  .card .art{position:relative;height:110px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 55%, color-mix(in srgb,var(--c) 38%,transparent), transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='38'%3E%3Ctext x='2' y='26' font-family='Arial' font-weight='bold' font-style='italic' font-size='20' fill='%23ffffff' fill-opacity='0.06'%3EGCS%3C/text%3E%3C/svg%3E")}
+  .card .art .ini{font-size:64px;font-weight:700;font-style:italic;color:#fff;letter-spacing:-.02em;text-shadow:0 6px 18px rgba(0,0,0,.45)}
+  .card .art .ri{position:absolute;left:12px;bottom:10px;font-size:22px;color:var(--c)}
+  .card .art img{position:absolute;right:10px;bottom:8px;width:26px;height:26px;opacity:.9}
+  .card .art .ctry{position:absolute;left:12px;top:10px;font-size:11px;font-weight:700;letter-spacing:.1em;background:rgba(0,0,0,.35);border-radius:6px;padding:4px 7px 3px}
+  .card .art .span{position:absolute;right:12px;top:10px;font-size:11px;color:var(--muted)}
+  .stats{padding:8px 10px 12px;display:flex;flex-direction:column;gap:6px}
+  .stat{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--surface-line);background:var(--surface);color:#fff;
+    border-radius:12px;padding:9px 12px;font-size:14.5px;font-weight:600;text-align:left;cursor:default}
+  .stat i{font-size:17px;color:var(--c);width:20px;text-align:center}
+  .stat .lbl{flex:1}
+  .stat .val{font-weight:700;font-style:italic;font-size:17px;text-align:right}
+  .stat .sub{display:block;font-size:10.5px;color:var(--muted);font-weight:400;font-style:normal}
+  .card.pick .stat{cursor:pointer}
+  .card.pick .stat:hover{border-color:var(--c)}
+  .card.pick .stat:active{transform:scale(.985)}
+  .stat.sel{background:var(--c);color:var(--ink);border-color:var(--c)}
+  .stat.sel i,.stat.sel .sub{color:var(--ink)}
+  .card.mini .top h2{font-size:15px;padding-right:0}
+  .card.mini .top{padding:9px 10px 8px}
+  .card.mini .top .no,.card.mini .art .span,.card.mini .art .ri{display:none}
+  .card.mini .art{height:58px}
+  .card.mini .art .ini{font-size:32px}
+  .card.mini .art .ctry{font-size:9px;padding:3px 5px 2px;left:7px;top:6px}
+  .card.mini .art img{width:16px;height:16px;right:6px;bottom:5px}
+  .card.mini .stats{padding:6px 6px 8px;gap:4px}
+  .card.mini .stat{padding:6px 7px;font-size:11px;gap:5px;border-radius:9px}
+  .card.mini .stat i{font-size:12px;width:13px}
+  .card.mini .stat .val{font-size:13px}
+  .card.mini .stat .sub{display:none}
+  .card.win{box-shadow:0 0 0 3px var(--teal),0 18px 40px rgba(0,0,0,.45)}
+  .card.lose{opacity:.55}
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .who{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who.p0{color:var(--orange)} .who.p1{color:var(--purple)}
+
+  .banner{border-radius:14px;padding:12px 14px;text-align:center;font-weight:700;font-style:italic;font-size:19px}
+  .banner small{display:block;font-weight:400;font-style:normal;font-size:12.5px;margin-top:3px;opacity:.9;line-height:1.4}
+  .banner.p0{background:rgba(255,124,26,.14);color:var(--orange);border:1px solid rgba(255,124,26,.45)}
+  .banner.p1{background:rgba(119,119,201,.16);color:#a5a5e6;border:1px solid rgba(119,119,201,.45)}
+  .banner.draw{background:rgba(81,206,167,.13);color:var(--teal);border:1px solid rgba(81,206,167,.4)}
+
+  .btn{border:none;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:700;font-style:italic;cursor:pointer;width:100%;
+    background:var(--orange);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn.purple{background:var(--purple);color:#fff}
+  .btn.ghost{background:var(--surface);color:#fff;border:1px solid var(--surface-line);font-style:normal;font-weight:600}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.6}
+
+  .hero{text-align:center;padding:14px 4px 4px}
+  .hero img{width:92px;height:92px}
+  .hero h1{font-size:34px;font-weight:700;font-style:italic;line-height:1;margin-top:10px}
+  .hero h1 em{color:var(--orange);font-style:italic}
+  .hero p{color:var(--muted);font-size:14px;margin-top:8px;line-height:1.45}
+  .strap{font-size:11px;letter-spacing:.22em;font-weight:600;color:var(--faint);text-align:center;margin-top:4px}
+  .panel{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:14px}
+  .panel h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:9px}
+  .panel ol{padding-left:18px;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.85)}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .seg button{border:1px solid var(--surface-line);background:transparent;color:#fff;border-radius:11px;padding:10px 6px;font-size:13.5px;font-weight:600;cursor:pointer}
+  .seg button small{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:2px}
+  .seg button.on{background:var(--teal);border-color:var(--teal);color:var(--ink)}
+  .seg button.on small{color:var(--ink)}
+  .names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .names label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .names input{width:100%;margin-top:4px;background:rgba(0,0,0,.25);border:1px solid var(--surface-line);border-radius:10px;color:#fff;padding:10px;font-size:15px;font-weight:600}
+  .names input:focus{outline:none;border-color:var(--teal)}
+  .row{display:flex;flex-direction:column;gap:8px}
+  .foot{font-size:11px;color:var(--faint);text-align:center;line-height:1.5}
+
+  /* pass-the-phone cover */
+  .cover{border-radius:22px;border:2px solid var(--pc);min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--pc) 22%,transparent),transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='38'%3E%3Ctext x='2' y='26' font-family='Arial' font-weight='bold' font-style='italic' font-size='20' fill='%23ffffff' fill-opacity='0.07'%3EGCS%3C/text%3E%3C/svg%3E"),#1f1f1d}
+  .cover img{width:80px;height:80px}
+  .cover h2{font-size:28px;font-weight:700;font-style:italic;color:var(--pc)}
+  .cover p{color:var(--muted);font-size:14px;line-height:1.45}
+  .cover .ti-device-mobile-share{font-size:30px;color:#fff}
+
+  .pop{animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+  .flip{animation:flip .45s ease}
+  @keyframes flip{from{transform:rotateY(90deg)}to{transform:none}}
+  .seg.seg3{grid-template-columns:1fr 1fr 1fr}
+  .seg.seg3 button{padding:10px 4px;font-size:13px}
+  .names.one{grid-template-columns:1fr}
+  .hint{font-size:12px;color:var(--muted);margin-top:8px;text-align:center;min-height:14px}
+  .joinrow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px}
+  .joinrow input{background:rgba(0,0,0,.25);border:1px solid var(--surface-line);border-radius:12px;color:#fff;padding:12px;font-size:22px;font-weight:700;font-style:italic;letter-spacing:.3em;text-align:center;min-width:0}
+  .joinrow input:focus{outline:none;border-color:var(--purple)}
+  .joinrow .btn{width:auto;padding:12px 18px}
+  .code{font-size:56px;font-weight:700;font-style:italic;letter-spacing:.18em;color:#fff;line-height:1;padding-left:.18em}
+  .spin{display:inline-block;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+    background:#2a2a28;border:1px solid var(--surface-line);color:#fff;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;transition:.25s;max-width:calc(100% - 32px)}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .card .art .asat{position:absolute;right:12px;top:26px;font-size:10px;color:var(--faint)}
+  .card.mini .art .asat{display:none}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* =========================================================================
+   GCS STAT ATTACK — v6
+
+   THE NUMBERS: men's Test career totals, taken directly from ESPNcricinfo Statsguru
+   (Test "all-round" career tables, read 20 Nov 2026).
+   set:'legend'  = retired from Tests, figures are final.
+   set:'current' = still playing (Cricinfo career span runs into 2026); figures are AS AT
+                   20 Nov 2026 and need refreshing from Statsguru before each tour. Cricinfo counts ICC World XI Tests, so Kallis, Dravid,
+   Lara, Muralidaran and Boucher each include that one Test (e.g. Dravid 164 Tests / 13,288).
+   The `cric` field on each card is the player's name exactly as Cricinfo lists it.
+
+   s = [Tests, Runs, Batting average, Highest score, Wickets, Catches + stumpings, All-round rating]
+   All-round rating = batting average / bowling average x 100, to 1 decimal place.
+     Only for players with 100+ Test wickets (everyone else 0). Good all-rounders bat better
+     than they bowl, so they score highest. bo = Cricinfo bowling average used in the sum.
+     This is a GCS calculation from Cricinfo's figures, not a Cricinfo stat.
+   ns = highest score was not out (shown with *); ct/st = keepers' catches and stumpings.
+
+   DECK order must match CARDS in netlify/functions/statattack.mjs (checked via DECK_ID).
+   ========================================================================= */
+var VERSION='v6';
+var DECK_ID='cricinfo-20nov2026-60-r7';
+var API='/.netlify/functions/statattack';
+var STATS=[
+  {key:'Tests',            short:'Tests',      icon:'ti-calendar-stats', fmt:function(v){return v;}},
+  {key:'Runs',             short:'Runs',       icon:'ti-cricket',        fmt:function(v){return v.toLocaleString('en-GB');}},
+  {key:'Batting average',  short:'Bat avg',    icon:'ti-chart-line',     fmt:function(v){return v.toFixed(2);}},
+  {key:'Highest score',    short:'High score', icon:'ti-trending-up',    fmt:function(v,c){return v+(c.ns?'*':'');}},
+  {key:'Wickets',          short:'Wickets',    icon:'ti-target-arrow',   fmt:function(v){return v;}},
+  {key:'Catches & stumpings', short:'Ct &amp; st', icon:'ti-hand-grab', fmt:function(v){return v;}},
+  {key:'All-round rating', short:'All-round', icon:'ti-arrows-exchange', fmt:function(v){return v?v.toFixed(1):'0';}}
+];
+var ROLE={
+  'Batter':      {col:'#ff7c1a', icon:'ti-cricket'},
+  'Bowler':      {col:'#51cea7', icon:'ti-target-arrow'},
+  'All-rounder': {col:'#7777c9', icon:'ti-arrows-exchange'},
+  'Wicketkeeper':{col:'#ffffff', icon:'ti-hand-stop'}
+};
+var DECK=[
+  {name:"Sachin Tendulkar", c:'IND', yrs:'1989\u20132013', set:'legend', role:'Batter', cric:'SR Tendulkar (IND)', s:[200,15921,53.78,248,46,115,0], ns:1},
+  {name:"Don Bradman", c:'AUS', yrs:'1928\u201348', set:'legend', role:'Batter', cric:'DG Bradman (AUS)', s:[52,6996,99.94,334,2,32,0]},
+  {name:"Brian Lara", c:'WI', yrs:'1990\u20132006', set:'legend', role:'Batter', cric:'BC Lara (ICC/WI)', s:[131,11953,52.88,400,0,164,0], ns:1},
+  {name:"Ricky Ponting", c:'AUS', yrs:'1995\u20132012', set:'legend', role:'Batter', cric:'RT Ponting (AUS)', s:[168,13378,51.85,257,5,196,0]},
+  {name:"Rahul Dravid", c:'IND', yrs:'1996\u20132012', set:'legend', role:'Batter', cric:'R Dravid (ICC/IND)', s:[164,13288,52.31,270,1,210,0]},
+  {name:"Alastair Cook", c:'ENG', yrs:'2006\u201318', set:'legend', role:'Batter', cric:'AN Cook (ENG)', s:[161,12472,45.35,294,1,175,0]},
+  {name:"Mahela Jayawardene", c:'SL', yrs:'1997\u20132014', set:'legend', role:'Batter', cric:'DPMD Jayawardene (SL)', s:[149,11814,49.84,374,6,205,0]},
+  {name:"Sunil Gavaskar", c:'IND', yrs:'1971\u201387', set:'legend', role:'Batter', cric:'SM Gavaskar (IND)', s:[125,10122,51.12,236,1,108,0], ns:1},
+  {name:"Viv Richards", c:'WI', yrs:'1974\u201391', set:'legend', role:'Batter', cric:'IVA Richards (WI)', s:[121,8540,50.23,291,32,122,0]},
+  {name:"Virat Kohli", c:'IND', yrs:'2011\u201325', set:'legend', role:'Batter', cric:'V Kohli (IND)', s:[123,9230,46.85,254,0,121,0], ns:1},
+  {name:"David Warner", c:'AUS', yrs:'2011\u201324', set:'legend', role:'Batter', cric:'DA Warner (AUS)', s:[112,8786,44.59,335,4,91,0], ns:1},
+  {name:"Graham Gooch", c:'ENG', yrs:'1975\u201395', set:'legend', role:'Batter', cric:'GA Gooch (ENG)', s:[118,8900,42.58,333,23,103,0]},
+  {name:"Jacques Kallis", c:'SA', yrs:'1995\u20132013', set:'legend', role:'All-rounder', cric:'JH Kallis (ICC/SA)', s:[166,13289,55.37,224,292,200,169.6], bo:32.65},
+  {name:"Garfield Sobers", c:'WI', yrs:'1954\u201374', set:'legend', role:'All-rounder', cric:'GS Sobers (WI)', s:[93,8032,57.78,365,235,109,169.8], ns:1, bo:34.03},
+  {name:"Ian Botham", c:'ENG', yrs:'1977\u201392', set:'legend', role:'All-rounder', cric:'IT Botham (ENG)', s:[102,5200,33.54,208,383,120,118.1], bo:28.4},
+  {name:"Kapil Dev", c:'IND', yrs:'1978\u201394', set:'legend', role:'All-rounder', cric:'N Kapil Dev (IND)', s:[131,5248,31.05,163,434,64,104.8], bo:29.64},
+  {name:"Imran Khan", c:'PAK', yrs:'1971\u201392', set:'legend', role:'All-rounder', cric:'Imran Khan (PAK)', s:[88,3807,37.69,136,362,28,165.2], bo:22.81},
+  {name:"Richard Hadlee", c:'NZ', yrs:'1973\u201390', set:'legend', role:'All-rounder', cric:'Sir RJ Hadlee (NZ)', s:[86,3124,27.16,151,431,39,121.8], ns:1, bo:22.29},
+  {name:"Muttiah Muralidaran", c:'SL', yrs:'1992\u20132010', set:'legend', role:'Bowler', cric:'M Muralidaran (ICC/SL)', s:[133,1261,11.67,67,800,72,51.4], bo:22.72},
+  {name:"Shane Warne", c:'AUS', yrs:'1992\u20132007', set:'legend', role:'Bowler', cric:'SK Warne (AUS)', s:[145,3154,17.32,99,708,125,68.2], bo:25.41},
+  {name:"James Anderson", c:'ENG', yrs:'2003\u201324', set:'legend', role:'Bowler', cric:'JM Anderson (ENG)', s:[188,1353,8.96,81,704,107,33.9], bo:26.45},
+  {name:"Anil Kumble", c:'IND', yrs:'1990\u20132008', set:'legend', role:'Bowler', cric:'A Kumble (IND)', s:[132,2506,17.77,110,619,60,59.9], ns:1, bo:29.65},
+  {name:"Stuart Broad", c:'ENG', yrs:'2007\u201323', set:'legend', role:'Bowler', cric:'SCJ Broad (ENG)', s:[167,3662,18.03,169,604,55,65.1], bo:27.68},
+  {name:"Glenn McGrath", c:'AUS', yrs:'1993\u20132007', set:'legend', role:'Bowler', cric:'GD McGrath (AUS)', s:[124,641,7.36,61,563,38,34.0], bo:21.64},
+  {name:"Ravichandran Ashwin", c:'IND', yrs:'2011\u201324', set:'legend', role:'Bowler', cric:'R Ashwin (IND)', s:[106,3503,25.75,124,537,36,107.3], bo:24},
+  {name:"Courtney Walsh", c:'WI', yrs:'1984\u20132001', set:'legend', role:'Bowler', cric:'CA Walsh (WI)', s:[132,936,7.54,30,519,29,30.9], ns:1, bo:24.44},
+  {name:"Dale Steyn", c:'SA', yrs:'2004\u201319', set:'legend', role:'Bowler', cric:'DW Steyn (SA)', s:[93,1251,13.59,76,439,26,59.2], bo:22.95},
+  {name:"Wasim Akram", c:'PAK', yrs:'1985\u20132002', set:'legend', role:'Bowler', cric:'Wasim Akram (PAK)', s:[104,2898,22.64,257,414,44,95.9], ns:1, bo:23.62},
+  {name:"Curtly Ambrose", c:'WI', yrs:'1988\u20132000', set:'legend', role:'Bowler', cric:'CEL Ambrose (WI)', s:[98,1439,12.40,53,405,18,59.1], bo:20.99},
+  {name:"Malcolm Marshall", c:'WI', yrs:'1978\u201391', set:'legend', role:'Bowler', cric:'MD Marshall (WI)', s:[81,1810,18.85,92,376,25,90.0], bo:20.94},
+  {name:"Mark Boucher", c:'SA', yrs:'1997\u20132012', set:'legend', role:'Wicketkeeper', cric:'MV Boucher (ICC/SA)', s:[147,5515,30.30,125,1,555,0], ct:532, st:23},
+  {name:"Adam Gilchrist", c:'AUS', yrs:'1999\u20132008', set:'legend', role:'Wicketkeeper', cric:'AC Gilchrist (AUS)', s:[96,5570,47.60,204,0,416,0], ns:1, ct:379, st:37},
+  {name:"Ian Healy", c:'AUS', yrs:'1988\u201399', set:'legend', role:'Wicketkeeper', cric:'IA Healy (AUS)', s:[119,4356,27.39,161,0,395,0], ns:1, ct:366, st:29},
+  {name:"MS Dhoni", c:'IND', yrs:'2005\u201314', set:'legend', role:'Wicketkeeper', cric:'MS Dhoni (IND)', s:[90,4876,38.09,224,0,294,0], ct:256, st:38},
+  {name:"Kumar Sangakkara", c:'SL', yrs:'2000\u201315', set:'legend', role:'Wicketkeeper', cric:'KC Sangakkara (SL)', s:[134,12400,57.40,319,0,202,0], ct:182, st:20},
+  {name:"Alan Knott", c:'ENG', yrs:'1967\u201381', set:'legend', role:'Wicketkeeper', cric:'APE Knott (ENG)', s:[95,4389,32.75,135,0,269,0], ct:250, st:19},
+  {name:"Joe Root", c:'ENG', yrs:'2012\u2013', set:'current', role:'Batter', cric:'JE Root (ENG)', s:[169,14278,50.45,262,74,220,0]},
+  {name:"Steve Smith", c:'AUS', yrs:'2010\u2013', set:'current', role:'Batter', cric:'SPD Smith (AUS)', s:[127,11003,55.29,239,19,224,0]},
+  {name:"Kane Williamson", c:'NZ', yrs:'2010\u2013', set:'current', role:'Batter', cric:'KS Williamson (NZ)', s:[110,9515,54.06,251,30,96,0]},
+  {name:"Harry Brook", c:'ENG', yrs:'2022\u2013', set:'current', role:'Batter', cric:'HC Brook (ENG)', s:[41,3610,53.08,317,1,66,0]},
+  {name:"Travis Head", c:'AUS', yrs:'2018\u2013', set:'current', role:'Batter', cric:'TM Head (AUS)', s:[70,4863,42.65,175,16,38,0]},
+  {name:"Marnus Labuschagne", c:'AUS', yrs:'2018\u2013', set:'current', role:'Batter', cric:'M Labuschagne (AUS)', s:[68,4861,42.64,215,15,52,0]},
+  {name:"Babar Azam", c:'PAK', yrs:'2016\u2013', set:'current', role:'Batter', cric:'Babar Azam (PAK)', s:[68,4863,42.65,196,2,54,0]},
+  {name:"Ben Duckett", c:'ENG', yrs:'2016\u2013', set:'current', role:'Batter', cric:'BM Duckett (ENG)', s:[49,3364,38.22,182,0,37,0]},
+  {name:"Ben Stokes", c:'ENG', yrs:'2013\u2013', set:'current', role:'All-rounder', cric:'BA Stokes (ENG)', s:[122,7273,34.46,258,252,115,111.2], bo:30.98},
+  {name:"Ravindra Jadeja", c:'IND', yrs:'2012\u2013', set:'current', role:'All-rounder', cric:'RA Jadeja (IND)', s:[91,4160,37.81,175,356,50,149.4], ns:1, bo:25.3},
+  {name:"Marco Jansen", c:'SA', yrs:'2021\u2013', set:'current', role:'All-rounder', cric:'M Jansen (SA)', s:[25,830,25.15,93,104,29,116.3], bo:21.63},
+  {name:"Nathan Lyon", c:'AUS', yrs:'2011\u2013', set:'current', role:'Bowler', cric:'NM Lyon (AUS)', s:[145,1766,13.08,47,577,69,43.1], bo:30.34},
+  {name:"Mitchell Starc", c:'AUS', yrs:'2011\u2013', set:'current', role:'Bowler', cric:'MA Starc (AUS)', s:[110,2527,19.58,99,460,53,75.4], bo:25.97},
+  {name:"Pat Cummins", c:'AUS', yrs:'2011\u2013', set:'current', role:'Bowler', cric:'PJ Cummins (AUS)', s:[77,1681,16.48,64,328,37,73.2], ns:1, bo:22.51},
+  {name:"Jasprit Bumrah", c:'IND', yrs:'2018\u2013', set:'current', role:'Bowler', cric:'JJ Bumrah (IND)', s:[53,348,6.56,34,238,17,33.1], ns:1, bo:19.84},
+  {name:"Kagiso Rabada", c:'SA', yrs:'2015\u2013', set:'current', role:'Bowler', cric:'K Rabada (SA)', s:[76,1176,12.78,72,358,34,58.2], bo:21.94},
+  {name:"Josh Hazlewood", c:'AUS', yrs:'2014\u2013', set:'current', role:'Bowler', cric:'JR Hazlewood (AUS)', s:[81,586,11.26,39,313,32,46.7], bo:24.1},
+  {name:"Mohammed Siraj", c:'IND', yrs:'2020\u2013', set:'current', role:'Bowler', cric:'Mohammed Siraj (IND)', s:[48,192,5.05,22,144,23,17.0], bo:29.63},
+  {name:"Shaheen Shah Afridi", c:'PAK', yrs:'2018\u2013', set:'current', role:'Bowler', cric:'Shaheen Shah Afridi (PAK)', s:[34,269,7.27,29,126,3,25.8], ns:1, bo:28.13},
+  {name:"Keshav Maharaj", c:'SA', yrs:'2016\u2013', set:'current', role:'Bowler', cric:'KA Maharaj (SA)', s:[63,1369,15.55,84,220,24,52.6], bo:29.55},
+  {name:"Rishabh Pant", c:'IND', yrs:'2018\u2013', set:'current', role:'Wicketkeeper', cric:'RR Pant (IND)', s:[53,3725,43.82,159,0,187,0], ns:1, ct:169, st:18},
+  {name:"Litton Das", c:'BAN', yrs:'2015\u2013', set:'current', role:'Wicketkeeper', cric:'Litton Das (BAN)', s:[60,3723,36.86,141,0,164,0], ct:142, st:22},
+  {name:"Mushfiqur Rahim", c:'BAN', yrs:'2005\u2013', set:'current', role:'Wicketkeeper', cric:'Mushfiqur Rahim (BAN)', s:[108,7062,38.80,219,0,130,0], ns:1, ct:115, st:15},
+  {name:"Kusal Mendis", c:'SL', yrs:'2015\u2013', set:'current', role:'Wicketkeeper', cric:'BKG Mendis (SL)', s:[77,5040,37.05,245,1,137,0], ct:132, st:5}
+];
+DECK.forEach(function(c,i){ c.no=i+1; });
+var AS_AT='20 Nov 2026';
+var SETS={
+  legends:{label:'Legends',   pick:function(c){return c.set==='legend';}},
+  current:{label:'Current stars', pick:function(c){return c.set==='current';}},
+  all:    {label:'Everyone',  pick:function(){return true;}}
+};
+function deckIdx(set){ var out=[]; DECK.forEach(function(c,i){ if(SETS[set].pick(c)) out.push(i); }); return out; }
+
+var state={opp:'bot', deckSet:'legends', mode:'quick', level:'smart', names:['Player 1','Player 2'], myName:'', joinCode:'', screen:'start'};
+var app=document.getElementById('app');
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function initials(n){return n.split(/\s+/).map(function(w){return w[0];}).join('').slice(0,3).toUpperCase();}
+function plural(n,w){return n+' '+w+(n===1?'':'s');}
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
+function lsSet(k,v){try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,JSON.stringify(v)); }catch(e){}}
+
+/* ---------- shared pieces ---------- */
+function header(quit){
+  return '<div class="hdr"><img src="gcs_mark_512.png" alt="GCS"><div class="t"><b>Stat Attack</b><span>GCS 2026 · '+VERSION+'</span></div>'+
+    (quit?'<button class="iconbtn" title="Leave game" onclick="'+quit+'"><i class="ti ti-x"></i></button>':'')+'</div>';
+}
+function cardHTML(c,opts){
+  opts=opts||{};
+  var R=ROLE[c.role];
+  var cls='card'+(opts.mini?' mini':'')+(opts.pick?' pick':'')+(opts.result?' '+opts.result:'')+(opts.anim?' '+opts.anim:'');
+  var h='<div class="'+cls+'" style="--c:'+R.col+'">'+
+    '<div class="top"><span class="no">#'+c.no+'</span><div class="role">'+esc(c.role)+'</div><h2>'+esc(c.name)+'</h2></div>'+
+    '<div class="art"><span class="ctry">'+c.c+'</span><span class="span">'+(c.set==='current'?'Tests '+c.yrs+'now':'Tests '+c.yrs)+'</span>'+(c.set==='current'?'<span class="asat">As at '+AS_AT+'</span>':'')+
+      '<span class="ini">'+initials(c.name)+'</span><i class="ti '+R.icon+' ri"></i><img src="gcs_mark_512.png" alt=""></div>'+
+    '<div class="stats">';
+  STATS.forEach(function(s,i){
+    var tag=opts.pick?'button':'div';
+    var sub='';
+    if(i===5 && c.ct!=null) sub='<span class="sub">'+c.ct+' ct + '+c.st+' st</span>';
+    if(i===3 && c.ns) sub='<span class="sub">* not out</span>';
+    if(i===6) sub='<span class="sub">'+(c.bo!=null?c.s[2].toFixed(2)+' bat \u00f7 '+c.bo.toFixed(2)+' bowl':'Needs 100 Test wickets')+'</span>';
+    h+='<'+tag+' class="stat'+(opts.sel===i?' sel':'')+'"'+(opts.pick?' onclick="'+opts.pick+'('+i+')"':'')+'>'+
+      '<i class="ti '+s.icon+'"></i><span class="lbl">'+(opts.mini?s.short:s.key)+'</span>'+
+      '<span class="val">'+s.fmt(c.s[i],c)+sub+'</span></'+tag+'>';
+  });
+  return h+'</div></div>';
+}
+function scoreStrip(names,counts,pot,turn,status){
+  var a=counts[0], b=counts[1], pct=Math.round(a/((a+b)||1)*100);
+  return '<div class="score"><div class="pill p0'+(turn===0?' on':'')+'"><small>'+esc(names[0])+'</small><b>'+a+'</b></div>'+
+    '<div class="pill pot"><small>Pot</small><b>'+pot+'</b></div>'+
+    '<div class="pill p1'+(turn===1?' on':'')+'"><small>'+esc(names[1])+'</small><b>'+b+'</b></div></div>'+
+    '<div class="bar"><i style="width:'+pct+'%"></i></div>'+(status?'<div class="status">'+status+'</div>':'');
+}
+/* One round's result: banner + both cards side by side. youSeat: which seat is "you" (or null). */
+function revealHTML(r,names,youSeat,vsBot){
+  var st=STATS[r.stat], A=DECK[r.cards[0]], B=DECK[r.cards[1]];
+  var fa=st.fmt(A.s[r.stat],A), fb=st.fmt(B.s[r.stat],B), banner;
+  var pickedBy=esc(names[r.caller])+' picked <b>'+st.key+'</b>. ';
+  if(r.winner===null){
+    banner='<div class="banner draw">It’s a tie!<small>'+pickedBy+fa+' each · both cards go in the pot ('+r.potAfter+'). '+esc(names[r.caller])+' calls again.</small></div>';
+  } else {
+    var w=r.winner, hi=w===0?fa:fb, lo=w===0?fb:fa, title;
+    if(youSeat!=null) title=(w===youSeat)?'You win the round!':esc(names[w])+(vsBot?' takes it':' wins the round');
+    else title=esc(names[w])+' wins the round!';
+    banner='<div class="banner p'+w+'">'+title+'<small>'+pickedBy+hi+' beats '+lo+
+      ' · +'+plural(1+r.potBefore,'card')+(r.potBefore?' (incl. '+r.potBefore+' from the pot)':'')+'</small></div>';
+  }
+  var res0=r.winner===null?'':(r.winner===0?'win':'lose'), res1=r.winner===null?'':(r.winner===1?'win':'lose');
+  return banner+'<div class="versus"><div><div class="who p0">'+esc(names[0])+'</div>'+cardHTML(A,{mini:true,sel:r.stat,result:res0,anim:r.caller===1?'flip':''})+'</div>'+
+    '<div><div class="who p1">'+esc(names[1])+'</div>'+cardHTML(B,{mini:true,sel:r.stat,result:res1,anim:r.caller===0?'flip':''})+'</div></div>';
+}
+function endHTML(names,counts,youSeat,vsBot,extraRounds){
+  var a=counts[0], b=counts[1], title, sub;
+  if(a===b){ title='It’s a tie'; sub=plural(a,'card')+' each.'; }
+  else {
+    var w=a>b?0:1, wn=a>b?a:b, ln=a>b?b:a;
+    if(youSeat!=null) title=(w===youSeat)?'You win!':esc(names[w])+' wins';
+    else title=esc(names[w])+' wins!';
+    sub=esc(names[w])+' finished with '+plural(wn,'card')+' to '+esc(names[1-w])+'’s '+ln+'.';
+    if(vsBot&&w===1) sub+=' Back to the nets!';
+  }
+  return '<div class="hero pop"><img src="gcs_mark_512.png" alt="GCS"><h1><em>'+title+'</em></h1><p>'+sub+(extraRounds||'')+'</p>'+
+   '<div class="strap">PLAY · TOUR · EXPERIENCE</div></div>';
+}
+
+/* ---------- start screen ---------- */
+function renderStart(){
+  state.screen='start'; stopPoll();
+  var o=state.opp;
+  var saved=lsGet('gcsStatAttackOnline');
+  var h=header()+
+  '<div class="hero pop"><img src="gcs_mark_512.png" alt="GCS"><h1>GCS <em>Stat Attack</em></h1>'+
+  '<p>Test cricket\u2019s best, past and present. Pick a stat, beat your opponent, win the deck.</p>'+
+  '<div class="strap">PLAY · TOUR · EXPERIENCE</div></div>'+
+  (saved&&saved.room?'<button class="btn purple" onclick="resumeOnline()"><i class="ti ti-player-play-filled"></i> Back to online game '+esc(saved.room)+'</button>':'')+
+  '<div class="panel"><h3>Who’s playing?</h3><div class="seg seg3">'+
+    '<button class="'+(o==='bot'?'on':'')+'" onclick="setOpt(\'opp\',\'bot\')"><i class="ti ti-robot"></i> 1 player<small>vs GCS Bot</small></button>'+
+    '<button class="'+(o==='two'?'on':'')+'" onclick="setOpt(\'opp\',\'two\')"><i class="ti ti-device-mobile"></i> 2 players<small>One phone</small></button>'+
+    '<button class="'+(o==='online'?'on':'')+'" onclick="setOpt(\'opp\',\'online\')"><i class="ti ti-world"></i> 2 players<small>Two phones</small></button>'+
+  '</div>'+
+  (o==='two'?'<div class="names"><div><label for="n0">Player 1</label><input id="n0" maxlength="14" value="'+esc(state.names[0])+'" oninput="state.names[0]=this.value"></div>'+
+       '<div><label for="n1">Player 2</label><input id="n1" maxlength="14" value="'+esc(state.names[1])+'" oninput="state.names[1]=this.value"></div></div>':'')+
+  (o==='online'?'<div class="names one"><div><label for="me">Your name</label><input id="me" maxlength="14" placeholder="e.g. Alfie" value="'+esc(state.myName)+'" oninput="state.myName=this.value"></div></div>':'')+
+  '</div>'+
+  '<div class="panel"><h3>Deck</h3><div class="seg seg3">'+
+    ['legends','current','all'].map(function(k){ var n=deckIdx(k).length;
+      return '<button class="'+(state.deckSet===k?'on':'')+'" onclick="setOpt(\'deckSet\',\''+k+'\')">'+SETS[k].label+'<small>'+n+' cards</small></button>'; }).join('')+
+  '</div>'+(o==='online'?'<div class="hint">The player who starts the game picks the deck.</div>':'')+'</div>'+
+  '<div class="panel"><h3>Game length</h3><div class="seg">'+
+    '<button class="'+(state.mode==='quick'?'on':'')+'" onclick="setOpt(\'mode\',\'quick\')">Quick<small>20 rounds, most cards wins</small></button>'+
+    '<button class="'+(state.mode==='full'?'on':'')+'" onclick="setOpt(\'mode\',\'full\')">Full match<small>Win every card</small></button>'+
+  '</div>'+(o==='online'?'<div class="hint">The player who starts the game sets the length.</div>':'')+'</div>'+
+  (o==='bot'?'<div class="panel"><h3>GCS Bot</h3><div class="seg">'+
+    '<button class="'+(state.level==='easy'?'on':'')+'" onclick="setOpt(\'level\',\'easy\')">Net session<small>Picks at random</small></button>'+
+    '<button class="'+(state.level==='smart'?'on':'')+'" onclick="setOpt(\'level\',\'smart\')">Test match<small>Picks its best stat</small></button>'+
+  '</div></div>':'');
+  if(o==='online'){
+    h+='<div class="row"><button class="btn" onclick="onlineCreate()"><i class="ti ti-plus"></i> Start a game</button>'+
+      '<div class="panel joinrow"><input id="code" maxlength="4" placeholder="CODE" autocapitalize="characters" autocomplete="off" value="'+esc(state.joinCode)+'" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,\'\');state.joinCode=this.value">'+
+      '<button class="btn purple" onclick="onlineJoin()"><i class="ti ti-login-2"></i> Join</button></div>'+
+      '<div class="hint" id="onErr"></div></div>';
+  } else {
+    h+='<button class="btn" onclick="newGame()"><i class="ti ti-player-play-filled"></i> Deal the cards</button>';
+  }
+  h+='<div class="panel"><h3>How to play</h3><ol>'+
+    '<li>The deck is shuffled and split: '+(deckIdx(state.deckSet).length/2)+' cards each.</li>'+
+    '<li>Whoever has the call picks one stat from their top card.</li>'+
+    '<li>Highest number wins both cards.</li>'+
+    '<li>A tie puts both cards in the pot. The next winner takes the lot.</li>'+
+    '<li>Win a round and you make the next call.</li>'+
+    (o==='two'?'<li>Pass the phone when it says so, and no peeking at the other card!</li>':'')+
+    (o==='online'?'<li>One player taps <b>Start a game</b> and reads out the 4-letter code. The other types it in and taps <b>Join</b>. Both phones need signal.</li>':'')+
+  '</ol></div>'+
+  '<div class="foot">Figures are men’s Test career totals from ESPNcricinfo: Tests, runs, batting average, highest score (* = not out), wickets, and catches plus stumpings. Legends are retired, so their figures are final; current players\u2019 figures are as at '+AS_AT+'. All-round rating is our own sum from Cricinfo\u2019s figures: batting average \u00f7 bowling average \u00d7 100, for players with 100+ Test wickets.<br>GCS Stat Attack · GCS 2026 · '+VERSION+'</div>';
+  app.innerHTML=h;
+}
+function setOpt(k,v){state[k]=v;renderStart();}
+
+/* =================== LOCAL GAMES (vs Bot, or one phone) =================== */
+function pname(i){return state.g.p[i].name;}
+function newGame(){
+  var d=shuffle(deckIdx(state.deckSet)), two=state.opp==='two', HALF=d.length/2;
+  var n0=two?(state.names[0].trim()||'Player 1'):'You';
+  var n1=two?(state.names[1].trim()||'Player 2'):'GCS Bot';
+  state.g={p:[{name:n0,bot:false,hand:d.slice(0,HALF)},{name:n1,bot:!two,hand:d.slice(HALF)}],
+    pot:[], turn:Math.random()<.5?0:1, round:1, max:20, viewer:null};
+  state.screen='game';
+  renderTurn();
+}
+function localStrip(withStatus){
+  var g=state.g;
+  var r=state.mode==='quick'?('Round '+g.round+' of '+g.max):('Round '+g.round);
+  return scoreStrip([pname(0),pname(1)],[g.p[0].hand.length,g.p[1].hand.length],g.pot.length,g.turn,
+    withStatus?r+' · <b>'+esc(pname(g.turn))+'’s call</b>':'');
+}
+function renderTurn(){
+  var g=state.g;
+  if(over()) return renderEnd();
+  var two=state.opp==='two', t=g.turn, me=g.p[t];
+  if(two && g.viewer!==t){ return renderCover(t); }
+  var h=header('confirmQuit()')+localStrip(true);
+  if(!two){
+    var you=DECK[g.p[0].hand[0]];
+    if(t===0) h+=cardHTML(you,{pick:'pick',anim:'pop'})+'<div class="status">Tap the stat you think beats the Bot’s card</div>';
+    else h+=cardHTML(you,{anim:'pop'})+'<button class="btn purple" id="botBtn" onclick="botPick()"><i class="ti ti-robot"></i> See what the Bot picks</button>';
+  } else {
+    h+=cardHTML(DECK[me.hand[0]],{pick:'pick',anim:'pop'})+'<div class="status">'+esc(me.name)+', tap the stat you think wins</div>';
+  }
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+function renderCover(t){
+  var col=t===0?'var(--orange)':'var(--purple)';
+  app.innerHTML=header('confirmQuit()')+localStrip(true)+
+    '<div class="cover pop" style="--pc:'+col+'"><i class="ti ti-device-mobile-share"></i>'+
+    '<h2>Pass to '+esc(pname(t))+'</h2>'+
+    '<p>It’s '+esc(pname(t))+'’s call.<br>'+esc(pname(1-t))+', look away while they pick!</p>'+
+    '<button class="btn'+(t===1?' purple':'')+'" onclick="state.g.viewer='+t+';renderTurn()"><i class="ti ti-eye"></i> I’m '+esc(pname(t))+': show my card</button></div>';
+  window.scrollTo(0,0);
+}
+function botChoice(c){
+  if(state.level==='easy') return Math.floor(Math.random()*STATS.length);
+  /* Smart: pick the stat where this card sits furthest above the deck average, in
+     standard deviations, so 800 wickets and a 99.94 average can be compared fairly. */
+  var best=0,bestZ=-1e9;
+  STATS.forEach(function(s,i){
+    var vals=DECK.map(function(d){return d.s[i];});
+    var mean=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+    var sd=Math.sqrt(vals.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/vals.length)||1;
+    var z=(c.s[i]-mean)/sd;
+    if(z>bestZ){bestZ=z;best=i;}
+  });
+  return best;
+}
+function botPick(){
+  var b=document.getElementById('botBtn'); if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2"></i> Bot is thinking…';}
+  setTimeout(function(){ resolve(botChoice(DECK[state.g.p[1].hand[0]])); },650);
+}
+function pick(i){ var g=state.g; if(g.p[g.turn].bot) return; resolve(i); }
+function resolve(i){
+  var g=state.g, caller=g.turn, potBefore=g.pot.length;
+  var a=g.p[0].hand.shift(), b=g.p[1].hand.shift(), va=DECK[a].s[i], vb=DECK[b].s[i], winner=null;
+  if(va!==vb){
+    winner=va>vb?0:1;
+    var W=g.p[winner];
+    W.hand.push(winner===0?a:b, winner===0?b:a); W.hand=W.hand.concat(g.pot); g.pot=[];
+    g.turn=winner;
+  } else g.pot.push(a,b);
+  var r={n:g.round,caller:caller,stat:i,cards:[a,b],winner:winner,potBefore:potBefore,potAfter:g.pot.length};
+  g.round++; g.viewer=null;
+  var nextTxt, cls='btn';
+  if(over()) nextTxt='<i class="ti ti-trophy"></i> See the result';
+  else if(state.opp==='two'){ nextTxt='<i class="ti ti-arrow-right"></i> Next round: '+esc(pname(g.turn))+'’s call'; if(g.turn===1) cls+=' purple'; }
+  else nextTxt='<i class="ti ti-arrow-right"></i> Next round';
+  app.innerHTML=header('confirmQuit()')+localStrip(false)+revealHTML(r,[pname(0),pname(1)],state.opp==='bot'?0:null,state.opp==='bot')+
+    '<button class="'+cls+'" onclick="renderTurn()">'+nextTxt+'</button>';
+  window.scrollTo(0,0);
+}
+function over(){
+  var g=state.g;
+  if(!g.p[0].hand.length||!g.p[1].hand.length) return true;
+  return state.mode==='quick' && g.round>g.max;
+}
+function renderEnd(){
+  var g=state.g; state.screen='end';
+  var extra=g.pot.length?' '+plural(g.pot.length,'card')+' left in the pot.':'';
+  app.innerHTML=header()+endHTML([pname(0),pname(1)],[g.p[0].hand.length,g.p[1].hand.length],state.opp==='bot'?0:null,state.opp==='bot',extra+'<br>Rounds played: '+(g.round-1)+'.')+
+   '<div class="row"><button class="btn" onclick="newGame()"><i class="ti ti-refresh"></i> Play again</button>'+
+   '<button class="btn ghost" onclick="renderStart()">Change players or settings</button></div>';
+  window.scrollTo(0,0);
+}
+function confirmQuit(){ if(confirm('Quit this game?')) renderStart(); }
+
+/* =================== ONLINE: TWO PHONES =================== */
+/* The server (netlify/functions/statattack.mjs) deals and keeps both hands; each phone only
+   gets its own top card. Phones check for the other player's move every 1.5 seconds. */
+var on=null, pollTimer=null, lastJSON='';
+function api(method,body,qs){
+  var opt={method:method,headers:{'content-type':'application/json'}};
+  if(body) opt.body=JSON.stringify(body);
+  return fetch(API+(qs||''),opt).then(function(r){ return r.json().catch(function(){return {ok:false,error:'Server error ('+r.status+')'};}); });
+}
+function onErr(msg){ var e=document.getElementById('onErr'); if(e){ e.textContent=msg; e.style.color='#ff9d52'; } else toast(msg); }
+function toast(msg){
+  var t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='toast'; document.body.appendChild(t); }
+  t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},2600);
+}
+function needName(){
+  var n=(state.myName||'').trim();
+  if(!n){ onErr('Type your name first'); var i=document.getElementById('me'); if(i) i.focus(); return null; }
+  return n;
+}
+function offlineCheck(){
+  if(location.protocol==='file:'){ onErr('Online games only work once the game is on the website. Open it from the app link.'); return false; }
+  return true;
+}
+function onlineCreate(){
+  var n=needName(); if(!n||!offlineCheck()) return;
+  onErr('Making a game…');
+  api('POST',{action:'create',name:n,mode:state.mode,deck:state.deckSet}).then(function(j){
+    if(!j.ok) return onErr(j.error||'Couldn’t start a game');
+    startOnline(j);
+  }).catch(function(){ onErr('No connection. Check your signal and try again.'); });
+}
+function onlineJoin(){
+  var n=needName(); if(!n||!offlineCheck()) return;
+  var code=(state.joinCode||'').trim();
+  if(code.length!==4) return onErr('Game codes are 4 letters');
+  onErr('Joining '+code+'…');
+  api('POST',{action:'join',room:code,name:n}).then(function(j){
+    if(!j.ok) return onErr(j.error||'Couldn’t join');
+    startOnline(j);
+  }).catch(function(){ onErr('No connection. Check your signal and try again.'); });
+}
+function resumeOnline(){
+  var s=lsGet('gcsStatAttackOnline'); if(!s) return renderStart();
+  on={room:s.room,token:s.token,seat:s.seat,game:null,seenGame:s.seenGame||0,seenN:s.seenN||0,busy:false};
+  state.screen='online'; lastJSON='';
+  app.innerHTML=header()+'<div class="status">Reconnecting to '+esc(s.room)+'…</div>';
+  poll(true);
+}
+function startOnline(j){
+  on={room:j.room,token:j.token,seat:j.seat,game:null,seenGame:0,seenN:0,busy:false};
+  saveOn();
+  state.screen='online'; lastJSON='';
+  applyGame(j.game);
+  startPoll();
+}
+function saveOn(){ if(on) lsSet('gcsStatAttackOnline',{room:on.room,token:on.token,seat:on.seat,seenGame:on.seenGame,seenN:on.seenN}); }
+function startPoll(){ stopPoll(); pollTimer=setInterval(function(){ if(!document.hidden) poll(); },1500); }
+function stopPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer=null; } }
+function poll(first){
+  if(!on) return;
+  api('GET',null,'?room='+encodeURIComponent(on.room)+'&token='+encodeURIComponent(on.token)).then(function(j){
+    if(!on) return;
+    if(!j.ok){ if(first){ lsSet('gcsStatAttackOnline',null); on=null; toast('That game has ended'); renderStart(); } return; }
+    if(first) startPoll();
+    applyGame(j.game);
+  }).catch(function(){ if(first){ app.innerHTML=header()+'<div class="status">No connection. Check your signal.</div><button class="btn ghost" onclick="renderStart()">Back</button>'; } });
+}
+function applyGame(game){
+  if(game.deckId!==DECK_ID){ stopPoll(); app.innerHTML=header()+'<div class="banner draw">This game needs an update<small>The two phones have different card decks. Close and reopen the app, then start a new game.</small></div><button class="btn ghost" onclick="leaveOnline()">Back</button>'; return; }
+  if(game.gameNo!==on.seenGame){ on.seenGame=game.gameNo; on.seenN=0; saveOn(); }
+  on.game=game;
+  var js=JSON.stringify(game)+'|'+on.seenN;
+  if(js===lastJSON) return;      // nothing new: don't redraw (avoids flicker and replaying animations)
+  lastJSON=js;
+  renderOnline();
+}
+function nextUnseen(){
+  var g=on.game, rs=g.results||[];
+  for(var i=0;i<rs.length;i++) if(rs[i].n>on.seenN) return rs[i];
+  return null;
+}
+function renderOnline(){
+  var g=on.game, me=on.seat, opp=1-me, names=g.names;
+  var quit='leaveOnline()';
+  if(g.status==='waiting'){
+    app.innerHTML=header(quit)+
+      '<div class="cover pop" style="--pc:var(--teal)"><i class="ti ti-world"></i><h2>Game code</h2>'+
+      '<div class="code">'+esc(g.room)+'</div>'+
+      '<p>Tell the other player this code.<br>They pick <b>2 players · Two phones</b>, type it in and tap <b>Join</b>.</p>'+
+      '<div class="status"><i class="ti ti-loader-2 spin"></i> Waiting for them to join…</div></div>';
+    return;
+  }
+  var r=nextUnseen();
+  var roundTxt=g.mode==='quick'?('Round '+Math.min(g.round,g.max)+' of '+g.max):('Round '+g.round);
+  var tally=(g.wins[0]||g.wins[1])?' · Games '+g.wins[0]+'–'+g.wins[1]:'';
+  if(r){
+    var last=!nextUnseen2(r);
+    var btn;
+    if(last && g.status==='over') btn='<i class="ti ti-trophy"></i> See the result';
+    else if(last) btn='<i class="ti ti-arrow-right"></i> Next round: '+(g.turn===me?'your call':esc(names[g.turn])+'’s call');
+    else btn='<i class="ti ti-arrow-right"></i> Next';
+    app.innerHTML=header(quit)+scoreStrip(names,g.counts,g.pot,null,'Room '+esc(g.room)+tally)+revealHTML(r,names,me,false)+
+      '<button class="btn'+(me===1?' purple':'')+'" onclick="seen('+r.n+')">'+btn+'</button>';
+    window.scrollTo(0,0); return;
+  }
+  if(g.status==='over'){
+    app.innerHTML=header(quit)+endHTML(names,g.counts,me,false,(g.pot?' '+plural(g.pot,'card')+' left in the pot.':'')+'<br>Rounds played: '+(g.round-1)+'.'+
+      '<br>Games won: '+esc(names[0])+' '+g.wins[0]+', '+esc(names[1])+' '+g.wins[1]+'.')+
+      '<div class="row"><button class="btn" onclick="rematch()"><i class="ti ti-refresh"></i> Rematch</button>'+
+      '<div class="status">Either player can start the rematch.</div>'+
+      '<button class="btn ghost" onclick="leaveOnline()">Leave game</button></div>';
+    return;
+  }
+  var card=DECK[g.myTop];
+  var status=roundTxt+' · '+(g.turn===me?'<b>Your call</b>':'<b>'+esc(names[g.turn])+'’s call</b>')+tally;
+  var h=header(quit)+scoreStrip(names,g.counts,g.pot,g.turn,status);
+  if(g.turn===me) h+=cardHTML(card,{pick:'onlinePick',anim:'pop'})+'<div class="status">Tap the stat you think beats '+esc(names[opp])+'’s card</div>';
+  else h+=cardHTML(card,{anim:'pop'})+'<div class="status"><i class="ti ti-loader-2 spin"></i> Waiting for '+esc(names[opp])+' to pick a stat…</div>';
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+function nextUnseen2(r){ var rs=on.game.results||[]; for(var i=0;i<rs.length;i++) if(rs[i].n>r.n) return rs[i]; return null; }
+function seen(n){ on.seenN=n; saveOn(); lastJSON=''; applyGame(on.game); }
+function onlinePick(i){
+  if(on.busy) return; on.busy=true;
+  document.querySelectorAll('.card.pick .stat').forEach(function(b){ b.disabled=true; });
+  api('POST',{action:'pick',room:on.room,token:on.token,stat:i,round:on.game.round}).then(function(j){
+    on.busy=false;
+    if(j.game) applyGame(j.game);
+    if(!j.ok && j.error) toast(j.error);
+  }).catch(function(){ on.busy=false; toast('No connection. Try again.'); lastJSON=''; renderOnline(); });
+}
+function rematch(){
+  api('POST',{action:'rematch',room:on.room,token:on.token}).then(function(j){
+    if(j.game) applyGame(j.game); else if(!j.ok) poll();
+  }).catch(function(){ toast('No connection. Try again.'); });
+}
+function leaveOnline(){
+  if(on && on.game && on.game.status==='playing' && !confirm('Leave this game? You can come back to it from the start screen.')) return;
+  stopPoll();
+  if(on && on.game && on.game.status!=='playing') lsSet('gcsStatAttackOnline',null);
+  on=null; renderStart();
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden && on && state.screen==='online') poll(); });
+
+renderStart();
+</script>
+
+</body>
+</html>

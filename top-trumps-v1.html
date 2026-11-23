@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GCS Top Trumps v1</title>
+<meta name="theme-color" content="#161615">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<!--
+  GCS Top Trumps — v1
+  Standalone build. Not yet wired into the itinerary app (index.html).
+  Card stats are fictional game values, not real player data — swap the DECK array below
+  for real squad players when ready.
+-->
+<style>
+  :root{
+    --orange:#ff7c1a; --teal:#51cea7; --purple:#7777c9;
+    --ink:#161615; --white:#ffffff;
+    --surface:rgba(255,255,255,.055);
+    --surface-line:rgba(255,255,255,.10);
+    --muted:rgba(255,255,255,.62);
+    --faint:rgba(255,255,255,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Josefin Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--ink);color:#fff;min-height:100%}
+  body{min-height:100vh;min-height:100dvh;display:flex;justify-content:center;
+    background-color:var(--ink);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='64'%3E%3Ctext x='4' y='40' font-family='Arial' font-weight='bold' font-style='italic' font-size='30' fill='%23ffffff' fill-opacity='0.025'%3EGCS%3C/text%3E%3C/svg%3E")}
+  .app{width:100%;max-width:430px;padding:14px 16px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+
+  /* header */
+  .hdr{display:flex;align-items:center;gap:11px}
+  .hdr img{width:38px;height:38px}
+  .hdr .t{flex:1;min-width:0}
+  .hdr b{display:block;font-weight:700;font-style:italic;font-size:19px;line-height:1.05}
+  .hdr span{font-size:11.5px;color:var(--muted)}
+  .iconbtn{width:36px;height:36px;border:none;border-radius:50%;background:var(--surface);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+  /* score strip */
+  .score{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+  .pill{background:var(--surface);border:1px solid var(--surface-line);border-radius:14px;padding:8px 12px;text-align:center}
+  .pill small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .pill b{font-size:22px;font-weight:700;font-style:italic}
+  .pill.you b{color:var(--orange)} .pill.cpu b{color:var(--purple)} .pill.pot b{color:var(--teal)}
+  .pill.pot{min-width:74px}
+  .bar{height:6px;border-radius:3px;background:var(--purple);overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--orange);transition:width .4s}
+  .status{font-size:13.5px;color:var(--muted);text-align:center;min-height:18px}
+  .status b{color:#fff}
+
+  /* card */
+  .card{position:relative;border-radius:20px;overflow:hidden;background:#1f1f1d;border:2px solid var(--c);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .card .top{position:relative;padding:12px 14px 10px;background:var(--c);color:var(--ink)}
+  .card .top .no{position:absolute;top:10px;right:12px;font-size:12px;font-weight:700;opacity:.7}
+  .card .top .role{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .card .top h2{font-size:21px;font-weight:700;font-style:italic;line-height:1.05;margin-top:2px;padding-right:30px}
+  .card .art{position:relative;height:118px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 55%, color-mix(in srgb,var(--c) 38%,transparent), transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='38'%3E%3Ctext x='2' y='26' font-family='Arial' font-weight='bold' font-style='italic' font-size='20' fill='%23ffffff' fill-opacity='0.06'%3EGCS%3C/text%3E%3C/svg%3E")}
+  .card .art i{font-size:66px;color:#fff;filter:drop-shadow(0 6px 14px rgba(0,0,0,.4))}
+  .card .art img{position:absolute;right:10px;bottom:8px;width:26px;height:26px;opacity:.9}
+  .card .quote{font-size:12.5px;color:var(--muted);padding:9px 14px 4px;line-height:1.4;font-style:italic}
+  .stats{padding:6px 10px 12px;display:flex;flex-direction:column;gap:6px}
+  .stat{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--surface-line);background:var(--surface);color:#fff;
+    border-radius:12px;padding:9px 12px;font-size:14.5px;font-weight:600;text-align:left;cursor:default}
+  .stat i{font-size:17px;color:var(--c);width:20px;text-align:center}
+  .stat .lbl{flex:1}
+  .stat .val{font-weight:700;font-style:italic;font-size:17px}
+  .stat .unit{font-size:11px;color:var(--muted);font-weight:400;margin-left:2px}
+  .card.pick .stat{cursor:pointer}
+  .card.pick .stat:hover{border-color:var(--c)}
+  .card.pick .stat:active{transform:scale(.985)}
+  .stat.sel{background:var(--c);color:var(--ink);border-color:var(--c)}
+  .stat.sel i,.stat.sel .unit{color:var(--ink)}
+  .card.mini .top h2{font-size:15px;padding-right:0}
+  .card.mini .top{padding:9px 10px 8px}
+  .card.mini .top .no{display:none}
+  .card.mini .art{height:64px}
+  .card.mini .art i{font-size:38px}
+  .card.mini .art img{width:18px;height:18px}
+  .card.mini .quote{display:none}
+  .card.mini .stats{padding:6px 6px 8px;gap:4px}
+  .card.mini .stat{padding:6px 7px;font-size:11.5px;gap:6px;border-radius:9px}
+  .card.mini .stat i{font-size:13px;width:14px}
+  .card.mini .stat .val{font-size:13.5px}
+  .card.mini .stat .unit{display:none}
+  .card.win{box-shadow:0 0 0 3px var(--teal),0 18px 40px rgba(0,0,0,.45)}
+  .card.lose{opacity:.55}
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .who{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:6px;text-align:center}
+  .who.you{color:var(--orange)} .who.cpu{color:var(--purple)}
+
+  /* card back */
+  .back{border-radius:20px;border:2px solid var(--surface-line);height:100%;min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    background:linear-gradient(135deg,rgba(255,124,26,.18),rgba(81,206,167,.14),rgba(119,119,201,.2)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='38'%3E%3Ctext x='2' y='26' font-family='Arial' font-weight='bold' font-style='italic' font-size='20' fill='%23ffffff' fill-opacity='0.08'%3EGCS%3C/text%3E%3C/svg%3E"),#1f1f1d}
+  .back img{width:72px;height:72px}
+  .back span{font-weight:700;font-style:italic;font-size:14px;color:var(--muted)}
+
+  .banner{border-radius:14px;padding:12px 14px;text-align:center;font-weight:700;font-style:italic;font-size:19px}
+  .banner small{display:block;font-weight:400;font-style:normal;font-size:12.5px;margin-top:3px;opacity:.85}
+  .banner.win{background:rgba(81,206,167,.16);color:var(--teal);border:1px solid rgba(81,206,167,.4)}
+  .banner.lose{background:rgba(119,119,201,.16);color:#a5a5e6;border:1px solid rgba(119,119,201,.45)}
+  .banner.draw{background:rgba(255,124,26,.13);color:var(--orange);border:1px solid rgba(255,124,26,.4)}
+
+  .btn{border:none;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:700;font-style:italic;cursor:pointer;width:100%;
+    background:var(--orange);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn.ghost{background:var(--surface);color:#fff;border:1px solid var(--surface-line);font-style:normal;font-weight:600}
+  .btn:active{transform:scale(.98)}
+
+  /* start + end */
+  .hero{text-align:center;padding:14px 4px 4px}
+  .hero img{width:92px;height:92px}
+  .hero h1{font-size:34px;font-weight:700;font-style:italic;line-height:1;margin-top:10px}
+  .hero h1 em{color:var(--orange);font-style:italic}
+  .hero p{color:var(--muted);font-size:14px;margin-top:8px;line-height:1.45}
+  .strap{font-size:11px;letter-spacing:.22em;font-weight:600;color:var(--faint);text-align:center;margin-top:4px}
+  .panel{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:14px}
+  .panel h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:9px}
+  .panel ol{padding-left:18px;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.85)}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .seg button{border:1px solid var(--surface-line);background:transparent;color:#fff;border-radius:11px;padding:10px 6px;font-size:13.5px;font-weight:600;cursor:pointer}
+  .seg button small{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:2px}
+  .seg button.on{background:var(--teal);border-color:var(--teal);color:var(--ink)}
+  .seg button.on small{color:var(--ink)}
+  .row{display:flex;flex-direction:column;gap:8px}
+  .foot{font-size:11px;color:var(--faint);text-align:center;line-height:1.5}
+
+  .pop{animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+  .flip{animation:flip .45s ease}
+  @keyframes flip{from{transform:rotateY(90deg)}to{transform:none}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* =========================================================================
+   GCS TOP TRUMPS — v1
+   STAT VALUES ARE FICTIONAL. They are made-up game numbers for cricket player
+   "types", not real players. To use real squad members, replace DECK with
+   {name, role, icon, quote, s:[batting,bowling,fielding,pace,spirit]}.
+   ========================================================================= */
+var VERSION='v1';
+var STATS=[
+  {key:'Batting',  icon:'ti-cricket',      unit:'/100'},
+  {key:'Bowling',  icon:'ti-target-arrow', unit:'/100'},
+  {key:'Fielding', icon:'ti-hand-grab',    unit:'/100'},
+  {key:'Pace',     icon:'ti-bolt',         unit:'km/h'},
+  {key:'Spirit',   icon:'ti-heart',        unit:'/100'}
+];
+var ROLE_COL={'Batter':'#ff7c1a','Bowler':'#51cea7','All-rounder':'#7777c9','Keeper':'#ffffff'};
+var DECK=[
+  {name:'The Opener',           role:'Batter',      icon:'ti-sunrise',        quote:'First ball, first boundary.',            s:[88,12,64,95,78]},
+  {name:'The Anchor',           role:'Batter',      icon:'ti-anchor',         quote:'Bats time. Lots of it.',                  s:[91,10,58,90,74]},
+  {name:'The Finisher',         role:'Batter',      icon:'ti-flag', quote:'Six needed off the last? Easy.',          s:[86,22,70,100,82]},
+  {name:'The Nightwatchman',    role:'Batter',      icon:'ti-moon',           quote:'Sent in late, never leaves.',             s:[48,55,61,112,95]},
+  {name:'The Pinch Hitter',     role:'Batter',      icon:'ti-rocket',         quote:'Strike rate first, questions later.',     s:[79,30,66,105,80]},
+  {name:'The Captain',          role:'Batter',      icon:'ti-crown',          quote:'Sets the field, sets the tone.',          s:[83,35,72,98,97]},
+  {name:'The Express Quick',    role:'Bowler',      icon:'ti-flame',          quote:'Keepers stand well back.',                s:[25,92,60,148,70]},
+  {name:'The Swing King',       role:'Bowler',      icon:'ti-wind',           quote:'Banana swing, every over.',               s:[32,89,64,134,76]},
+  {name:'The Leg-Spinner',      role:'Bowler',      icon:'ti-rotate-clockwise', quote:'Wrist, flight and mischief.',           s:[38,90,62,82,84]},
+  {name:'The Off-Spinner',      role:'Bowler',      icon:'ti-refresh',        quote:'Tidy, tight, relentless.',                s:[41,84,66,86,80]},
+  {name:'The Death Bowler',     role:'Bowler',      icon:'ti-skull',          quote:'Yorkers on demand.',                      s:[28,87,58,138,73]},
+  {name:'The Mystery Spinner',  role:'Bowler',      icon:'ti-question-mark',  quote:'Nobody knows which way it turns.',        s:[22,91,52,88,77]},
+  {name:'The Seam Machine',     role:'Bowler',      icon:'ti-settings',       quote:'Hits a length all day long.',             s:[35,85,63,130,79]},
+  {name:'The Batting All-rounder', role:'All-rounder', icon:'ti-arrows-exchange', quote:'Runs plus a few useful overs.',       s:[80,62,70,118,81]},
+  {name:'The Bowling All-rounder', role:'All-rounder', icon:'ti-switch-horizontal', quote:'Wickets plus lusty lower-order hits.', s:[64,80,68,132,79]},
+  {name:'The Utility Player',   role:'All-rounder', icon:'ti-tool',           quote:'Bats 3 to 9, bowls whenever asked.',      s:[70,70,74,115,88]},
+  {name:'The Gun Fielder',      role:'All-rounder', icon:'ti-target',         quote:'Direct hits from anywhere.',              s:[58,45,98,110,85]},
+  {name:'The Sledger',          role:'All-rounder', icon:'ti-message-chatbot',quote:'Talks a good game. All game.',            s:[60,66,63,120,40]},
+  {name:'The Twelfth Man',      role:'All-rounder', icon:'ti-bottle',         quote:'Drinks, gloves, and a great attitude.',   s:[42,40,82,108,99]},
+  {name:'The Keeper-Batter',    role:'Keeper',      icon:'ti-hand-stop',      quote:'Gloves on, then runs on the board.',      s:[84,5,90,96,83]},
+  {name:'The Stumping Specialist', role:'Keeper',   icon:'ti-bolt',           quote:'Quicker than the eye.',                   s:[55,4,96,92,86]},
+  {name:'The Chirpy Keeper',    role:'Keeper',      icon:'ti-microphone',     quote:'Never stops talking behind the stumps.',  s:[62,6,88,94,72]},
+  {name:'The Umpire',           role:'Keeper',      icon:'ti-gavel',          quote:'Finger up. That’s out.',             s:[15,15,40,70,100]},
+  {name:'The Groundskeeper',    role:'Keeper',      icon:'ti-plant-2',        quote:'The pitch is ready. Probably.',           s:[20,20,55,60,96]}
+];
+DECK.forEach(function(c,i){ c.no=i+1; });
+
+var state={mode:'quick', level:'smart', screen:'start'};
+var app=document.getElementById('app');
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+/* ---------- views ---------- */
+function header(sub){
+  return '<div class="hdr"><img src="gcs_mark_512.png" alt="GCS"><div class="t"><b>Top Trumps</b><span>'+esc(sub)+'</span></div>'+
+    (state.screen==='game'?'<button class="iconbtn" title="Quit game" onclick="confirmQuit()"><i class="ti ti-x"></i></button>':'')+'</div>';
+}
+function cardHTML(c,opts){
+  opts=opts||{};
+  var col=ROLE_COL[c.role]||'#ff7c1a';
+  var cls='card'+(opts.mini?' mini':'')+(opts.pick?' pick':'')+(opts.result?' '+opts.result:'')+(opts.anim?' '+opts.anim:'');
+  var h='<div class="'+cls+'" style="--c:'+col+'">'+
+    '<div class="top"><span class="no">#'+c.no+'</span><div class="role">'+esc(c.role)+'</div><h2>'+esc(c.name)+'</h2></div>'+
+    '<div class="art"><i class="ti '+c.icon+'"></i><img src="gcs_mark_512.png" alt=""></div>'+
+    '<div class="quote">“'+esc(c.quote)+'”</div><div class="stats">';
+  STATS.forEach(function(s,i){
+    var tag=opts.pick?'button':'div';
+    h+='<'+tag+' class="stat'+(opts.sel===i?' sel':'')+'"'+(opts.pick?' onclick="pick('+i+')"':'')+'>'+
+      '<i class="ti '+s.icon+'"></i><span class="lbl">'+s.key+'</span><span class="val">'+c.s[i]+'<span class="unit">'+(s.unit==='km/h'?' km/h':'')+'</span></span></'+tag+'>';
+  });
+  return h+'</div></div>';
+}
+function scoreHTML(){
+  var g=state.g, tot=g.you.length+g.cpu.length+g.pot.length;
+  var pct=tot?Math.round(g.you.length/(g.you.length+g.cpu.length||1)*100):50;
+  var roundTxt=state.mode==='quick'?('Round '+Math.min(g.round,g.max)+' of '+g.max):('Round '+g.round);
+  return '<div class="score"><div class="pill you"><small>You</small><b>'+g.you.length+'</b></div>'+
+    '<div class="pill pot"><small>Pot</small><b>'+g.pot.length+'</b></div>'+
+    '<div class="pill cpu"><small>GCS Bot</small><b>'+g.cpu.length+'</b></div></div>'+
+    '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="status">'+roundTxt+' · '+(g.turn==='you'?'<b>Your call</b>':'<b>GCS Bot’s call</b>')+'</div>';
+}
+
+function renderStart(){
+  state.screen='start';
+  app.innerHTML=header('GCS 2026 · '+VERSION)+
+  '<div class="hero pop"><img src="gcs_mark_512.png" alt="GCS"><h1>GCS <em>Top Trumps</em></h1>'+
+  '<p>24 cricket characters. Pick your best stat, beat the GCS Bot, win the whole deck.</p>'+
+  '<div class="strap">PLAY · TOUR · EXPERIENCE</div></div>'+
+  '<div class="panel"><h3>Game length</h3><div class="seg">'+
+    '<button class="'+(state.mode==='quick'?'on':'')+'" onclick="setOpt(\'mode\',\'quick\')">Quick<small>15 rounds, most cards wins</small></button>'+
+    '<button class="'+(state.mode==='full'?'on':'')+'" onclick="setOpt(\'mode\',\'full\')">Full match<small>Win every card</small></button>'+
+  '</div></div>'+
+  '<div class="panel"><h3>GCS Bot</h3><div class="seg">'+
+    '<button class="'+(state.level==='easy'?'on':'')+'" onclick="setOpt(\'level\',\'easy\')">Net session<small>Picks at random</small></button>'+
+    '<button class="'+(state.level==='smart'?'on':'')+'" onclick="setOpt(\'level\',\'smart\')">Test match<small>Picks its best stat</small></button>'+
+  '</div></div>'+
+  '<button class="btn" onclick="newGame()"><i class="ti ti-player-play-filled"></i> Deal the cards</button>'+
+  '<div class="panel"><h3>How to play</h3><ol>'+
+    '<li>The deck is shuffled and split: 12 cards each.</li>'+
+    '<li>On your call, tap a stat on your top card.</li>'+
+    '<li>Highest number wins both cards. Pace is in km/h, so the quicks rule that one.</li>'+
+    '<li>A tie puts both cards in the pot, and the next winner takes the lot.</li>'+
+    '<li>Whoever wins a round makes the next call.</li>'+
+  '</ol></div>'+
+  '<div class="foot">Card stats are made up for the game, not real player figures.<br>Top Trumps-style game · GCS 2026 · '+VERSION+'</div>';
+}
+function setOpt(k,v){state[k]=v;renderStart();}
+
+function newGame(){
+  var d=shuffle(DECK);
+  state.g={you:d.slice(0,12), cpu:d.slice(12), pot:[], turn:Math.random()<.5?'you':'cpu', round:1, max:15, last:null};
+  state.screen='game'; renderTurn();
+}
+function renderTurn(){
+  var g=state.g;
+  if(over()) return renderEnd();
+  var you=g.you[0];
+  var h=header('GCS 2026 · '+VERSION)+scoreHTML();
+  if(g.turn==='you'){
+    h+=cardHTML(you,{pick:true,anim:'pop'});
+    h+='<div class="status">Tap the stat you think beats the Bot’s card</div>';
+  } else {
+    h+=cardHTML(you,{anim:'pop'});
+    h+='<button class="btn" id="botBtn" onclick="botPick()"><i class="ti ti-robot"></i> See what the Bot picks</button>';
+  }
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+function botChoice(c){
+  if(state.level==='easy') return Math.floor(Math.random()*STATS.length);
+  /* Smart: the stat where this card sits furthest above the deck average, measured in
+     standard deviations, so 148 km/h pace and 92 bowling can be compared fairly. */
+  var best=0,bestZ=-1e9;
+  STATS.forEach(function(s,i){
+    var vals=DECK.map(function(d){return d.s[i];});
+    var mean=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+    var sd=Math.sqrt(vals.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/vals.length)||1;
+    var z=(c.s[i]-mean)/sd;
+    if(z>bestZ){bestZ=z;best=i;}
+  });
+  return best;
+}
+function botPick(){
+  var b=document.getElementById('botBtn'); if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2"></i> Bot is thinking…';}
+  setTimeout(function(){ resolve(botChoice(state.g.cpu[0])); },650);
+}
+function pick(i){ if(state.g.turn!=='you')return; resolve(i); }
+
+function resolve(i){
+  var g=state.g, a=g.you.shift(), b=g.cpu.shift(), st=STATS[i];
+  var va=a.s[i], vb=b.s[i], res, banner;
+  var caller=g.turn==='you'?'You picked':'GCS Bot picked';
+  var potN=g.pot.length;
+  if(va>vb){ res='win'; g.you.push(a,b); g.you=g.you.concat(g.pot); g.pot=[]; g.turn='you';
+    banner='<div class="banner win">You win the round!<small>'+caller+' '+st.key+': '+va+' beats '+vb+' · +'+(1+potN)+' card'+(potN?'s':'')+(potN?' (incl. '+potN+' from the pot)':'')+'</small></div>'; }
+  else if(vb>va){ res='lose'; g.cpu.push(b,a); g.cpu=g.cpu.concat(g.pot); g.pot=[]; g.turn='cpu';
+    banner='<div class="banner lose">GCS Bot takes it<small>'+caller+' '+st.key+': '+vb+' beats '+va+(potN?' · Bot also scoops the pot ('+potN+')':'')+'</small></div>'; }
+  else { res='draw'; g.pot.push(a,b);
+    banner='<div class="banner draw">It’s a tie!<small>'+st.key+': '+va+' each · both cards go in the pot ('+g.pot.length+')</small></div>'; }
+  g.round++;
+  var h=header('GCS 2026 · '+VERSION)+scoreHTML().replace(/<div class="status">[\s\S]*?<\/div>$/,'')+banner+
+    '<div class="versus"><div><div class="who you">You</div>'+cardHTML(a,{mini:true,sel:i,result:res==='win'?'win':(res==='lose'?'lose':'')})+'</div>'+
+    '<div><div class="who cpu">GCS Bot</div>'+cardHTML(b,{mini:true,sel:i,anim:'flip',result:res==='lose'?'win':(res==='win'?'lose':'')})+'</div></div>'+
+    '<button class="btn" onclick="renderTurn()">'+(over()?'<i class="ti ti-trophy"></i> See the result':'<i class="ti ti-arrow-right"></i> Next round')+'</button>';
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+function over(){
+  var g=state.g;
+  if(!g.you.length||!g.cpu.length) return true;
+  if(state.mode==='quick' && g.round>g.max) return true;
+  return false;
+}
+function renderEnd(){
+  var g=state.g; state.screen='end';
+  var y=g.you.length, c=g.cpu.length;
+  var title, sub;
+  if(y>c){ title='You win!'; sub='You finished with '+y+' cards to the Bot’s '+c+'.'; }
+  else if(c>y){ title='GCS Bot wins'; sub='The Bot finished with '+c+' cards to your '+y+'. Back to the nets!'; }
+  else { title='It’s a tie'; sub=y+' cards each.'; }
+  if(g.pot.length) sub+=' '+g.pot.length+' card'+(g.pot.length>1?'s were':' was')+' left in the pot.';
+  app.innerHTML=header('GCS 2026 · '+VERSION)+
+   '<div class="hero pop"><img src="gcs_mark_512.png" alt="GCS"><h1>'+(y>c?'<em>'+title+'</em>':title)+'</h1><p>'+sub+'<br>Rounds played: '+(g.round-1)+'.</p>'+
+   '<div class="strap">PLAY · TOUR · EXPERIENCE</div></div>'+
+   '<div class="row"><button class="btn" onclick="newGame()"><i class="ti ti-refresh"></i> Play again</button>'+
+   '<button class="btn ghost" onclick="renderStart()">Change settings</button></div>';
+}
+function confirmQuit(){ if(confirm('Quit this game?')) renderStart(); }
+
+renderStart();
+</script>
+</body>
+</html>

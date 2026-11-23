@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GCS Stat Attack v3</title>
+<meta name="theme-color" content="#161615">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,400;0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+<!--
+  GCS Stat Attack — v3
+  v3: renamed from "Top Trumps" to GCS Stat Attack; retired players only;
+      figures taken from ESPNcricinfo Test career records (see the data notes in the script).
+  v2: real cricketers; 2-player pass-and-play mode alongside the GCS Bot.
+  Standalone build. Not yet wired into the itinerary app (index.html).
+-->
+<style>
+  :root{
+    --orange:#ff7c1a; --teal:#51cea7; --purple:#7777c9;
+    --ink:#161615; --white:#ffffff;
+    --surface:rgba(255,255,255,.055);
+    --surface-line:rgba(255,255,255,.10);
+    --muted:rgba(255,255,255,.62);
+    --faint:rgba(255,255,255,.4);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Josefin Sans',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--ink);color:#fff;min-height:100%}
+  body{min-height:100vh;min-height:100dvh;display:flex;justify-content:center;
+    background-color:var(--ink);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='64'%3E%3Ctext x='4' y='40' font-family='Arial' font-weight='bold' font-style='italic' font-size='30' fill='%23ffffff' fill-opacity='0.025'%3EGCS%3C/text%3E%3C/svg%3E")}
+  .app{width:100%;max-width:430px;padding:14px 16px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+
+  .hdr{display:flex;align-items:center;gap:11px}
+  .hdr img{width:38px;height:38px}
+  .hdr .t{flex:1;min-width:0}
+  .hdr b{display:block;font-weight:700;font-style:italic;font-size:19px;line-height:1.05}
+  .hdr span{font-size:11.5px;color:var(--muted)}
+  .iconbtn{width:36px;height:36px;border:none;border-radius:50%;background:var(--surface);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+
+  .score{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+  .pill{background:var(--surface);border:1px solid var(--surface-line);border-radius:14px;padding:8px 10px;text-align:center;min-width:0}
+  .pill small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pill b{font-size:22px;font-weight:700;font-style:italic}
+  .pill.p0 b{color:var(--orange)} .pill.p1 b{color:var(--purple)} .pill.pot b{color:var(--teal)}
+  .pill.on{border-color:currentColor}
+  .pill.p0.on{border-color:var(--orange)} .pill.p1.on{border-color:var(--purple)}
+  .pill.pot{min-width:70px}
+  .bar{height:6px;border-radius:3px;background:var(--purple);overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--orange);transition:width .4s}
+  .status{font-size:13.5px;color:var(--muted);text-align:center;min-height:18px}
+  .status b{color:#fff}
+
+  /* card */
+  .card{position:relative;border-radius:20px;overflow:hidden;background:#1f1f1d;border:2px solid var(--c);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .card .top{position:relative;padding:12px 14px 10px;background:var(--c);color:var(--ink)}
+  .card .top .no{position:absolute;top:10px;right:12px;font-size:12px;font-weight:700;opacity:.7}
+  .card .top .role{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+  .card .top h2{font-size:22px;font-weight:700;font-style:italic;line-height:1.05;margin-top:2px;padding-right:30px}
+  .card .art{position:relative;height:110px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 55%, color-mix(in srgb,var(--c) 38%,transparent), transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='38'%3E%3Ctext x='2' y='26' font-family='Arial' font-weight='bold' font-style='italic' font-size='20' fill='%23ffffff' fill-opacity='0.06'%3EGCS%3C/text%3E%3C/svg%3E")}
+  .card .art .ini{font-size:64px;font-weight:700;font-style:italic;color:#fff;letter-spacing:-.02em;text-shadow:0 6px 18px rgba(0,0,0,.45)}
+  .card .art .ri{position:absolute;left:12px;bottom:10px;font-size:22px;color:var(--c)}
+  .card .art img{position:absolute;right:10px;bottom:8px;width:26px;height:26px;opacity:.9}
+  .card .art .ctry{position:absolute;left:12px;top:10px;font-size:11px;font-weight:700;letter-spacing:.1em;background:rgba(0,0,0,.35);border-radius:6px;padding:4px 7px 3px}
+  .card .art .span{position:absolute;right:12px;top:10px;font-size:11px;color:var(--muted)}
+  .stats{padding:8px 10px 12px;display:flex;flex-direction:column;gap:6px}
+  .stat{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--surface-line);background:var(--surface);color:#fff;
+    border-radius:12px;padding:9px 12px;font-size:14.5px;font-weight:600;text-align:left;cursor:default}
+  .stat i{font-size:17px;color:var(--c);width:20px;text-align:center}
+  .stat .lbl{flex:1}
+  .stat .val{font-weight:700;font-style:italic;font-size:17px;text-align:right}
+  .stat .sub{display:block;font-size:10.5px;color:var(--muted);font-weight:400;font-style:normal}
+  .card.pick .stat{cursor:pointer}
+  .card.pick .stat:hover{border-color:var(--c)}
+  .card.pick .stat:active{transform:scale(.985)}
+  .stat.sel{background:var(--c);color:var(--ink);border-color:var(--c)}
+  .stat.sel i,.stat.sel .sub{color:var(--ink)}
+  .card.mini .top h2{font-size:15px;padding-right:0}
+  .card.mini .top{padding:9px 10px 8px}
+  .card.mini .top .no,.card.mini .art .span,.card.mini .art .ri{display:none}
+  .card.mini .art{height:58px}
+  .card.mini .art .ini{font-size:32px}
+  .card.mini .art .ctry{font-size:9px;padding:3px 5px 2px;left:7px;top:6px}
+  .card.mini .art img{width:16px;height:16px;right:6px;bottom:5px}
+  .card.mini .stats{padding:6px 6px 8px;gap:4px}
+  .card.mini .stat{padding:6px 7px;font-size:11px;gap:5px;border-radius:9px}
+  .card.mini .stat i{font-size:12px;width:13px}
+  .card.mini .stat .val{font-size:13px}
+  .card.mini .stat .sub{display:none}
+  .card.win{box-shadow:0 0 0 3px var(--teal),0 18px 40px rgba(0,0,0,.45)}
+  .card.lose{opacity:.55}
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .who{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-bottom:6px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who.p0{color:var(--orange)} .who.p1{color:var(--purple)}
+
+  .banner{border-radius:14px;padding:12px 14px;text-align:center;font-weight:700;font-style:italic;font-size:19px}
+  .banner small{display:block;font-weight:400;font-style:normal;font-size:12.5px;margin-top:3px;opacity:.9;line-height:1.4}
+  .banner.p0{background:rgba(255,124,26,.14);color:var(--orange);border:1px solid rgba(255,124,26,.45)}
+  .banner.p1{background:rgba(119,119,201,.16);color:#a5a5e6;border:1px solid rgba(119,119,201,.45)}
+  .banner.draw{background:rgba(81,206,167,.13);color:var(--teal);border:1px solid rgba(81,206,167,.4)}
+
+  .btn{border:none;border-radius:14px;padding:14px 16px;font-size:16px;font-weight:700;font-style:italic;cursor:pointer;width:100%;
+    background:var(--orange);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn.purple{background:var(--purple);color:#fff}
+  .btn.ghost{background:var(--surface);color:#fff;border:1px solid var(--surface-line);font-style:normal;font-weight:600}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.6}
+
+  .hero{text-align:center;padding:14px 4px 4px}
+  .hero img{width:92px;height:92px}
+  .hero h1{font-size:34px;font-weight:700;font-style:italic;line-height:1;margin-top:10px}
+  .hero h1 em{color:var(--orange);font-style:italic}
+  .hero p{color:var(--muted);font-size:14px;margin-top:8px;line-height:1.45}
+  .strap{font-size:11px;letter-spacing:.22em;font-weight:600;color:var(--faint);text-align:center;margin-top:4px}
+  .panel{background:var(--surface);border:1px solid var(--surface-line);border-radius:16px;padding:14px}
+  .panel h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:9px}
+  .panel ol{padding-left:18px;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.85)}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .seg button{border:1px solid var(--surface-line);background:transparent;color:#fff;border-radius:11px;padding:10px 6px;font-size:13.5px;font-weight:600;cursor:pointer}
+  .seg button small{display:block;font-weight:400;font-size:11px;color:var(--muted);margin-top:2px}
+  .seg button.on{background:var(--teal);border-color:var(--teal);color:var(--ink)}
+  .seg button.on small{color:var(--ink)}
+  .names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .names label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .names input{width:100%;margin-top:4px;background:rgba(0,0,0,.25);border:1px solid var(--surface-line);border-radius:10px;color:#fff;padding:10px;font-size:15px;font-weight:600}
+  .names input:focus{outline:none;border-color:var(--teal)}
+  .row{display:flex;flex-direction:column;gap:8px}
+  .foot{font-size:11px;color:var(--faint);text-align:center;line-height:1.5}
+
+  /* pass-the-phone cover */
+  .cover{border-radius:22px;border:2px solid var(--pc);min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--pc) 22%,transparent),transparent 70%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='38'%3E%3Ctext x='2' y='26' font-family='Arial' font-weight='bold' font-style='italic' font-size='20' fill='%23ffffff' fill-opacity='0.07'%3EGCS%3C/text%3E%3C/svg%3E"),#1f1f1d}
+  .cover img{width:80px;height:80px}
+  .cover h2{font-size:28px;font-weight:700;font-style:italic;color:var(--pc)}
+  .cover p{color:var(--muted);font-size:14px;line-height:1.45}
+  .cover .ti-device-mobile-share{font-size:30px;color:#fff}
+
+  .pop{animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+  .flip{animation:flip .45s ease}
+  @keyframes flip{from{transform:rotateY(90deg)}to{transform:none}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* =========================================================================
+   GCS STAT ATTACK — v3
+
+   THE NUMBERS: men's Test career totals from ESPNcricinfo (Statsguru / Records).
+   Every player is retired from Test cricket, so the figures are final.
+   Cricinfo counts ICC World XI Tests, so Kallis, Dravid and Lara include that one Test.
+
+   CHECKED against ESPNcricinfo tables (20 Nov 2026, via search of Cricinfo pages):
+     - Most runs in career: Tendulkar, Ponting, Kallis, Dravid, Cook, Sangakkara (Mat/Runs/Ave/HS)
+     - Bradman, Lara, Gavaskar batting rows (Mat/Runs/HS/Ave)
+     - 1000 runs + 100 wickets table: Sobers, Botham, Kapil Dev, Imran Khan, Hadlee, Kallis
+     - Most wickets in career: Muralidaran, Warne, Anderson, Kumble, Broad, McGrath,
+       Ashwin, Walsh, Steyn, Ambrose, Marshall
+     - Most dismissals (keepers): Boucher, Gilchrist, Healy, Dhoni, Knott (Mat/Ct/St)
+     - Most catches: Dravid, Jayawardene, Kallis, Ponting
+     - Kohli full career row (Mat/Runs/HS/Ave/Wkts/Ct)
+   NOT YET CHECKED against a Cricinfo page (entered from Cricinfo records, need a tick):
+     - Richards, Gooch, Jayawardene batting rows; Warner full row; Wasim Akram's 414 wkts
+     - Wickets / catches for most specialist batters (e.g. Tendulkar 46 wkts / 115 ct)
+     - Runs / HS / average / catches for the bowlers
+     - Keepers' full-career HS/average (Dhoni 224, Sangakkara 319, Knott 135)
+
+   s = [Tests, Runs, Batting average, Highest score, Wickets, Catches + stumpings]
+   ns = highest score was not out (shown with *)
+   ct/st = catches and stumpings, shown on keeper cards so the total is visible
+   ========================================================================= */
+var VERSION='v3';
+var STATS=[
+  {key:'Tests',            icon:'ti-calendar-stats', fmt:function(v){return v;}},
+  {key:'Runs',             icon:'ti-cricket',        fmt:function(v){return v.toLocaleString('en-GB');}},
+  {key:'Batting average',  icon:'ti-chart-line',     fmt:function(v){return v.toFixed(2);}},
+  {key:'Highest score',    icon:'ti-trending-up',    fmt:function(v,c){return v+(c.ns?'*':'');}},
+  {key:'Wickets',          icon:'ti-target-arrow',   fmt:function(v){return v;}},
+  {key:'Catches & stumpings', icon:'ti-hand-grab',   fmt:function(v){return v;}}
+];
+var ROLE={
+  'Batter':      {col:'#ff7c1a', icon:'ti-cricket'},
+  'Bowler':      {col:'#51cea7', icon:'ti-target-arrow'},
+  'All-rounder': {col:'#7777c9', icon:'ti-arrows-exchange'},
+  'Wicketkeeper':{col:'#ffffff', icon:'ti-hand-stop'}
+};
+var DECK=[
+  // Batters
+  {name:'Sachin Tendulkar',   c:'IND', yrs:'1989–2013', role:'Batter', s:[200,15921,53.78,248,46,115], ns:1},
+  {name:'Don Bradman',        c:'AUS', yrs:'1928–48',   role:'Batter', s:[52,6996,99.94,334,2,32]},
+  {name:'Brian Lara',         c:'WI',  yrs:'1990–2006', role:'Batter', s:[131,11953,52.88,400,0,164], ns:1},
+  {name:'Ricky Ponting',      c:'AUS', yrs:'1995–2012', role:'Batter', s:[168,13378,51.85,257,5,196]},
+  {name:'Rahul Dravid',       c:'IND', yrs:'1996–2012', role:'Batter', s:[164,13288,52.31,270,1,210]},
+  {name:'Alastair Cook',      c:'ENG', yrs:'2006–18',   role:'Batter', s:[161,12472,45.35,294,1,175]},
+  {name:'Mahela Jayawardene', c:'SL',  yrs:'1997–2014', role:'Batter', s:[149,11814,49.84,374,6,205]},
+  {name:'Sunil Gavaskar',     c:'IND', yrs:'1971–87',   role:'Batter', s:[125,10122,51.12,236,1,108], ns:1},
+  {name:'Viv Richards',       c:'WI',  yrs:'1974–91',   role:'Batter', s:[121,8540,50.23,291,32,122]},
+  {name:'Virat Kohli',        c:'IND', yrs:'2011–25',   role:'Batter', s:[123,9230,46.85,254,0,121], ns:1},
+  {name:'David Warner',       c:'AUS', yrs:'2011–24',   role:'Batter', s:[112,8786,44.59,335,4,91], ns:1},
+  {name:'Graham Gooch',       c:'ENG', yrs:'1975–95',   role:'Batter', s:[118,8900,42.58,333,23,103]},
+  // All-rounders
+  {name:'Jacques Kallis',     c:'SA',  yrs:'1995–2013', role:'All-rounder', s:[166,13289,55.37,224,292,200]},
+  {name:'Garfield Sobers',    c:'WI',  yrs:'1954–74',   role:'All-rounder', s:[93,8032,57.78,365,235,109], ns:1},
+  {name:'Ian Botham',         c:'ENG', yrs:'1977–92',   role:'All-rounder', s:[102,5200,33.54,208,383,120]},
+  {name:'Kapil Dev',          c:'IND', yrs:'1978–94',   role:'All-rounder', s:[131,5248,31.05,163,434,64]},
+  {name:'Imran Khan',         c:'PAK', yrs:'1971–92',   role:'All-rounder', s:[88,3807,37.69,136,362,28]},
+  {name:'Richard Hadlee',     c:'NZ',  yrs:'1973–90',   role:'All-rounder', s:[86,3124,27.16,151,431,39], ns:1},
+  // Bowlers
+  {name:'Muttiah Muralidaran',c:'SL',  yrs:'1992–2010', role:'Bowler', s:[133,1261,11.67,67,800,72]},
+  {name:'Shane Warne',        c:'AUS', yrs:'1992–2007', role:'Bowler', s:[145,3154,17.32,99,708,125]},
+  {name:'James Anderson',     c:'ENG', yrs:'2003–24',   role:'Bowler', s:[188,1353,9.47,81,704,112]},
+  {name:'Anil Kumble',        c:'IND', yrs:'1990–2008', role:'Bowler', s:[132,2506,17.77,110,619,60], ns:1},
+  {name:'Stuart Broad',       c:'ENG', yrs:'2007–23',   role:'Bowler', s:[167,3662,18.03,169,604,52]},
+  {name:'Glenn McGrath',      c:'AUS', yrs:'1993–2007', role:'Bowler', s:[124,641,7.36,61,563,38]},
+  {name:'Ravichandran Ashwin',c:'IND', yrs:'2011–24',   role:'Bowler', s:[106,3503,25.75,124,537,36]},
+  {name:'Courtney Walsh',     c:'WI',  yrs:'1984–2001', role:'Bowler', s:[132,936,7.54,30,519,29], ns:1},
+  {name:'Dale Steyn',         c:'SA',  yrs:'2004–19',   role:'Bowler', s:[93,1251,13.40,76,439,26]},
+  {name:'Wasim Akram',        c:'PAK', yrs:'1985–2002', role:'Bowler', s:[104,2898,22.64,257,414,44], ns:1},
+  {name:'Curtly Ambrose',     c:'WI',  yrs:'1988–2000', role:'Bowler', s:[98,1439,12.40,53,405,18]},
+  {name:'Malcolm Marshall',   c:'WI',  yrs:'1978–91',   role:'Bowler', s:[81,1810,18.85,92,376,25]},
+  // Wicketkeepers  (last stat = catches + stumpings)
+  {name:'Mark Boucher',       c:'SA',  yrs:'1997–2012', role:'Wicketkeeper', s:[147,5515,30.30,125,1,555], ct:532, st:23},
+  {name:'Adam Gilchrist',     c:'AUS', yrs:'1999–2008', role:'Wicketkeeper', s:[96,5570,47.60,204,0,416], ns:1, ct:379, st:37},
+  {name:'Ian Healy',          c:'AUS', yrs:'1988–99',   role:'Wicketkeeper', s:[119,4356,27.39,161,0,395], ns:1, ct:366, st:29},
+  {name:'MS Dhoni',           c:'IND', yrs:'2005–14',   role:'Wicketkeeper', s:[90,4876,38.09,224,0,294], ct:256, st:38},
+  {name:'Kumar Sangakkara',   c:'SL',  yrs:'2000–15',   role:'Wicketkeeper', s:[134,12400,57.40,319,0,202], ct:182, st:20},
+  {name:'Alan Knott',         c:'ENG', yrs:'1967–81',   role:'Wicketkeeper', s:[95,4389,32.75,135,0,269], ct:250, st:19}
+];
+DECK.forEach(function(c,i){ c.no=i+1; });
+var HALF=DECK.length/2;   // 36 cards -> 18 each
+
+var state={opp:'bot', mode:'quick', level:'smart', names:['Player 1','Player 2'], screen:'start'};
+var app=document.getElementById('app');
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function initials(n){return n.split(/\s+/).map(function(w){return w[0];}).join('').slice(0,3).toUpperCase();}
+function pname(i){return state.g.p[i].name;}
+function plural(n,w){return n+' '+w+(n===1?'':'s');}
+
+/* ---------- pieces ---------- */
+function header(){
+  return '<div class="hdr"><img src="gcs_mark_512.png" alt="GCS"><div class="t"><b>Stat Attack</b><span>GCS 2026 · '+VERSION+'</span></div>'+
+    (state.screen==='game'?'<button class="iconbtn" title="Quit game" onclick="confirmQuit()"><i class="ti ti-x"></i></button>':'')+'</div>';
+}
+function cardHTML(c,opts){
+  opts=opts||{};
+  var R=ROLE[c.role];
+  var cls='card'+(opts.mini?' mini':'')+(opts.pick?' pick':'')+(opts.result?' '+opts.result:'')+(opts.anim?' '+opts.anim:'');
+  var h='<div class="'+cls+'" style="--c:'+R.col+'">'+
+    '<div class="top"><span class="no">#'+c.no+'</span><div class="role">'+esc(c.role)+'</div><h2>'+esc(c.name)+'</h2></div>'+
+    '<div class="art"><span class="ctry">'+c.c+'</span><span class="span">Tests '+c.yrs+'</span>'+
+      '<span class="ini">'+initials(c.name)+'</span><i class="ti '+R.icon+' ri"></i><img src="gcs_mark_512.png" alt=""></div>'+
+    '<div class="stats">';
+  STATS.forEach(function(s,i){
+    var tag=opts.pick?'button':'div';
+    var sub='';
+    if(i===5 && c.ct!=null) sub='<span class="sub">'+c.ct+' ct + '+c.st+' st</span>';
+    if(i===3 && c.ns) sub='<span class="sub">* not out</span>';
+    h+='<'+tag+' class="stat'+(opts.sel===i?' sel':'')+'"'+(opts.pick?' onclick="pick('+i+')"':'')+'>'+
+      '<i class="ti '+s.icon+'"></i><span class="lbl">'+(opts.mini&&i===5?'Ct &amp; st':(opts.mini&&i===2?'Bat avg':(opts.mini&&i===3?'High score':s.key)))+'</span>'+
+      '<span class="val">'+s.fmt(c.s[i],c)+sub+'</span></'+tag+'>';
+  });
+  return h+'</div></div>';
+}
+function scoreHTML(showStatus){
+  var g=state.g, a=g.p[0].hand.length, b=g.p[1].hand.length;
+  var pct=Math.round(a/((a+b)||1)*100);
+  var h='<div class="score"><div class="pill p0'+(g.turn===0?' on':'')+'"><small>'+esc(pname(0))+'</small><b>'+a+'</b></div>'+
+    '<div class="pill pot"><small>Pot</small><b>'+g.pot.length+'</b></div>'+
+    '<div class="pill p1'+(g.turn===1?' on':'')+'"><small>'+esc(pname(1))+'</small><b>'+b+'</b></div></div>'+
+    '<div class="bar"><i style="width:'+pct+'%"></i></div>';
+  if(showStatus){
+    var r=state.mode==='quick'?('Round '+g.round+' of '+g.max):('Round '+g.round);
+    h+='<div class="status">'+r+' · <b>'+esc(pname(g.turn))+'’s call</b></div>';
+  }
+  return h;
+}
+
+/* ---------- start screen ---------- */
+function renderStart(){
+  state.screen='start';
+  var two=state.opp==='two';
+  app.innerHTML=header()+
+  '<div class="hero pop"><img src="gcs_mark_512.png" alt="GCS"><h1>GCS <em>Stat Attack</em></h1>'+
+  '<p>'+DECK.length+' retired Test cricket greats. Pick a stat, beat your opponent, win the deck.</p>'+
+  '<div class="strap">PLAY · TOUR · EXPERIENCE</div></div>'+
+  '<div class="panel"><h3>Who’s playing?</h3><div class="seg">'+
+    '<button class="'+(!two?'on':'')+'" onclick="setOpt(\'opp\',\'bot\')"><i class="ti ti-robot"></i> 1 player<small>vs the GCS Bot</small></button>'+
+    '<button class="'+(two?'on':'')+'" onclick="setOpt(\'opp\',\'two\')"><i class="ti ti-users"></i> 2 players<small>Pass the phone</small></button>'+
+  '</div>'+
+  (two?'<div class="names"><div><label for="n0">Player 1</label><input id="n0" maxlength="14" value="'+esc(state.names[0])+'" oninput="state.names[0]=this.value"></div>'+
+       '<div><label for="n1">Player 2</label><input id="n1" maxlength="14" value="'+esc(state.names[1])+'" oninput="state.names[1]=this.value"></div></div>':'')+
+  '</div>'+
+  '<div class="panel"><h3>Game length</h3><div class="seg">'+
+    '<button class="'+(state.mode==='quick'?'on':'')+'" onclick="setOpt(\'mode\',\'quick\')">Quick<small>20 rounds, most cards wins</small></button>'+
+    '<button class="'+(state.mode==='full'?'on':'')+'" onclick="setOpt(\'mode\',\'full\')">Full match<small>Win every card</small></button>'+
+  '</div></div>'+
+  (two?'':'<div class="panel"><h3>GCS Bot</h3><div class="seg">'+
+    '<button class="'+(state.level==='easy'?'on':'')+'" onclick="setOpt(\'level\',\'easy\')">Net session<small>Picks at random</small></button>'+
+    '<button class="'+(state.level==='smart'?'on':'')+'" onclick="setOpt(\'level\',\'smart\')">Test match<small>Picks its best stat</small></button>'+
+  '</div></div>')+
+  '<button class="btn" onclick="newGame()"><i class="ti ti-player-play-filled"></i> Deal the cards</button>'+
+  '<div class="panel"><h3>How to play</h3><ol>'+
+    '<li>The deck is shuffled and split: '+HALF+' cards each.</li>'+
+    '<li>Whoever has the call picks one stat from their top card.</li>'+
+    '<li>Highest number wins both cards.</li>'+
+    '<li>A tie puts both cards in the pot. The next winner takes the lot.</li>'+
+    '<li>Win a round and you make the next call.</li>'+
+    (two?'<li>Pass the phone when it says so, and no peeking at the other card!</li>':'')+
+  '</ol></div>'+
+  '<div class="foot">Figures are men’s Test career totals: Tests, runs, batting average, highest score (* = not out), wickets, and catches plus stumpings. Every player is retired from Tests, so the numbers are final.<br>Source: ESPNcricinfo Test career records.<br>GCS Stat Attack · GCS 2026 · '+VERSION+'</div>';
+}
+function setOpt(k,v){state[k]=v;renderStart();}
+
+/* ---------- game flow ---------- */
+function newGame(){
+  var d=shuffle(DECK), two=state.opp==='two';
+  var n0=two?(state.names[0].trim()||'Player 1'):'You';
+  var n1=two?(state.names[1].trim()||'Player 2'):'GCS Bot';
+  state.g={p:[{name:n0,bot:false,hand:d.slice(0,HALF)},{name:n1,bot:!two,hand:d.slice(HALF)}],
+    pot:[], turn:Math.random()<.5?0:1, round:1, max:20, viewer:null};
+  state.screen='game';
+  renderTurn();
+}
+function renderTurn(){
+  var g=state.g;
+  if(over()) return renderEnd();
+  var two=state.opp==='two', t=g.turn, me=g.p[t];
+  // 2 players: cover the screen so only the caller sees their card.
+  if(two && g.viewer!==t){ return renderCover(t); }
+  var h=header()+scoreHTML(true);
+  if(!two){
+    var you=g.p[0].hand[0];
+    if(t===0){
+      h+=cardHTML(you,{pick:true,anim:'pop'})+'<div class="status">Tap the stat you think beats the Bot’s card</div>';
+    } else {
+      h+=cardHTML(you,{anim:'pop'})+'<button class="btn purple" id="botBtn" onclick="botPick()"><i class="ti ti-robot"></i> See what the Bot picks</button>';
+    }
+  } else {
+    h+=cardHTML(me.hand[0],{pick:true,anim:'pop'})+'<div class="status">'+esc(me.name)+', tap the stat you think wins</div>';
+  }
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+function renderCover(t){
+  var g=state.g, col=t===0?'var(--orange)':'var(--purple)';
+  app.innerHTML=header()+scoreHTML(true)+
+    '<div class="cover pop" style="--pc:'+col+'"><i class="ti ti-device-mobile-share"></i>'+
+    '<h2>Pass to '+esc(pname(t))+'</h2>'+
+    '<p>It’s '+esc(pname(t))+'’s call.<br>'+esc(pname(1-t))+', look away while they pick!</p>'+
+    '<button class="btn'+(t===1?' purple':'')+'" onclick="state.g.viewer='+t+';renderTurn()"><i class="ti ti-eye"></i> I’m '+esc(pname(t))+': show my card</button></div>';
+  window.scrollTo(0,0);
+}
+function botChoice(c){
+  if(state.level==='easy') return Math.floor(Math.random()*STATS.length);
+  /* Smart: pick the stat where this card sits furthest above the deck average, in
+     standard deviations, so 800 wickets and a 99.94 average can be compared fairly. */
+  var best=0,bestZ=-1e9;
+  STATS.forEach(function(s,i){
+    var vals=DECK.map(function(d){return d.s[i];});
+    var mean=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+    var sd=Math.sqrt(vals.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/vals.length)||1;
+    var z=(c.s[i]-mean)/sd;
+    if(z>bestZ){bestZ=z;best=i;}
+  });
+  return best;
+}
+function botPick(){
+  var b=document.getElementById('botBtn'); if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2"></i> Bot is thinking…';}
+  setTimeout(function(){ resolve(botChoice(state.g.p[1].hand[0])); },650);
+}
+function pick(i){ var g=state.g; if(g.p[g.turn].bot) return; resolve(i); }
+
+function resolve(i){
+  var g=state.g, st=STATS[i], caller=g.turn;
+  var a=g.p[0].hand.shift(), b=g.p[1].hand.shift();
+  var va=a.s[i], vb=b.s[i], potN=g.pot.length, banner, winner=null;
+  var fa=st.fmt(va,a), fb=st.fmt(vb,b);
+  var pickedBy=esc(pname(caller))+' picked <b>'+st.key+'</b>. ';
+  if(va!==vb){
+    winner=va>vb?0:1;
+    var W=g.p[winner];
+    // winner's card first, then the loser's, then anything in the pot
+    W.hand.push(winner===0?a:b, winner===0?b:a); W.hand=W.hand.concat(g.pot); g.pot=[];
+    var hi=winner===0?fa:fb, lo=winner===0?fb:fa;
+    var title=(state.opp==='bot'&&winner===0)?'You win the round!':esc(W.name)+(state.opp==='bot'?' takes it':' wins the round!');
+    banner='<div class="banner p'+winner+'">'+title+'<small>'+pickedBy+hi+' beats '+lo+
+      ' · +'+plural(1+potN,'card')+(potN?' (incl. '+potN+' from the pot)':'')+'</small></div>';
+    g.turn=winner;
+  } else {
+    g.pot.push(a,b);
+    banner='<div class="banner draw">It’s a tie!<small>'+pickedBy+fa+' each · both cards go in the pot ('+g.pot.length+'). '+esc(pname(caller))+' calls again.</small></div>';
+  }
+  g.round++;
+  // In 2-player mode both players see the reveal, so the cover goes back up for the next call.
+  g.viewer=null;
+  var res0=winner===null?'':(winner===0?'win':'lose'), res1=winner===null?'':(winner===1?'win':'lose');
+  var nextTxt;
+  if(over()) nextTxt='<i class="ti ti-trophy"></i> See the result';
+  else if(state.opp==='two') nextTxt='<i class="ti ti-arrow-right"></i> Next round: '+esc(pname(g.turn))+'’s call';
+  else nextTxt='<i class="ti ti-arrow-right"></i> Next round';
+  app.innerHTML=header()+scoreHTML(false)+banner+
+    '<div class="versus"><div><div class="who p0">'+esc(pname(0))+'</div>'+cardHTML(a,{mini:true,sel:i,result:res0,anim:caller===1?'flip':''})+'</div>'+
+    '<div><div class="who p1">'+esc(pname(1))+'</div>'+cardHTML(b,{mini:true,sel:i,result:res1,anim:caller===0?'flip':''})+'</div></div>'+
+    '<button class="btn'+(!over()&&g.turn===1?' purple':'')+'" onclick="renderTurn()">'+nextTxt+'</button>';
+  window.scrollTo(0,0);
+}
+function over(){
+  var g=state.g;
+  if(!g.p[0].hand.length||!g.p[1].hand.length) return true;
+  return state.mode==='quick' && g.round>g.max;
+}
+function renderEnd(){
+  var g=state.g; state.screen='end';
+  var a=g.p[0].hand.length, b=g.p[1].hand.length, title, sub;
+  if(a===b){ title='It’s a tie'; sub=plural(a,'card')+' each.'; }
+  else {
+    var w=a>b?0:1, wn=a>b?a:b, ln=a>b?b:a;
+    if(state.opp==='bot') title=w===0?'You win!':'GCS Bot wins';
+    else title=esc(pname(w))+' wins!';
+    sub=esc(pname(w))+' finished with '+plural(wn,'card')+' to '+esc(pname(1-w))+'’s '+ln+'.';
+    if(state.opp==='bot'&&w===1) sub+=' Back to the nets!';
+  }
+  if(g.pot.length) sub+=' '+plural(g.pot.length,'card')+' left in the pot.';
+  app.innerHTML=header()+
+   '<div class="hero pop"><img src="gcs_mark_512.png" alt="GCS"><h1><em>'+title+'</em></h1><p>'+sub+'<br>Rounds played: '+(g.round-1)+'.</p>'+
+   '<div class="strap">PLAY · TOUR · EXPERIENCE</div></div>'+
+   '<div class="row"><button class="btn" onclick="newGame()"><i class="ti ti-refresh"></i> Play again</button>'+
+   '<button class="btn ghost" onclick="renderStart()">Change players or settings</button></div>';
+  window.scrollTo(0,0);
+}
+function confirmQuit(){ if(confirm('Quit this game?')) renderStart(); }
+
+renderStart();
+</script>
+</body>
+</html>
